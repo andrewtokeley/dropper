@@ -29,23 +29,33 @@ enum BlockType: Int {
 /// Enumerated value for each visual type of block
 enum BlockColour: Int {
     
-    case yellow = 0
-    case red
-    case blue
-    case orange
-    case ground
+    case colour1 = 0
+    case colour2
+    case colour3
+    case colour4
+    case colour5
+    case colour6
     
     static var random: BlockColour {
-        return BlockColour(rawValue: Int.random(in: 0..<4)) ?? .blue
+        return BlockColour(rawValue: Int.random(in: 0..<5)) ?? .colour4
+    }
+    
+    static func randomSet(_ count: Int) -> [BlockColour] {
+        var result = [BlockColour]()
+        for _ in 0..<count {
+            result.append(BlockColour.random)
+        }
+        return result
     }
     
     var description: String {
         switch self {
-        case .orange: return "Orange"
-        case .yellow: return "Yellow"
-        case .red: return "Red"
-        case .blue: return "Blue"
-        case .ground: return "Ground"
+        case .colour1: return "Orange"
+        case .colour2: return "Yellow"
+        case .colour3: return "Red"
+        case .colour4: return "Blue"
+        case .colour5: return "Green"
+        case .colour6: return "Ground"
         }
     }
 }

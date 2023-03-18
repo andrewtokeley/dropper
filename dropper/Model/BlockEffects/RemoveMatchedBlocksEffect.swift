@@ -16,32 +16,48 @@ class RemoveMatchedBlocksEffect: GridEffect {
     private var visited: [[Bool]]!
     
     /// The number of blocks that a group must include to be considered a match
-    private var minimumMatchCount: Int = 9
+    private var minimumMatchCount: Int
 
-    init(grid: BlockGrid, minimumMatchCount: Int = 9) {
-        super.init(grid: grid)
+    
+    /// Initailises a new ``RemoveMatchedBlocksEffect`` instance
+    /// - Parameters:
+    ///   - grid: grid to apply the effect on
+    ///   - minimumMatchCount: minimum number of matching blocks to trigger a matched block group. The default is 9.
+    init(minimumMatchCount: Int = 9) {
         self.minimumMatchCount = minimumMatchCount
     }
     
     /**
      Applies a remove effect to remove all sets of 3 or more blocks that are matched by colour.
      */
-    override func apply() -> Bool {
-        let groups = findConnectedGroups(grid: grid)
-        if groups.count == 0 {
-            return false
-        } else {
+    override func apply(_ grid: BlockGrid) -> EffectResult {
+        self.effectResults.clear()
+        var removeBlocks = [Block]()
+        let groups = findConnectedGroups(grid: grid, minimumMatchCount: self.minimumMatchCount)
+        if groups.count > 0 {
             for group in groups {
-                grid.removeBlocks(group.map { $0.gridReference })
+                removeBlocks.append(contentsOf: group.map { $0.block! })
+                grid.removeBlocks(group.map { $0.gridReference }, suppressDelegateCall: true)
             }
-            return true
         }
+        
+        effectResults.blocksRemoved = removeBlocks
+        effectResults.achievments.addTo(.explodedBlock, removeBlocks.count)
+        
+        if minimumMatchCount >= 10 && minimumMatchCount < 20 {
+            effectResults.achievments.addTo(.match10, groups.count)
+        }
+        if minimumMatchCount >= 20 {
+            effectResults.achievments.addTo(.match20, groups.count)
+        }
+        
+        return effectResults
     }
     
     /**
      Returns each group of colour matched blocks.
      */
-    public func findConnectedGroups(grid: BlockGrid) -> [[BlockResult]] {
+    public func findConnectedGroups(grid: BlockGrid, minimumMatchCount: Int) -> [[BlockResult]] {
         var groups = [[BlockResult]]()
         self.visited = Array(repeating: Array(repeating: false, count: grid.columns), count: grid.rows)
         

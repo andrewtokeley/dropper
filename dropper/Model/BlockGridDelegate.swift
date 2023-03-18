@@ -15,6 +15,7 @@ protocol BlockGridDelegate {
     func blockGrid(_ blockGrid: BlockGrid, playerRotatedBy degrees: CGFloat)
     func blockGrid(_ blockGrid: BlockGrid, playerMovedInDirection direction: BlockMoveDirection)
     func blockGrid(_ blockGrid: BlockGrid, playerBlockRemoved block: Block)
+    func blockGrid(_ blockGrid: BlockGrid, playerDropedTo reference: GridReference)
     func playerRemoved()
     
     // MARK: - Blocks

@@ -60,11 +60,11 @@ class BlockGridTests: XCTestCase {
         XCTAssertTrue(result.isInsideGrid)
         XCTAssertEqual(result.gridReference.row, 6)
         XCTAssertEqual(result.gridReference.column, 2)
-        XCTAssertEqual(result.block?.colour, .yellow)
+        XCTAssertEqual(result.block?.colour, .colour2)
         XCTAssertEqual(result.block?.type, .player)
         
         let result2 = grid.get(GridReference(6,3))
-        XCTAssertEqual(result2.block?.colour, .blue)
+        XCTAssertEqual(result2.block?.colour, .colour4)
         XCTAssertEqual(result2.block?.type, .player)
         
         XCTAssertNil(grid.get(GridReference(0,0)).block)
@@ -113,7 +113,7 @@ class BlockGridTests: XCTestCase {
         XCTAssertEqual(left.block, nil)
         XCTAssertEqual(left.isInsideGrid, true)
         
-        XCTAssertEqual(right.block?.colour, BlockColour.blue)
+        XCTAssertEqual(right.block?.colour, BlockColour.colour4)
         XCTAssertEqual(right.isInsideGrid, true)
         
         XCTAssertEqual(top.block, nil)
@@ -139,7 +139,7 @@ class BlockGridTests: XCTestCase {
         
         XCTAssertEqual(adjacents.count, 4)
         XCTAssertNil(adjacents.first(where: {$0.block == nil }))
-        XCTAssertNil(adjacents.first(where: {$0.block?.colour != .blue }))
+        XCTAssertNil(adjacents.first(where: {$0.block?.colour != .colour4 }))
 //        let left = grid.get(GridReference(4,2))
 //        XCTAssertEqual(left.block?.colour, .yellow)
 //        XCTAssertEqual(left.isInsideGrid, true)
@@ -251,6 +251,76 @@ class BlockGridTests: XCTestCase {
                       
     }
     
+    func testCanMovePlayerByOriginReference() throws {
+        
+        let grid = try! BlockGrid([
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "XY", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
+            ])
+        // add a horizontal longBar
+        XCTAssertNotNil(try? grid.addPlayer(Shape.I(.random)))
+        
+        XCTAssertFalse(grid.canMovePlayer(GridReference(0,3))) // nope
+        XCTAssertFalse(grid.canMovePlayer(GridReference(0,4))) // nope
+        XCTAssertFalse(grid.canMovePlayer(GridReference(1,4))) // nope
+        
+        XCTAssertTrue(grid.canMovePlayer(GridReference(2,4))) // yep
+        XCTAssertTrue(grid.canMovePlayer(GridReference(3,4))) // yep
+        XCTAssertTrue(grid.canMovePlayer(GridReference(2,3))) // yep
+    }
+    
+    func testDoubleDropBug() throws {
+        
+        let grid = try! BlockGrid([
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ])
+        // add an longbar
+        XCTAssertNotNil(try? grid.addPlayer(Shape.I(.random)))
+        let _ = grid.dropPlayer()
+        
+        // check block all the way down
+        if let newOrigin = grid.playerOrigin {
+            XCTAssertNotNil(newOrigin)
+            XCTAssertEqual(newOrigin.row, 0)
+        } else {
+            XCTFail()
+        }
+    }
+    
+    func testPlayerCanDropTo() throws {
+        
+        let grid = try! BlockGrid([
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "XY", "  ", "XY", "  ", "  "],
+                ["  ", "  ", "XB", "  ", "XR", "  ", "  "],
+            ])
+        // add an I horizontal
+        XCTAssertNotNil(try? grid.addPlayer(Shape.I(.random)))
+        let _ = grid.movePlayer(.down)
+        let _ = grid.movePlayer(.down)
+        XCTAssertTrue(grid.rotatePlayer())
+        
+        let dropTo = grid.playerCanDropTo
+        XCTAssertNotNil(dropTo)
+        XCTAssertEqual(dropTo?.row, 2)
+        XCTAssertEqual(dropTo?.column, grid.playerOrigin?.column)
+    }
+    
     func testCanMovePlayer() throws {
         
         let grid = try! BlockGrid([
@@ -284,17 +354,17 @@ class BlockGridTests: XCTestCase {
         // PY should have moved down
         XCTAssertNil(grid.get(GridReference(5,2)).block)
         XCTAssertEqual(grid.get(GridReference(4,2)).block?.type, .player)
-        XCTAssertEqual(grid.get(GridReference(4,2)).block?.colour, .yellow)
+        XCTAssertEqual(grid.get(GridReference(4,2)).block?.colour, .colour2)
         
         // PB should have moved down
         XCTAssertNil(grid.get(GridReference(5,3)).block)
         XCTAssertEqual(grid.get(GridReference(4,3)).block?.type, .player)
-        XCTAssertEqual(grid.get(GridReference(4,3)).block?.colour, .blue)
+        XCTAssertEqual(grid.get(GridReference(4,3)).block?.colour, .colour4)
         
         // PR should have moved down
         XCTAssertNil(grid.get(GridReference(5,4)).block)
         XCTAssertEqual(grid.get(GridReference(4,4)).block?.type, .player)
-        XCTAssertEqual(grid.get(GridReference(4,4)).block?.colour, .red)
+        XCTAssertEqual(grid.get(GridReference(4,4)).block?.colour, .colour3)
         
     }
     
@@ -325,7 +395,7 @@ class BlockGridTests: XCTestCase {
             columns: 7)
             
         // add play to (4,3)
-        if let _ = try? grid.addPlayer(Shape.elbow(.red)) {
+        if let _ = try? grid.addPlayer(Shape.L(.colour3)) {
             
             XCTAssertTrue(grid.hasPlayer)
             
@@ -396,7 +466,7 @@ class BlockGridTests: XCTestCase {
             columns: 7)
         
         // add a L shape
-        if let _ = try? grid.addPlayer(Shape.bucket(.blue)) {
+        if let _ = try? grid.addPlayer(Shape.L(.colour4)) {
             XCTAssertNotNil(grid.playerOrigin)
         } else {
             XCTFail()
@@ -409,11 +479,11 @@ class BlockGridTests: XCTestCase {
             columns: 7)
         
         // add vertical 3 block player shape
-        if let _ = try? grid.addPlayer(Shape.longBar(.blue)) {
+        if let _ = try? grid.addPlayer(Shape.I(.colour4)) {
             let blocks = grid.playerBlocks
-            XCTAssertEqual(blocks[0].block?.colour, BlockColour.blue)
-            XCTAssertEqual(blocks[1].block?.colour, BlockColour.blue)
-            XCTAssertEqual(blocks[1].block?.colour, BlockColour.blue)
+            XCTAssertEqual(blocks[0].block?.colour, BlockColour.colour4)
+            XCTAssertEqual(blocks[1].block?.colour, BlockColour.colour4)
+            XCTAssertEqual(blocks[1].block?.colour, BlockColour.colour4)
         } else {
             XCTFail()
         }
@@ -424,7 +494,7 @@ class BlockGridTests: XCTestCase {
             rows: 7,
             columns: 7)
             
-        if let _ = try? grid.addPlayer(Shape.bucket(.blue)) {
+        if let _ = try? grid.addPlayer(Shape.O(.colour4)) {
             XCTAssertTrue(grid.rotatePlayer())
             
         } else {
@@ -439,19 +509,23 @@ class BlockGridTests: XCTestCase {
             rows: 7,
             columns: 7)
             
-        if let _ = try? grid.addPlayer(Shape.longBar(.blue)) {
-            // starts vertical
+        if let _ = try? grid.addPlayer(Shape.I(.colour4)) {
+            // starts horizontal
             let player = grid.playerBlocks
-            let column = player[0].gridReference.column
-            XCTAssertEqual(player[1].gridReference.column, column)
-            XCTAssertEqual(player[2].gridReference.column, column)
+            let row = player[0].gridReference.row
+            XCTAssertEqual(player[1].gridReference.row, row)
+            XCTAssertEqual(player[2].gridReference.row, row)
             
-            // After rotate becomes horizontal
+            // move down a bit so it can rotate
+            let _ = grid.movePlayer(.down)
+            let _ = grid.movePlayer(.down)
+            
+            // After rotate becomes vertical
             XCTAssertTrue(grid.rotatePlayer())
             let newPlayer = grid.playerBlocks.map { $0.gridReference }
-            let row = newPlayer[0].row
-            XCTAssertEqual(newPlayer[1].row, row)
-            XCTAssertEqual(newPlayer[2].row, row)
+            let column = newPlayer[0].column
+            XCTAssertEqual(newPlayer[1].column, column)
+            XCTAssertEqual(newPlayer[2].column, column)
             
         } else {
             XCTFail()

@@ -96,23 +96,23 @@ class BlockGrid {
                 let char = blocks[rows-r-1][c]
                 switch char {
                 case "PB":
-                    result[r][c] = Block(.blue, .player)
+                    result[r][c] = Block(.colour4, .player)
                 case "PY":
-                    result[r][c] = Block(.yellow, .player)
+                    result[r][c] = Block(.colour2, .player)
                 case "PR":
-                    result[r][c] = Block(.red, .player)
+                    result[r][c] = Block(.colour3, .player)
                 case "PO":
-                    result[r][c] = Block(.orange, .player)
+                    result[r][c] = Block(.colour1, .player)
                 case "XB":
-                    result[r][c] = Block(.blue, .block)
+                    result[r][c] = Block(.colour4, .block)
                 case "XY":
-                    result[r][c] = Block(.yellow, .block)
+                    result[r][c] = Block(.colour2, .block)
                 case "XR":
-                    result[r][c] = Block(.red, .block)
+                    result[r][c] = Block(.colour3, .block)
                 case "XO":
-                    result[r][c] = Block(.orange, .block)
+                    result[r][c] = Block(.colour1, .block)
                 case "XX":
-                    result[r][c] = Block(.ground, .wall)
+                    result[r][c] = Block(.colour6, .wall)
                 default:
                     result[r][c] = nil
                 }
@@ -143,6 +143,35 @@ class BlockGrid {
     
     // MARK: - Position Functions
     
+    /**
+     Returns the reference locations where the player would drop to
+     */
+    var playerDropReferences: [GridReference]? {
+        
+        if let playerOrigin = playerOrigin, let playerCanDropTo = playerCanDropTo {
+            let rowOffset = playerCanDropTo.row - playerOrigin.row
+            let columnOffset = playerCanDropTo.column - playerOrigin.column
+            return playerBlocks.map { $0.gridReference.offSet(rowOffset, columnOffset)}
+        }
+        return nil
+    }
+    
+    var playerCanDropTo: GridReference? {
+        guard let playerOrigin = playerOrigin else {
+            return nil
+        }
+        var dropTo: GridReference?
+        for row in 0..<playerOrigin.row {
+            let tryDropTo = playerOrigin.offSet(-(row + 1), 0)
+            if canMovePlayer(tryDropTo) {
+                dropTo = tryDropTo
+            } else {
+                // the first time we can't move down means the previous move was the furthest we can go
+                break
+            }
+        }
+        return dropTo
+    }
     /**
      Returns whether a reference is within the bounds of the grid
      */
@@ -494,7 +523,7 @@ class BlockGrid {
     
     /// Removes any blocks at the given reference locations
     /// - Parameter references: array of GridReference instances
-    func removeBlocks(_ references: [GridReference]) {
+    func removeBlocks(_ references: [GridReference], suppressDelegateCall: Bool = false) {
         var removedBlocks = [Block]()
         for reference in references {
             if let block = blocks[reference.row][reference.column] {
@@ -502,7 +531,9 @@ class BlockGrid {
                 blocks[reference.row][reference.column] = nil
             }
         }
-        delegate?.blockGrid(self, blocksRemoved: removedBlocks)
+        if !suppressDelegateCall {
+            delegate?.blockGrid(self, blocksRemoved: removedBlocks)
+        }
     }
     
     
@@ -589,9 +620,17 @@ class BlockGrid {
      Moves a play as far down as it will go
      */
     func dropPlayer() {
-        var canMove = true
-        while canMove {
-            canMove = movePlayer(.down)
+        guard hasPlayer else { return }
+        guard let playerDropReferences = playerDropReferences else { return }
+        
+        let playerReferences = playerBlocks.map { $0.gridReference }
+        let _ = moveBlocks(from: playerReferences , to: playerDropReferences, suppressDelegateCall: true)
+        
+        // update the player origin
+        if let playerOrigin = playerOrigin {
+            let delta = playerDropReferences[0] - playerReferences[0]
+            self.playerOrigin = playerOrigin + delta
+            delegate?.blockGrid(self, playerDropedTo: self.playerOrigin!)
         }
     }
     
@@ -602,21 +641,58 @@ class BlockGrid {
         return canMove(references: playerBlocks.map { $0.gridReference }, direction: direction)
     }
     
+    /**
+     Retursn whether the player can move to the specified reference location
+     */
+    public func canMovePlayer(_ reference: GridReference) -> Bool {
+        guard let playerOrigin = playerOrigin else {
+            return false
+        }
+
+        // calculate the player references for the given location
+        
+        let rowOffset = reference.row - playerOrigin.row
+        let columnOffset = reference.column - playerOrigin.column
+        let references  = playerBlocks.map { $0.gridReference.offSet(rowOffset, columnOffset)}
+        
+        return canMove(references: playerBlocks.map { $0.gridReference }, to: references)
+    }
+    
+//    func movePlayer(to: reference) -> Bool {
+//        guard hasPlayer else { return false }
+//        guard canMovePlayer(reference) else { return false }
+//        
+//        let references = playerBlocks.map { $0.gridReference }
+//        
+//        // Don't allow moveBlocks to call the moveBlocks delegate method because we want to call  playerDropped instead, as it's likely to be handled differently by clients
+//        let result = moveBlocks(from: references, direction: dir, suppressDelegateCall: true)
+//        
+//        if result {
+//            // redefine where the origin is
+//            playerOrigin = playerOrigin?.adjacent(direction.gridDirection)
+//            
+//            delegate?.blockGrid(self, playerMovedInDirection: direction)
+//        }
+//        return result
+//    }
+    
     func movePlayer(_ direction: BlockMoveDirection) -> Bool {
         guard hasPlayer else { return false }
         guard canMovePlayer(direction) else { return false }
         
         let references = playerBlocks.map { $0.gridReference }
         
-        // Don't allow moveBlocks to call the moveBlocks delegate method because we want to call  playerMovedInDirection instead, as it's likely to be handled differently by clients
+        // Don't allow moveBlocks to call the moveBlocks delegate method because we want to call  playerDropped instead, as it's likely to be handled differently by clients
         let result = moveBlocks(from: references, direction: direction, suppressDelegateCall: true)
+        
         if result {
             // redefine where the origin is
             playerOrigin = playerOrigin?.adjacent(direction.gridDirection)
-            
             delegate?.blockGrid(self, playerMovedInDirection: direction)
         }
         return result
+        
+        
     }
     
     /**

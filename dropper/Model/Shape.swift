@@ -15,57 +15,86 @@ struct Shape {
         let type = Int.random(in: 0..<6)
         switch type {
         case 0:
-            return elbow(colour)
+            return L(colour)
         case 1:
-            return longBar(colour)
+            return I(colour)
         case 2:
-            return bucket(colour)
+            return J(colour)
         case 3:
-            return smallBar(colour)
+            return S(colour)
         case 4:
-            return block(colour)
+            return Z(colour)
         case 5:
-            return lightning(colour)
+            return O(colour)
         default:
-            return longBar(colour)
+            return I(colour)
         }
     }
     
-    static func smallBar(_ colour: BlockColour) -> Shape {
+    /**
+     L shape
+     
+     ````
+     | | |x|
+     |x|x|x|
+     | | | |
+     ````
+     */
+    static func L(_ colour: BlockColour) -> Shape {
         return Shape(references: [
+            GridReference(0,1),
             GridReference(0,0),
-            GridReference(-1,0),
-        ], colours: Array(repeating: colour, count: 2))
-    }
-    
-    static func elbow(_ colour: BlockColour) -> Shape {
-        return Shape(references: [
-            GridReference(1,0),
-            GridReference(0,0),
-            GridReference(-1,0),
-            GridReference(-1,1)
+            GridReference(0,-1),
+            GridReference(1,1)
         ], colours: Array(repeating: colour, count: 4))
     }
     
-    static func bucket(_ colour: BlockColour) -> Shape {
+    /**
+     J shape
+     
+     ````
+     |x| | |
+     |x|x|x|
+     | | | |
+     ````
+     */
+    static func J(_ colour: BlockColour) -> Shape {
+        return Shape(references: [
+            GridReference(0,1),
+            GridReference(0,0),
+            GridReference(0,-1),
+            GridReference(1,-1)
+        ], colours: Array(repeating: colour, count: 4))
+    }
+    
+    /**
+     I shape.
+     
+     ````
+     | | | | |
+     |x|x|x|x|
+     | | | | |
+     ````
+     */
+    static func I(_ colour: BlockColour) -> Shape {
         return Shape(references: [
             GridReference(0,-1),
             GridReference(0,0),
             GridReference(0,1),
-            GridReference(1,-1),
-            GridReference(1,1),
-        ], colours: Array(repeating: colour, count: 5))
+            GridReference(0,2)
+        ], colours: Array(repeating: colour, count: 4))
     }
     
-    static func longBar(_ colour: BlockColour) -> Shape {
-        return Shape(references: [
-            GridReference(1,0),
-            GridReference(0,0),
-            GridReference(-1,0)
-        ], colours: Array(repeating: colour, count: 3))
-    }
-    
-    static func block(_ colour: BlockColour) -> Shape {
+    /**
+     O shape
+     
+     ````
+     | |x|x|
+     | |x|x|
+     | | | |
+     ````
+     */
+    static func O(_ colour: BlockColour) -> Shape {
         return Shape(references: [
             GridReference(1,0),
             GridReference(1,1),
@@ -74,12 +103,39 @@ struct Shape {
         ], colours: Array(repeating: colour, count: 4))
     }
     
-    static func lightning(_ colour: BlockColour) -> Shape {
+    /**
+     S shape
+     
+     ````
+     | |x|x|
+     |x|x| |
+     | | | |
+     ````
+     */
+    static func S(_ colour: BlockColour) -> Shape {
         return Shape(references: [
-            GridReference(-1,-1),
             GridReference(0,-1),
             GridReference(0,0),
-            GridReference(1,0)
+            GridReference(1,0),
+            GridReference(1,1)
+        ], colours: Array(repeating: colour, count: 4))
+    }
+    
+    /**
+     Z shape
+     
+     ````
+     |x|x| |
+     | |x|x|
+     | | | |
+     ````
+     */
+    static func Z(_ colour: BlockColour) -> Shape {
+        return Shape(references: [
+            GridReference(1,-1),
+            GridReference(1,0),
+            GridReference(0,0),
+            GridReference(0,1)
         ], colours: Array(repeating: colour, count: 4))
     }
 }

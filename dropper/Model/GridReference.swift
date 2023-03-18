@@ -54,13 +54,19 @@ class GridReference {
         )
     }
     
+    /**
+     Returns a new GridReference equal to the current instance offset by the given row, column offsets
+     */
     func offSet(_ rowOffset: Int, _ columnOffset: Int) -> GridReference {
         return GridReference(row + rowOffset, column + columnOffset)
     }
     
-//    var isDiagonalTo(_ reference: GridReference): Bool {
-//        return
-//    }
+    static func + (left: GridReference, right: GridReference) -> GridReference {
+        return GridReference(left.row + right.row, left.column + right.column)
+    }
+    static func - (left: GridReference, right: GridReference) -> GridReference {
+        return GridReference(left.row - right.row, left.column - right.column)
+    }
 }
 
 extension GridReference: Equatable {

@@ -15,6 +15,10 @@ enum ShapeNodeError: Error {
 
 class ShapeNode: SKSpriteNode {
     
+    var blocks = [Block]()
+    var references = [GridReference]()
+    var blockSize: CGFloat = 0
+    
     var blocksNodes = [BlockNode]()
     
     /**
@@ -39,17 +43,20 @@ class ShapeNode: SKSpriteNode {
     init (blocks: [Block], references: [GridReference], blockSize: CGFloat) throws {
         guard blocks.count != 0 else { throw ShapeNodeError.InvalidInitialState}
         guard blocks.count == references.count else { throw ShapeNodeError.InvalidInitialState}
-        
-        // All shapes are defined within a 3x3 grid, where GridReference (0,0) is at the centre
-//        let minRow = references.min { a, b in a.row < b.row }!.row
-//        let maxRow = references.max { a, b in a.row < b.row }!.row
-//        let minColumn = references.min { a, b in a.column < b.column }!.column
-//        let maxColumn = references.max { a, b in a.column < b.column }!.column
-//
-//        let width = CGFloat(maxColumn - minColumn + 1) * blockSize
-//        let height = CGFloat(maxRow - minRow + 1) * blockSize
 
         super.init(texture: nil, color: .clear, size: CGSize(width: blockSize*3.0, height: blockSize*3.0))
+        
+        setShape(blocks: blocks, references: references, blockSize: blockSize)
+    }
+    
+    init (shape: Shape, blockSize: CGFloat) {
+        super.init(texture: nil, color: .clear, size: CGSize(width: blockSize*3.0, height: blockSize*3.0))
+        setShape(shape, blockSize: blockSize)
+    }
+    
+    public func setShape(blocks: [Block], references: [GridReference], blockSize: CGFloat) {
+        self.removeAllChildren()
+        self.size = CGSize(width: blockSize*3.0, height: blockSize*3.0)
         
         for i in 0..<blocks.count {
             let blockNode = BlockNode(block: blocks[i], size: blockSize)
@@ -63,6 +70,14 @@ class ShapeNode: SKSpriteNode {
             blocksNodes.append(blockNode)
             addChild(blockNode)
         }
+    }
+    
+    public func setShape(_ shape: Shape, blockSize: CGFloat) {
+        var blocks = [Block]()
+        for i in 0..<shape.colours.count {
+            blocks.append(Block(shape.colours[i], .block))
+        }
+        setShape(blocks: blocks, references: shape.references, blockSize: blockSize)
     }
     
     /**
@@ -85,6 +100,6 @@ class ShapeNode: SKSpriteNode {
     }
     
     required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
     }
 }

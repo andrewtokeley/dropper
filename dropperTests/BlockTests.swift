@@ -19,8 +19,8 @@ class BlockTests: XCTestCase {
     }
 
     func testEquality() throws {
-        let block1 = Block(.red, .player)
-        let block2 = Block(.red, .player)
+        let block1 = Block(.colour3, .player)
+        let block2 = Block(.colour3, .player)
         XCTAssertNotEqual(block1, block2)
         XCTAssertEqual(block1, block1)
     }

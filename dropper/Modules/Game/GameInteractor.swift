@@ -17,22 +17,9 @@ final class GameInteractor: Interactor {
 extension GameInteractor: GameInteractorApi {
     func createNewGame() {
         let grid = try! BlockGrid(rows: 18, columns: 10)
+        let game = Game(genre: .tetrisClassic)
         
-//        grid.addBlock(block: Block(.ground,.wall), reference: GridReference(6,3))
-//        
-//        grid.addBlock(block: Block(.ground,.wall), reference: GridReference(6,5))
-//        
-//        grid.addBlock(block: Block(.orange,.block), reference: GridReference(5,4))
-//        grid.addBlock(block: Block(.ground, .wall), reference: GridReference(4,4))
-//        
-//
-//        grid.addBlock(block: Block(.ground, .wall), reference: GridReference(6,4))
-//        grid.addBlock(block: Block(.ground, .wall), reference: GridReference(6,5))
-//        grid.addBlock(block: Block(.ground, .wall), reference: GridReference(6,6))
-//        grid.addBlock(block: Block(.ground, .wall), reference: GridReference(6,7))
-//        grid.addBlock(block: Block(.ground, .wall), reference: GridReference(6,8))
-//        
-        presenter.didCreateNewGame(grid)
+        presenter.didCreateNewGame(game: game, grid: grid)
     }
     
 }

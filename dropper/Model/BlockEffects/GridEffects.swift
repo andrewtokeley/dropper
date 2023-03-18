@@ -9,20 +9,18 @@ import Foundation
 
 class GridEffect {
     
-    /// Reference to the BlockGrid being searched
-    public var grid: BlockGrid!
-    
-    /// Initialise a new instance
-    /// - Parameter grid:the grid to apply the effect to
-    init(grid: BlockGrid) {
-        self.grid = grid
-    }
+    /// A record of what result the effect caused
+    public var effectResults = EffectResult()
     
     /**
-     Applies the effect on the grid, returning a flag indicating whether any blocks were moved/removed
+     Applies the effect on the grid, returning the result of the transformation.
+     
+     Note that this method will suppress any grid.delegate call backs that may advise of removed or moved blocks, so that the caller can handle effects more directly.
+     
+     - Returns: EffectResult
      */
-    func apply() -> Bool {
-        return false
+    func apply(_ grid: BlockGrid) -> EffectResult {
+        return EffectResult()
     }
     
 }

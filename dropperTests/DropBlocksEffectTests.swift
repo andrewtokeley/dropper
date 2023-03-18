@@ -30,13 +30,13 @@ class DropBlocksEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
             ])
         
-        let effect = DropBlocksEffect(grid: grid)
-        XCTAssertTrue(effect.apply()) // on move drop, XR and XY will drop
-        XCTAssertFalse(effect.apply()) // nothing will drop
+        let effect = DropBlocksEffect()
+        let result = effect.apply(grid)
+        XCTAssertTrue(result.isMaterial)
         
-        XCTAssertEqual(grid.get(GridReference(0, 3)).block?.colour, .blue)
-        XCTAssertEqual(grid.get(GridReference(0, 4)).block?.colour, .yellow)
-        XCTAssertEqual(grid.get(GridReference(1, 3)).block?.colour, .red)
+        XCTAssertEqual(grid.get(GridReference(0, 3)).block?.colour, .colour4)
+        XCTAssertEqual(grid.get(GridReference(0, 4)).block?.colour, .colour2)
+        XCTAssertEqual(grid.get(GridReference(1, 3)).block?.colour, .colour3)
         
     }
 
@@ -52,13 +52,13 @@ class DropBlocksEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
             ])
         
-        let effect = DropBlocksEffect(grid: grid)
-        XCTAssertTrue(effect.apply())
-        
+        let effect = DropBlocksEffect()
+        let result = effect.apply(grid)
+        XCTAssertTrue(result.isMaterial)
         
         // check XR has moved one space
         XCTAssertNil(grid.get(GridReference(2, 3)).block)
-        XCTAssertEqual(grid.get(GridReference(1, 3)).block?.colour, .red)
+        XCTAssertEqual(grid.get(GridReference(1, 3)).block?.colour, .colour3)
         
         // check XY didn't move at all because of the wall
         XCTAssertNotNil(grid.get(GridReference(2, 4)).block)
@@ -78,8 +78,9 @@ class DropBlocksEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "XB", "  ", "XB", "  "],
             ])
         
-        let effect = DropBlocksEffect(grid: grid)
-        XCTAssertTrue(effect.apply())
+        let effect = DropBlocksEffect()
+        let result = effect.apply(grid)
+        XCTAssertTrue(result.isMaterial)
         
         // check XY didn't move at all because of the player
         XCTAssertNotNil(grid.get(GridReference(2, 4)).block)

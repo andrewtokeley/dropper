@@ -19,6 +19,29 @@
 		D834301B29A47B4A00D9C052 /* BlockGridDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D834301A29A47B4A00D9C052 /* BlockGridDelegate.swift */; };
 		D834301E29A481B600D9C052 /* ScreenPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D834301D29A481B600D9C052 /* ScreenPosition.swift */; };
 		D834302129A48B5900D9C052 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = D834302029A48B5900D9C052 /* Podfile */; };
+		D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D729BAC16C001120C7 /* UIImageExtension.swift */; };
+		D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D929BB1FFC001120C7 /* Cloud.swift */; };
+		D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */; };
+		D83F62E029BC5FC7001120C7 /* SKLabelNodeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62DF29BC5FC7001120C7 /* SKLabelNodeExtension.swift */; };
+		D83F62E229BD19B4001120C7 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = D83F62E129BD19B4001120C7 /* GameScene.sks */; };
+		D83F62E429BDA2C6001120C7 /* EffectResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62E329BDA2C6001120C7 /* EffectResult.swift */; };
+		D83F62E629BDA3D3001120C7 /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62E529BDA3D3001120C7 /* Achievement.swift */; };
+		D83F62E829BDBF35001120C7 /* Level.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62E729BDBF35001120C7 /* Level.swift */; };
+		D83F62EB29BDC24F001120C7 /* LevelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62EA29BDC24F001120C7 /* LevelService.swift */; };
+		D83F62ED29BE4841001120C7 /* AchievementsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62EC29BE4841001120C7 /* AchievementsTests.swift */; };
+		D83F62EF29BE4C39001120C7 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62EE29BE4C39001120C7 /* Game.swift */; };
+		D83F62F129BEA4A5001120C7 /* RemoveRowsEffectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62F029BEA4A5001120C7 /* RemoveRowsEffectTests.swift */; };
+		D83F62F329BEBB82001120C7 /* EffectsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62F229BEBB82001120C7 /* EffectsRunner.swift */; };
+		D83F62F529BEDAE7001120C7 /* EffectsRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62F429BEDAE6001120C7 /* EffectsRunnerTests.swift */; };
+		D83F62F729BFB5BD001120C7 /* ProgressNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62F629BFB5BD001120C7 /* ProgressNode.swift */; };
+		D83F62FE29C032BA001120C7 /* HomeDisplayData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62F829C032BA001120C7 /* HomeDisplayData.swift */; };
+		D83F62FF29C032BA001120C7 /* HomePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62F929C032BA001120C7 /* HomePresenter.swift */; };
+		D83F630029C032BA001120C7 /* HomeRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62FA29C032BA001120C7 /* HomeRouter.swift */; };
+		D83F630129C032BA001120C7 /* HomeModuleApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62FB29C032BA001120C7 /* HomeModuleApi.swift */; };
+		D83F630229C032BA001120C7 /* HomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62FC29C032BA001120C7 /* HomeInteractor.swift */; };
+		D83F630329C032BA001120C7 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62FD29C032BA001120C7 /* HomeView.swift */; };
+		D83F630629C0E9B2001120C7 /* SKNodeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */; };
+		D83F630829C1A039001120C7 /* AutoPositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F630729C1A039001120C7 /* AutoPositionTests.swift */; };
 		D869175529A7F259008C60F0 /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D869175429A7F259008C60F0 /* UIColorExtension.swift */; };
 		D869175929A97685008C60F0 /* PlayerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D869175829A97685008C60F0 /* PlayerNode.swift */; };
 		D869175C29A9C373008C60F0 /* RemoveMatchedBlocksEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = D869175B29A9C373008C60F0 /* RemoveMatchedBlocksEffect.swift */; };
@@ -84,6 +107,29 @@
 		D834301A29A47B4A00D9C052 /* BlockGridDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockGridDelegate.swift; sourceTree = "<group>"; };
 		D834301D29A481B600D9C052 /* ScreenPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenPosition.swift; sourceTree = "<group>"; };
 		D834302029A48B5900D9C052 /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		D83F62D729BAC16C001120C7 /* UIImageExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtension.swift; sourceTree = "<group>"; };
+		D83F62D929BB1FFC001120C7 /* Cloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cloud.swift; sourceTree = "<group>"; };
+		D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKOutlinedLabelNode.swift; sourceTree = "<group>"; };
+		D83F62DF29BC5FC7001120C7 /* SKLabelNodeExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKLabelNodeExtension.swift; sourceTree = "<group>"; };
+		D83F62E129BD19B4001120C7 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
+		D83F62E329BDA2C6001120C7 /* EffectResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectResult.swift; sourceTree = "<group>"; };
+		D83F62E529BDA3D3001120C7 /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
+		D83F62E729BDBF35001120C7 /* Level.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Level.swift; sourceTree = "<group>"; };
+		D83F62EA29BDC24F001120C7 /* LevelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelService.swift; sourceTree = "<group>"; };
+		D83F62EC29BE4841001120C7 /* AchievementsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsTests.swift; sourceTree = "<group>"; };
+		D83F62EE29BE4C39001120C7 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
+		D83F62F029BEA4A5001120C7 /* RemoveRowsEffectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveRowsEffectTests.swift; sourceTree = "<group>"; };
+		D83F62F229BEBB82001120C7 /* EffectsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectsRunner.swift; sourceTree = "<group>"; };
+		D83F62F429BEDAE6001120C7 /* EffectsRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectsRunnerTests.swift; sourceTree = "<group>"; };
+		D83F62F629BFB5BD001120C7 /* ProgressNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressNode.swift; sourceTree = "<group>"; };
+		D83F62F829C032BA001120C7 /* HomeDisplayData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDisplayData.swift; sourceTree = "<group>"; };
+		D83F62F929C032BA001120C7 /* HomePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePresenter.swift; sourceTree = "<group>"; };
+		D83F62FA29C032BA001120C7 /* HomeRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRouter.swift; sourceTree = "<group>"; };
+		D83F62FB29C032BA001120C7 /* HomeModuleApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeModuleApi.swift; sourceTree = "<group>"; };
+		D83F62FC29C032BA001120C7 /* HomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeInteractor.swift; sourceTree = "<group>"; };
+		D83F62FD29C032BA001120C7 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKNodeExtension.swift; sourceTree = "<group>"; };
+		D83F630729C1A039001120C7 /* AutoPositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPositionTests.swift; sourceTree = "<group>"; };
 		D869175429A7F259008C60F0 /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		D869175829A97685008C60F0 /* PlayerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerNode.swift; sourceTree = "<group>"; };
 		D869175B29A9C373008C60F0 /* RemoveMatchedBlocksEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveMatchedBlocksEffect.swift; sourceTree = "<group>"; };
@@ -157,7 +203,9 @@
 		D8036E3F29A217800081CF41 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				D83F62E929BDC243001120C7 /* Services */,
 				D869175A29A9C252008C60F0 /* BlockEffects */,
+				D83F62E529BDA3D3001120C7 /* Achievement.swift */,
 				D8036E4029A218090081CF41 /* Block.swift */,
 				D8036E4229A218F80081CF41 /* BlockGrid.swift */,
 				D80B0A7A29A2932D00E7B43A /* BlockResult.swift */,
@@ -166,6 +214,8 @@
 				D834301D29A481B600D9C052 /* ScreenPosition.swift */,
 				D869176729B2BFA2008C60F0 /* GridRange.swift */,
 				D869176C29B528D8008C60F0 /* Shape.swift */,
+				D83F62E729BDBF35001120C7 /* Level.swift */,
+				D83F62EE29BE4C39001120C7 /* Game.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -173,10 +223,33 @@
 		D834301F29A487C900D9C052 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
-				D8FDAE2E29A48D91007AA40B /* Game */,
 				D8FDAE2F29A48DC9007AA40B /* AppModules.swift */,
+				D8FDAE2E29A48D91007AA40B /* Game */,
+				D83F630429C032C4001120C7 /* Home */,
+				D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */,
 			);
 			path = Modules;
+			sourceTree = "<group>";
+		};
+		D83F62E929BDC243001120C7 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				D83F62EA29BDC24F001120C7 /* LevelService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		D83F630429C032C4001120C7 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				D83F62F829C032BA001120C7 /* HomeDisplayData.swift */,
+				D83F62F929C032BA001120C7 /* HomePresenter.swift */,
+				D83F62FA29C032BA001120C7 /* HomeRouter.swift */,
+				D83F62FB29C032BA001120C7 /* HomeModuleApi.swift */,
+				D83F62FC29C032BA001120C7 /* HomeInteractor.swift */,
+				D83F62FD29C032BA001120C7 /* HomeView.swift */,
+			);
+			path = Home;
 			sourceTree = "<group>";
 		};
 		D869175A29A9C252008C60F0 /* BlockEffects */ = {
@@ -187,6 +260,8 @@
 				D869176329ABE928008C60F0 /* GridEffects.swift */,
 				D869176E29B6B416008C60F0 /* RemoveRowsEffect.swift */,
 				D869177029B6B612008C60F0 /* DropIntoEmptyRowsEffect.swift */,
+				D83F62E329BDA2C6001120C7 /* EffectResult.swift */,
+				D83F62F229BEBB82001120C7 /* EffectsRunner.swift */,
 			);
 			path = BlockEffects;
 			sourceTree = "<group>";
@@ -225,6 +300,7 @@
 				D88D552B29A16D7B003A0478 /* Assets.xcassets */,
 				D88D552D29A16D7B003A0478 /* LaunchScreen.storyboard */,
 				D869175429A7F259008C60F0 /* UIColorExtension.swift */,
+				D83F62D729BAC16C001120C7 /* UIImageExtension.swift */,
 			);
 			path = dropper;
 			sourceTree = "<group>";
@@ -236,6 +312,10 @@
 				D8036E4829A225010081CF41 /* BlockGridTests.swift */,
 				D869175D29A9F196008C60F0 /* RemoveMatchedBlocksEffectTests.swift */,
 				D869176129AB1DF9008C60F0 /* DropBlocksEffectTests.swift */,
+				D83F62EC29BE4841001120C7 /* AchievementsTests.swift */,
+				D83F62F029BEA4A5001120C7 /* RemoveRowsEffectTests.swift */,
+				D83F62F429BEDAE6001120C7 /* EffectsRunnerTests.swift */,
+				D83F630729C1A039001120C7 /* AutoPositionTests.swift */,
 			);
 			path = dropperTests;
 			sourceTree = "<group>";
@@ -258,6 +338,10 @@
 				D8036E3A29A18F830081CF41 /* Ground.swift */,
 				D869175829A97685008C60F0 /* PlayerNode.swift */,
 				D869177229B80BF7008C60F0 /* ScoreNode.swift */,
+				D83F62D929BB1FFC001120C7 /* Cloud.swift */,
+				D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */,
+				D83F62DF29BC5FC7001120C7 /* SKLabelNodeExtension.swift */,
+				D83F62F629BFB5BD001120C7 /* ProgressNode.swift */,
 			);
 			path = Sprites;
 			sourceTree = "<group>";
@@ -272,6 +356,7 @@
 				D8FDAE2329A48D88007AA40B /* GamePresenter.swift */,
 				D8FDAE2729A48D88007AA40B /* GameRouter.swift */,
 				D8FDAE2229A48D88007AA40B /* GameView.swift */,
+				D83F62E129BD19B4001120C7 /* GameScene.sks */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -394,6 +479,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D83F62E229BD19B4001120C7 /* GameScene.sks in Resources */,
 				D88D552C29A16D7B003A0478 /* Assets.xcassets in Resources */,
 				D834302129A48B5900D9C052 /* Podfile in Resources */,
 				D88D552F29A16D7B003A0478 /* LaunchScreen.storyboard in Resources */,
@@ -493,16 +579,27 @@
 				D8036E3D29A199EA0081CF41 /* Button.swift in Sources */,
 				D869176B29B48183008C60F0 /* ShapeNode.swift in Sources */,
 				D869177329B80BF7008C60F0 /* ScoreNode.swift in Sources */,
+				D83F630629C0E9B2001120C7 /* SKNodeExtension.swift in Sources */,
 				D8036E4129A218090081CF41 /* Block.swift in Sources */,
+				D83F62E629BDA3D3001120C7 /* Achievement.swift in Sources */,
+				D83F62E829BDBF35001120C7 /* Level.swift in Sources */,
 				D88D552529A16D79003A0478 /* GameScene.swift in Sources */,
+				D83F62F729BFB5BD001120C7 /* ProgressNode.swift in Sources */,
 				D869175529A7F259008C60F0 /* UIColorExtension.swift in Sources */,
 				D88D555729A174CE003A0478 /* BlockNode.swift in Sources */,
+				D83F62E029BC5FC7001120C7 /* SKLabelNodeExtension.swift in Sources */,
 				D869177129B6B612008C60F0 /* DropIntoEmptyRowsEffect.swift in Sources */,
+				D83F62F329BEBB82001120C7 /* EffectsRunner.swift in Sources */,
+				D83F62EF29BE4C39001120C7 /* Game.swift in Sources */,
 				D8FDAE2829A48D88007AA40B /* GameView.swift in Sources */,
 				D869176029AB1215008C60F0 /* DropBlocksEffect.swift in Sources */,
+				D83F630129C032BA001120C7 /* HomeModuleApi.swift in Sources */,
+				D83F630029C032BA001120C7 /* HomeRouter.swift in Sources */,
+				D83F62EB29BDC24F001120C7 /* LevelService.swift in Sources */,
 				D8036E3B29A18F830081CF41 /* Ground.swift in Sources */,
 				D8FDAE2929A48D88007AA40B /* GamePresenter.swift in Sources */,
 				D869176F29B6B416008C60F0 /* RemoveRowsEffect.swift in Sources */,
+				D83F630329C032BA001120C7 /* HomeView.swift in Sources */,
 				D834301B29A47B4A00D9C052 /* BlockGridDelegate.swift in Sources */,
 				D8FDAE2A29A48D88007AA40B /* GameDisplayData.swift in Sources */,
 				D869175C29A9C373008C60F0 /* RemoveMatchedBlocksEffect.swift in Sources */,
@@ -513,8 +610,15 @@
 				D869176D29B528D8008C60F0 /* Shape.swift in Sources */,
 				D8FDAE3029A48DC9007AA40B /* AppModules.swift in Sources */,
 				D88D551F29A16D79003A0478 /* AppDelegate.swift in Sources */,
+				D83F62FE29C032BA001120C7 /* HomeDisplayData.swift in Sources */,
 				D869176829B2BFA2008C60F0 /* GridRange.swift in Sources */,
+				D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */,
+				D83F62FF29C032BA001120C7 /* HomePresenter.swift in Sources */,
+				D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */,
+				D83F62E429BDA2C6001120C7 /* EffectResult.swift in Sources */,
+				D83F630229C032BA001120C7 /* HomeInteractor.swift in Sources */,
 				D8036E4529A21AFA0081CF41 /* GridReference.swift in Sources */,
+				D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,6 +628,10 @@
 			files = (
 				D869175E29A9F196008C60F0 /* RemoveMatchedBlocksEffectTests.swift in Sources */,
 				D869176229AB1DF9008C60F0 /* DropBlocksEffectTests.swift in Sources */,
+				D83F62F529BEDAE7001120C7 /* EffectsRunnerTests.swift in Sources */,
+				D83F630829C1A039001120C7 /* AutoPositionTests.swift in Sources */,
+				D83F62ED29BE4841001120C7 /* AchievementsTests.swift in Sources */,
+				D83F62F129BEA4A5001120C7 /* RemoveRowsEffectTests.swift in Sources */,
 				D8036E4729A221650081CF41 /* BlockTests.swift in Sources */,
 				D8036E4929A225010081CF41 /* BlockGridTests.swift in Sources */,
 			);

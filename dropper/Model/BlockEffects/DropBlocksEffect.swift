@@ -13,8 +13,10 @@ class DropBlocksEffect: GridEffect {
      
      Note this also check to see if player blocks can move too.
      */
-    override func apply() -> Bool {
-        var dropBlocksFrom = [GridReference]()
+    override func apply(_ grid: BlockGrid) -> EffectResult {
+        self.effectResults.clear()
+        
+        var blockToDrop = [BlockResult]()
         var dropBlocksTo = [GridReference]()
         
         for column in 0..<grid.columns {
@@ -47,7 +49,7 @@ class DropBlocksEffect: GridEffect {
                     let dropDistance = min(gapsBelow.reduce(0) { $0 + $1.length }, distanceToNearestBarrier)
 
                     if dropDistance > 0 {
-                        dropBlocksFrom.append(block.gridReference)
+                        blockToDrop.append(block)
                         dropBlocksTo.append(block.gridReference.offSet(-dropDistance, 0))
                     }
                 }
@@ -55,7 +57,12 @@ class DropBlocksEffect: GridEffect {
         }
         
         // make the moves
-        return grid.moveBlocks(from: dropBlocksFrom, to: dropBlocksTo)
+        let _ = grid.moveBlocks(from: blockToDrop.map { $0.gridReference }, to: dropBlocksTo, suppressDelegateCall: true)
+        
+        effectResults.blocksMoved = blockToDrop.map { $0.block! }
+        effectResults.blocksMovedTo = dropBlocksTo
+        
+        return effectResults
 
     }
 }

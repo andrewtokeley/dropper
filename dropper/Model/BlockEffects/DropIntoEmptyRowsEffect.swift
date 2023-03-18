@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import UIKit
 
 class DropIntoEmptyRowsEffect: GridEffect {
     
-    override func apply() -> Bool {
+    override func apply(_ grid: BlockGrid) -> EffectResult {
+        self.effectResults.clear()
         var blocksToMove = [BlockResult]()
         
         // for each blank row, move all the blocks above it down one space
@@ -26,8 +28,14 @@ class DropIntoEmptyRowsEffect: GridEffect {
         }
         
         if blocksToMove.count > 0 {
-            return grid.moveBlocks(from: blocksToMove.map { $0.gridReference }, direction:.down)
+            let _ = grid.moveBlocks(from: blocksToMove.map { $0.gridReference }, direction:.down, suppressDelegateCall: true)
         }
-        return false
+        // move to
+        let to = blocksToMove.map { $0.gridReference.adjacent(BlockMoveDirection.down.gridDirection) }
+        
+        effectResults.blocksMoved = blocksToMove.map { $0.block! }
+        effectResults.blocksMovedTo = to
+        
+        return effectResults
     }
 }

@@ -10,12 +10,9 @@ import Viperit
 
 enum AppModules: String, ViperitModule {
     case game
+    case home
     
     var viewType: ViperitViewType {
-        if self == .game {
-            return .code
-        } else {
-            return .code
-        }
+        return .code
     }
 }

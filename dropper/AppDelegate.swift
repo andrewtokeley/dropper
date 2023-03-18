@@ -17,8 +17,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Open first view
         self.window = UIWindow(frame: UIScreen.main.bounds)
-        let module = AppModules.game.build()
-        module.router.show(inWindow: self.window, embedInNavController: false, setupData: nil, makeKeyAndVisible: true)
+        let module = AppModules.home.build()
+        
+        module.router.show(inWindow: self.window, embedInNavController: true, setupData: nil, makeKeyAndVisible: true)
 
         return true
     }

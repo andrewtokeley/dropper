@@ -10,6 +10,7 @@ import UIKit
 import Viperit
 import SpriteKit
 import PureLayout
+import SwiftUI
 
 //MARK: GameView Class
 final class GameView: UserInterface {
@@ -31,6 +32,7 @@ final class GameView: UserInterface {
      */
     lazy var gameSKView: SKView = {
         let view = SKView()
+        view.backgroundColor = .gameBackground
         view.allowsTransparency = true
         view.ignoresSiblingOrder = true
         
@@ -44,8 +46,24 @@ final class GameView: UserInterface {
 
     override func loadView() {
         super.loadView()
+        self.view.backgroundColor = .gameBackground
+        
+        let settingsButton = UIBarButtonItem(title: NSString(string: "\u{2699}\u{0000FE0E}") as String, style: .plain, target: self, action: #selector(settingsTapped))
+        let font = UIFont.systemFont(ofSize: 40)
+        let attributes = [NSAttributedString.Key.font : font, NSAttributedString.Key.foregroundColor: UIColor.white]
+        settingsButton.setTitleTextAttributes(attributes, for: .normal)
+    
+        let add = UIBarButtonItem(barButtonSystemItem: .organize, target: self, action: #selector(settingsTapped))
+        add.tintColor = .white
+        navigationItem.rightBarButtonItems = [settingsButton]
+        
+        registerSwipes()
         view.addSubview(gameSKView)
         setConstraints()
+    }
+    
+    @objc func settingsTapped(_ sender: UIBarButtonItem) {
+        
     }
     
     private func setConstraints() {
@@ -98,8 +116,46 @@ final class GameView: UserInterface {
             }
         }
     }
+
+    // MARK: - Swipes
+
+    func registerSwipes() {
+        let left = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
+        left.direction = .left
+        let right = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
+        right.direction = .right
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tap))
+        //up.direction = .up
+        let down = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
+        down.direction = .down
+        self.view.addGestureRecognizer(left)
+        self.view.addGestureRecognizer(right)
+        self.view.addGestureRecognizer(tap)
+        self.view.addGestureRecognizer(down)
+    }
+
+    @objc func pan(sender: UIPanGestureRecognizer) {
+        presenter.didSelectMove(.left)
+    }
     
+    @objc func tap(sender: UITapGestureRecognizer) {
+        presenter.didSelectRotate()
+    }
+    
+    @objc func swipe(sender: UISwipeGestureRecognizer) {
+        //print(sender.direction)
+        if sender.direction == .left {
+            presenter.didSelectMove(.left)
+        }
+        if sender.direction == .right {
+            presenter.didSelectMove(.right)
+        }
+        if sender.direction == .down {
+            presenter.didSelectDrop()
+        }
+    }
 }
+
 
 //MARK: - GameView API
 
@@ -107,6 +163,21 @@ final class GameView: UserInterface {
  These are the methods that the presenter can call to get the view to present something to the user
  */
 extension GameView: GameViewApi {
+    
+    func updateLevelProgress(_ message: String, progress: Double) {
+        gameScene?.updateLevelProgress(message, progress: progress)
+    }
+    
+    func displayLevel(_ level: Level) {
+        gameScene?.displayLevel(level)
+    }
+    func displayNextShape(_ shape: Shape) {
+        gameScene?.displayNextShape(shape)
+    }
+    
+    func displayPoints(_ points: Int, from: GridReference) {
+        gameScene?.displayPoints(points, from: from)
+    }
     
     func updateScore(_ score: Int) {
         gameScene?.updateScore(score)
@@ -120,6 +191,7 @@ extension GameView: GameViewApi {
     func initialiseGame(rows: Int, columns: Int) {
         let scene = GameScene(rows: rows, columns: columns, size: self.view.bounds.size)
         scene.scaleMode = .resizeFill
+        scene.backgroundColor = .gameBackground
         gameSKView.presentScene(scene)
     }
     
@@ -188,6 +260,22 @@ extension GameView: GameViewApi {
             completion?()
         }
     }
+    
+    func movePlayer(_ reference: GridReference, speed: CGFloat, withShake: Bool = false, completion: (()->Void)?) {
+        gameScene?.movePlayer(reference, speed: speed) {
+            if withShake {
+                self.gameScene?.shakeBlocks(completion: {
+                    completion?()
+                })
+            } else {
+                completion?()
+            }
+        }
+    }
+}
+
+extension GameView: SKSceneDelegate {
+    
 }
 
 // MARK: - GameView Viper Components API

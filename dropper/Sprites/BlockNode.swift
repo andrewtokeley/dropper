@@ -8,31 +8,29 @@
 import SpriteKit
 
 class BlockNode: SKSpriteNode {
+    public var colour: UIColor = .red {
+        didSet {
+            rectangle.fillColor = colour
+        }
+    }
     
     var block: Block!
     var blockColour: UIColor {
         switch block.colour {
-            case .orange: return .orange
-            case .yellow: return .yellow
-            case .red: return .red
-            case .blue: return .cyan
-            case .ground: return .brown
-        default: return .systemPink
+            case .colour1: return .gameBlock1
+            case .colour2: return .gameBlock2
+            case .colour3: return .gameBlock3
+            case .colour4: return .gameBlock4
+            case .colour5: return .gameBlock5
+        default: return .white
         }
     }
     
-    
-    
     lazy var rectangle: SKShapeNode = {
         let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:-self.size.width/2, y:-self.size.height/2), size: self.size), cornerRadius: 0)
-        node.strokeColor = .black
-        node.lineWidth = 2
+        node.strokeColor = UIColor.gameBackground
+        node.lineWidth = 4
         node.fillColor = blockColour
-        
-//        if block.type == .player {
-//            //parentDot.position = CGPoint(x:-self.size.width/2, y:-self.size.height/2)
-//            node.addChild(parentDot)
-//        }
         return node
     }()
     
@@ -45,7 +43,8 @@ class BlockNode: SKSpriteNode {
     }
     
     required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
+        print("INIT CODER")
     }
     
     // MARK: - Actions
