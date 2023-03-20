@@ -28,6 +28,7 @@ struct BlockResult {
     /// The grid reference where the search was conducted
     var gridReference: GridReference
     
+    /// Debug message
     var description: String {
         return "Colour: \(block?.colour.description ?? "nil"), Type: \(block?.type.description ?? "nil"), isInsideGrid: \(isInsideGrid), GridRef: \(gridReference.row), \(gridReference.column)."
     }

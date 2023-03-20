@@ -8,6 +8,7 @@
 import SpriteKit
 
 class BlockNode: SKSpriteNode {
+    
     public var colour: UIColor = .red {
         didSet {
             rectangle.fillColor = colour
@@ -15,6 +16,7 @@ class BlockNode: SKSpriteNode {
     }
     
     var block: Block!
+    
     var blockColour: UIColor {
         switch block.colour {
             case .colour1: return .gameBlock1
@@ -26,13 +28,27 @@ class BlockNode: SKSpriteNode {
         }
     }
     
-    lazy var rectangle: SKShapeNode = {
+    private lazy var rectangle: SKShapeNode = {
         let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:-self.size.width/2, y:-self.size.height/2), size: self.size), cornerRadius: 0)
         node.strokeColor = UIColor.gameBackground
         node.lineWidth = 4
         node.fillColor = blockColour
+        node.name = "bodyNode"
+        if block.isGhost {
+            node.fillColor = blockColour.withAlphaComponent(0.5)
+        }
         return node
     }()
+    
+    // MARK: - Functions
+    
+    /**
+     Changes the block's appearance to appear like a ghost or not.
+     */
+    public func setGhostState(_ isGhost: Bool) {
+        let alpha = isGhost ? 0.5 : 1
+        rectangle.fillColor = rectangle.fillColor.withAlphaComponent(alpha)
+    }
     
     // MARK: - Initializers
     
@@ -42,33 +58,29 @@ class BlockNode: SKSpriteNode {
         addChild(rectangle)
     }
     
+    override init(texture: SKTexture?, color: UIColor, size: CGSize) {
+        super.init(texture: nil, color: .clear, size: CGSize.zero)
+    }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        print("INIT CODER")
+        
     }
     
     // MARK: - Actions
     
+    /**
+     Animate the block to simulate an explosion
+     */
     public func explode(_ completion: (()->Void)?) {
-        let pulseUp = SKAction.scale(to: 1.3, duration: 0.15)
-        let pulseDown = SKAction.scale(to: 0.0, duration: CGFloat.random(in: 0.1..<0.8))
-        let pause = SKAction.wait(forDuration: 0.02)
-        let pulse = SKAction.sequence([pause, pulseUp, pulseDown])
+        let pulseUp = SKAction.scale(to: 1.3, duration: 0.03)
+        let pulseDown = SKAction.scale(to: 0.0, duration: 0.03)
+        //let pause = SKAction.wait(forDuration: 0.01)
+        let pulse = SKAction.sequence([pulseUp, pulseDown])
         
         rectangle.run(pulse) {
             completion?()
         }
     }
     
-    
-//    private func adjustLabelFontSizeToFitRect(labelNode:SKLabelNode, rect:CGRect, scale: CGFloat = 1) {
-//        // Determine the font scaling factor that should let the label text fit in the given rectangle.
-//        let scalingFactor = min(rect.width / labelNode.frame.width, rect.height / labelNode.frame.height)
-//
-//        // Change the fontSize.
-//        labelNode.fontSize *= scalingFactor * scale
-//
-//        // Optionally move the SKLabelNode to the center of the rectangle.
-//        labelNode.position = CGPoint(x: rect.midX, y: rect.midY - labelNode.frame.height / 2.0)
-//    }
 }

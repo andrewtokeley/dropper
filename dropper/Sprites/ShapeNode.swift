@@ -19,7 +19,29 @@ class ShapeNode: SKSpriteNode {
     var references = [GridReference]()
     var blockSize: CGFloat = 0
     
-    var blocksNodes = [BlockNode]()
+    /// Reference to the shape's block nodes
+    var blockNodes = [BlockNode]()
+    
+    /**
+     Returns a ShapeNode that is a copy of the current ShapeNode, but looks ghostlike.
+     
+     Note, the position of the Ghost ShapeNode will be the same as the current ShapeNode.
+     */
+    var ghostShapeNode: ShapeNode? {
+        // copy doesn't copy any of the custom properties, just the node stuff
+        if let node = self.copy() as? ShapeNode {
+            node.removeAllActions()
+            for child in node.children {
+                if let blockNode = child as? BlockNode {
+                    if let bodyNode = blockNode.childNode(withName: "bodyNode") as? SKShapeNode {
+                        bodyNode.fillColor = bodyNode.fillColor.withAlphaComponent(0.5)
+                    }
+                }
+            }
+            return node
+        }
+        return nil
+    }
     
     /**
      Initialise a new shape as defined by the blocks and corresponding grid
@@ -53,21 +75,34 @@ class ShapeNode: SKSpriteNode {
         super.init(texture: nil, color: .clear, size: CGSize(width: blockSize*3.0, height: blockSize*3.0))
         setShape(shape, blockSize: blockSize)
     }
+
+    override init(texture: SKTexture?, color: UIColor, size: CGSize) {
+        super.init(texture: nil, color: .clear, size: CGSize.zero)
+    }
     
-    public func setShape(blocks: [Block], references: [GridReference], blockSize: CGFloat) {
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    //MARK: - Set Shape
+    
+    /**
+     (Re)Sets the shape
+     */
+    private func setShape(blocks: [Block], references: [GridReference], blockSize: CGFloat) {
         self.removeAllChildren()
         self.size = CGSize(width: blockSize*3.0, height: blockSize*3.0)
-        
+
         for i in 0..<blocks.count {
             let blockNode = BlockNode(block: blocks[i], size: blockSize)
             blockNode.name = blocks[i].id
-            
+
             // position (0,0), the centre of the node, is the position of the block at GridReference(0,0)
             let x = CGFloat(references[i].column) * blockSize
             let y = CGFloat(references[i].row) * blockSize
             blockNode.position = CGPoint(x: x, y: y)
-            
-            blocksNodes.append(blockNode)
+
+            blockNodes.append(blockNode)
             addChild(blockNode)
         }
     }
@@ -75,8 +110,10 @@ class ShapeNode: SKSpriteNode {
     public func setShape(_ shape: Shape, blockSize: CGFloat) {
         var blocks = [Block]()
         for i in 0..<shape.colours.count {
-            blocks.append(Block(shape.colours[i], .block))
+            let block = Block(shape.colours[i], .block)
+            blocks.append(block)
         }
+        
         setShape(blocks: blocks, references: shape.references, blockSize: blockSize)
     }
     
@@ -91,15 +128,13 @@ class ShapeNode: SKSpriteNode {
         if let node = self.childNode(withName: block.id) {
             node.run(SKAction.fadeOut(withDuration: 0.5)) {
                 node.removeFromParent()
-                self.blocksNodes.removeAll(where: { $0.block.id == block.id})
+                self.blockNodes.removeAll(where: { $0.block.id == block.id})
                 
                 // if this was the last block let the completion handler know
-                completion?(self.blocksNodes.count)
+                completion?(self.blockNodes.count)
             }
         }
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
+    
 }

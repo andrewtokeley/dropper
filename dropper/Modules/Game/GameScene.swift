@@ -19,12 +19,31 @@ enum CollisionTypes: UInt32 {
     case platform = 4
 }
 
+struct GridBuffer {
+    var gridLeft: CGFloat = 0
+    var gridRight: CGFloat = 0
+    var gridTop: CGFloat = 0
+    var gridBottom: CGFloat = 0
+    
+    var spacer: CGFloat = 30
+}
+
 class GameScene: SKScene {
 
     // MARK: - Constants
 
-    private let speedDuration = TimeInterval(0.2)
+    /// The duration between calls to the loopCallback
+    private var loopTimeInterval = TimeInterval(0)
+    
+    /// The callback to call each time the game loop runs
+    private var loopCallback: (()->Void)?
 
+    /// How long since the update method last checked whether to call the loopCallback
+    private var lastTimeInterval = TimeInterval(0)
+    
+    /// The duration for move block actions (may make zero)
+    private let speedDuration = 0.2
+    
     /// The amount of space on both sides of the grid
     private let side_space: CGFloat = 30
 
@@ -32,7 +51,7 @@ class GameScene: SKScene {
     private var gridHeight: CGFloat {
         return CGFloat(self.rows) * blockSize
     }
-        
+    
     /// The height of the ground
     private var groundHeight: CGFloat {
         return 1.0 * blockSize
@@ -45,6 +64,8 @@ class GameScene: SKScene {
     
     // MARK: - Variables
     
+    private var gridBuffer = GridBuffer()
+    
     /// The number of rows in the grid
     private var rows: Int = 0
     
@@ -55,7 +76,11 @@ class GameScene: SKScene {
     // private var blockNodes = [[BlockNode?]]()
     private var blockNodes = [BlockNode]()
     
-    private var playerNode: ShapeNode?
+    /// ShapeNode that represents the active shape
+    private var shapeNode: ShapeNode?
+    
+    /// ShapeNode that represents the ghost of the active shape (where it would drop to)
+    private var ghostNode: ShapeNode?
     
     /// Dimension of each block - blocks are always square
     private var blockSize: CGFloat = 10
@@ -81,6 +106,26 @@ class GameScene: SKScene {
         return node
     }
     
+    lazy var levelBlock: SKNode = {
+        let node = SKNode()
+        node.addChild(levelLabel)
+        node.addChild(levelHeadingLabel)
+        levelHeadingLabel.autoPositionWithinParent(.centreTop)
+        levelLabel.autoPositionWithinParent(.centreTop, yOffSet: levelHeadingLabel.frame.size.height + 10)
+        
+        return node
+    }()
+    
+    lazy var goalBlock: SKNode = {
+        let node = SKNode()
+        node.addChild(goalHeadingLabel)
+        node.addChild(goalMessageLabel)
+        goalHeadingLabel.autoPositionWithinParent(.centreTop)
+        goalMessageLabel.autoPositionWithinParent(.centreTop, yOffSet: goalHeadingLabel.frame.size.height + 10)
+        
+        return node
+    }()
+    
     lazy var scoreHeadingLabel: SKLabelNode = { return createLabel("SCORE", 18, .white, .right) }()
     lazy var scoreLabel: SKLabelNode = { return createLabel("0", 32, .gameHighlight, .right) }()
     
@@ -89,8 +134,8 @@ class GameScene: SKScene {
     
     lazy var nextHeadingLabel: SKLabelNode = { return createLabel("NEXT", 18, .white) }()
     
-    lazy var goalHeadingLabel: SKLabelNode = { return createLabel("GOAL", 18, .white) }()
-    lazy var goalMessageLabel: SKLabelNode = { return createLabel("", 18, .gameHighlight, .right) }()
+    lazy var goalHeadingLabel: SKLabelNode = { return createLabel("ROWS", 18, .white, .center) }()
+    lazy var goalMessageLabel: SKLabelNode = { return createLabel("0", 32, .gameHighlight, .center) }()
 
     lazy var nextShape: ShapeNode = {
         let shape = Shape.random(.colour1)
@@ -98,10 +143,10 @@ class GameScene: SKScene {
         return node
     }()
     
-    lazy var progressNode: ProgressNode = {
-        let node = ProgressNode(size: CGSize.zero)
-        return node
-    }()
+//    lazy var progressNode: ProgressNode = {
+//        let node = ProgressNode(size: CGSize.zero)
+//        return node
+//    }()
     
     var sideBar: SKShapeNode {
         let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:0,y:0), size: CGSize(width: side_space, height: self.size.height - headerHeight)))
@@ -113,15 +158,26 @@ class GameScene: SKScene {
     
     //MARK: - Initialisers
     
-    private func initialise(rows: Int, columns: Int, size: CGSize) {
+    init(rows: Int, columns: Int, size: CGSize, loopCallback: (()->Void)? = nil) {
+        super.init(size: size)
         self.rows = rows
         self.columns = columns
-        self.blockSize = (size.width-2*side_space)/CGFloat(columns)
-    }
-    
-    init(rows: Int, columns: Int, size: CGSize) {
-        super.init(size: size)
-        initialise(rows: rows, columns: columns, size: size)
+        
+        // calculate a block size that gaurantees the grid will fit the visible screen and have at least a blocksize to the left and right.
+        
+        // Reserve this much space above the grid, for headings/scores etc.
+        let gridTop: CGFloat = 150
+        self.blockSize = min(self.size.width/CGFloat(columns + 2), (self.size.height-gridTop)/CGFloat(rows + 3))
+        let gridLeftRight = (self.size.width - CGFloat(columns) * self.blockSize)/2
+        let gridBottom = gridLeftRight
+        self.gridBuffer = GridBuffer(
+            gridLeft: gridLeftRight,
+            gridRight: gridLeftRight,
+            gridTop: gridTop,
+            gridBottom: 2.0 * blockSize)
+        
+        self.loopCallback = loopCallback
+        //drawGrid()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -130,17 +186,29 @@ class GameScene: SKScene {
     
     //MARK: - Overrides
     
+    override func update(_ currentTime: TimeInterval) {
+        guard loopCallback != nil else { return }
+        guard loopTimeInterval > 0 else { return }
+        
+        if abs(lastTimeInterval - currentTime) > self.loopTimeInterval {
+            lastTimeInterval = currentTime
+            loopCallback?()
+        }
+    }
+    
     override func sceneDidLoad() {
 
         addChild(scoreLabel)
         addChild(scoreHeadingLabel)
-        addChild(levelLabel)
-        addChild(levelHeadingLabel)
-        addChild(goalMessageLabel)
-        addChild(goalHeadingLabel)
+//        addChild(levelLabel)
+//        addChild(levelHeadingLabel)
+        addChild(levelBlock)
+//        addChild(goalMessageLabel)
+//        addChild(goalHeadingLabel)
+        addChild(goalBlock)
         addChild(nextHeadingLabel)
         addChild(nextShape)
-        addChild(progressNode)
+        //addChild(progressNode)
         self.columns = 10
         //self.blockSize = (self.size.width-2*side_space)/CGFloat(self.columns)
         
@@ -162,36 +230,15 @@ class GameScene: SKScene {
      Whenever the scene size changes we need to manually reposition nodes.
      */
     private func repositionNodes() {
-        let topSpacer: CGFloat = 100
-        let textLevel1_OffSet = topSpacer + 0
-        let textLevel2_OffSet = topSpacer + 25
-        let textLevel3_OffSet = topSpacer + 120
+        let textLevel1_OffSet: CGFloat = 100
+        let textLevel2_OffSet: CGFloat = 125
         
-        let spacer: CGFloat = 15
-
-        // next
-        nextHeadingLabel.autoPositionWithinScene(.leftTop, xOffSet: spacer, yOffSet: textLevel1_OffSet)
- 
-        // next Shape
-        nextShape.autoPositionWithinScene(.leftTop, xOffSet: spacer, yOffSet: textLevel2_OffSet)
-        
-        // goal
-        goalHeadingLabel.autoPositionWithinScene(.leftTop, xOffSet: spacer, yOffSet:textLevel3_OffSet)
-        goalMessageLabel.autoPositionWithinScene(.rightTop, xOffSet: spacer, yOffSet: textLevel3_OffSet)
-
-        // score
-        scoreHeadingLabel.autoPositionWithinScene(.rightTop, xOffSet: spacer, yOffSet: textLevel1_OffSet)
-        scoreLabel.autoPositionWithinScene(.rightTop, xOffSet: spacer, yOffSet: textLevel2_OffSet)
-        
-        // level
-        levelHeadingLabel.autoPositionWithinScene(.centreTop, yOffSet: textLevel1_OffSet)
-        levelLabel.autoPositionWithinScene(.centreTop, yOffSet: textLevel2_OffSet)
-        
-        // progess
-        progressNode.size.width = self.size.width * 0.85
-        progressNode.size.height = 10
-        progressNode.autoPositionWithinScene(.centreTop, yOffSet: textLevel3_OffSet - 25)
-        progressNode.buildNode()
+        nextHeadingLabel.autoPositionWithinParent(.leftTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel1_OffSet)
+        nextShape.autoPositionWithinParent(.leftTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel2_OffSet)
+        goalBlock.autoPositionWithinParent(.leftTop, xOffSet: 0.35*size.width, yOffSet: textLevel1_OffSet)
+        scoreHeadingLabel.autoPositionWithinParent(.rightTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel1_OffSet)
+        scoreLabel.autoPositionWithinParent(.rightTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel2_OffSet)
+        levelBlock.autoPositionWithinParent(.rightTop, xOffSet: 0.40*size.width, yOffSet: textLevel1_OffSet)
     }
     /**
      Gets the screen point at the centre of a GridReference
@@ -199,11 +246,11 @@ class GameScene: SKScene {
     private func getPosition(_ reference: GridReference, centre: Bool = true) -> CGPoint {
         
         var position = CGPoint.zero
-        position.x = CGFloat(reference.column) * blockSize + side_space
+        position.x = CGFloat(reference.column) * blockSize + gridBuffer.gridLeft
         if centre {
             position.x += blockSize/2.0
         }
-        position.y = CGFloat(reference.row) * blockSize + side_space
+        position.y = CGFloat(reference.row) * blockSize + gridBuffer.gridBottom
         if centre {
             position.y += blockSize/2.0
         }
@@ -214,6 +261,41 @@ class GameScene: SKScene {
         blockNodes.first(where: { $0.block == block })
     }
         
+    public func startGameLoop(_ loopTimeInterval: TimeInterval) {
+        self.loopTimeInterval = loopTimeInterval
+        self.lastTimeInterval = TimeInterval(0)
+    }
+    
+    public func stopGameLoop() {
+        self.loopTimeInterval = TimeInterval(0)
+    }
+    
+    private func drawGrid() {
+        for row in 0..<rows + 1 {
+            let horizontal = UIBezierPath()
+            let rowHeight = getPosition(GridReference(row, 0), centre: false).y
+            let left = getPosition(GridReference(0, 0), centre: false).x
+            let right = getPosition(GridReference(0, columns), centre: false).x
+            horizontal.move(to: CGPoint(x: left, y: rowHeight))
+            horizontal.addLine(to: CGPoint(x: right, y: rowHeight))
+            let line = SKShapeNode(path: horizontal.cgPath)
+            line.strokeColor = .white
+            self.addChild(line)
+            for column in 0..<columns + 1 {
+                let columnWidth = getPosition(GridReference(0, column), centre: false).x
+                let bottom = getPosition(GridReference(0, 0), centre: false).y
+                let top = getPosition(GridReference(rows, 0), centre: false).y
+                
+                let vertical = UIBezierPath()
+                vertical.move(to: CGPoint(x: columnWidth, y: bottom))
+                vertical.addLine(to: CGPoint(x: columnWidth, y: top))
+                let line = SKShapeNode(path: vertical.cgPath)
+                line.strokeColor = .white
+                self.addChild(line)
+            }
+        }
+    }
+    
     // MARK: - Score Methods
     public func updateScore(_ score: Int) {
         self.scoreLabel.text = "\(score)"
@@ -238,61 +320,54 @@ class GameScene: SKScene {
         pointLabel.run(sequence)
     }
     
-    // MARK: - Player Methods
-
+    // MARK: - User Interface
+    
     public func displayLevel(_ level: Level) {
         levelLabel.text = "\(level.number)"
-        goalMessageLabel.text = level.goalDescription
-        progressNode.updateProgress(0)
+        goalMessageLabel.text = "\(String(describing: level.goalProgressValue))"
+        //progressNode.updateProgress(0)
     }
     
-    func updateLevelProgress(_ message: String, progress: Double) {
-        goalMessageLabel.text = message
-        progressNode.updateProgress(progress)
+    func updateLevelProgress(_ progressValue: Int, progress: Double) {
+        goalMessageLabel.text = "\(progressValue)"
+        //progressNode.updateProgress(progress)
     }
     
     public func displayNextShape(_ shape: Shape) {
         nextShape.setShape(shape, blockSize: 15)
     }
     
-    public func addPlayer(_ blocks: [Block], references: [GridReference], to: GridReference) throws {
-
-        // convert the references to be relative to the origin
-        let relativeReferences = references.map { GridReference($0.row-to.row, $0.column-to.column) }
-        self.playerNode = try ShapeNode(blocks: blocks, references:relativeReferences, blockSize: blockSize)
-
-        if let playerNode = playerNode {
+    // MARK: - Shape Methods
+    
+    public func addShape(_ shape: Shape, to: GridReference) {
+        self.shapeNode = ShapeNode(shape: shape, blockSize: blockSize)
+        if let shapeNode = shapeNode {
             // add the player's nodes to the blockNodes array
-            self.blockNodes.append(contentsOf: playerNode.blocksNodes)
-
-            playerNode.position = getPosition(to)
-
-            addChild(playerNode)
+            self.blockNodes.append(contentsOf: shapeNode.blockNodes)
+            shapeNode.position = getPosition(to)
+            addChild(shapeNode)
         }
     }
     
-    public func addPlayer(_ blocks: [Block], to: GridReference) throws {
-        
-//        self.playerNode = try ShapeNode(blocks: blocks, references: <#T##[GridReference]#>, blockSize: <#T##CGFloat#>)
-//        if let playerNode = playerNode {
-//
-//            // add the player's nodes to the blockNodes array
-//            self.blockNodes.append(contentsOf: playerNode.blocksNodes)
-//
-//            playerNode.position = getPosition(to)
-//            addChild(playerNode)
-//        }
+    func showShapeGhost(_ at: GridReference) {
+        self.ghostNode?.removeFromParent()
+        self.ghostNode = self.shapeNode?.ghostShapeNode
+        if let node = self.ghostNode {
+            node.position = getPosition(at)
+            print("ghost pos = \(node.position)")
+            print("ghost ref = \(at)")
+            addChild(node)
+        }
     }
     
-    public func rotatePlayer(_ degrees: Float, completion: (()->Void)? = nil) {
-        self.playerNode?.run(SKAction.rotate(byAngle: -CGFloat(GLKMathDegreesToRadians(degrees)), duration: speedDuration)) {
+    public func rotateShape(_ degrees: Float, completion: (()->Void)? = nil) {
+        self.shapeNode?.run(SKAction.rotate(byAngle: -CGFloat(GLKMathDegreesToRadians(degrees)), duration: 0)) {
             completion?()
         }
     }
     
-    public func movePlayer(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)? = nil) {
-        print("move player \(direction)")
-        if let playerNode = playerNode {
+    public func moveShape(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)? = nil) {
+        if let playerNode = shapeNode {
             playerNode.run(SKAction.moveBy(
                 x: CGFloat(direction.gridDirection.gridDelta.columnDelta)*blockSize,
                 y: CGFloat(direction.gridDirection.gridDelta.rowDelta)*blockSize,
@@ -304,8 +379,8 @@ class GameScene: SKScene {
         }
     }
     
-    public func movePlayer(_ reference: GridReference, speed: CGFloat, completion: (()->Void)? = nil) {
-        if let playerNode = playerNode {
+    public func moveShape(_ reference: GridReference, speed: CGFloat, completion: (()->Void)? = nil) {
+        if let playerNode = shapeNode {
             let newPosition = getPosition(reference)
             playerNode.removeAllActions()
             playerNode.run(SKAction.move(to: newPosition, duration: speed)) {
@@ -316,35 +391,35 @@ class GameScene: SKScene {
         }
     }
     
-    func removePlayer() {
-        if let playerBlockNode = playerNode?.blocksNodes {
+    func removeShape() {
+        if let playerBlockNode = shapeNode?.blockNodes {
             for playerBlockNode in playerBlockNode {
                 self.blockNodes.removeAll(where: {$0 == playerBlockNode })
             }
-            playerNode?.removeFromParent()
+            shapeNode?.removeFromParent()
         }
     }
     
-    func removePlayerBlock(_ block: Block, completion: (()->Void)? = nil) {
-        if let playerNode = playerNode {
-            playerNode.removeBlock(block) { (remainingBlocks) in
-                if remainingBlocks == 0 {
-                    self.removePlayer()
-                }
-                completion?()
-                return
-            }
-        } else {
-            completion?()
-        }
-    }
+//    func removePlayerBlock(_ block: Block, completion: (()->Void)? = nil) {
+//        if let playerNode = playerNode {
+//            playerNode.removeBlock(block) { (remainingBlocks) in
+//                if remainingBlocks == 0 {
+//                    self.removeShape()
+//                }
+//                completion?()
+//                return
+//            }
+//        } else {
+//            completion?()
+//        }
+//    }
     
     /**
      Removes the player and replaces it with blocks of the given type
      */
-    func convertPlayerToType(_ type: BlockType) {
-        if let playerNode = playerNode {
-            for node in playerNode.blocksNodes {
+    func convertShapeToType(_ type: BlockType) {
+        if let playerNode = shapeNode {
+            for node in playerNode.blockNodes {
                 if let block = node.block {
                     block.type = type
                     // get the nodes postion in the scene's coordinate system
@@ -358,7 +433,7 @@ class GameScene: SKScene {
                 }
             }
         }
-        removePlayer()
+        removeShape()
     }
     
     // MARK: - Block Methods
@@ -372,7 +447,7 @@ class GameScene: SKScene {
         
         let dispatch = DispatchGroup()
         for node in blockNodes {
-            if !(playerNode?.blocksNodes.contains(node) ?? false) {
+            if !(shapeNode?.blockNodes.contains(node) ?? false) {
                 dispatch.enter()
                 node.run(shake) {
                     dispatch.leave()
@@ -435,10 +510,11 @@ class GameScene: SKScene {
     }
     
     public func moveBlock(_ block: Block, to: GridReference, completion: (()->Void)?) {
+        let speed = 0.05
         if let node = getNode(block) {
             
             let toPos = getPosition(to)
-            let duration = (node.position.y - toPos.y)/blockSize * speedDuration
+            let duration = (node.position.y - toPos.y)/blockSize * speed
             node.run(SKAction.move(to: CGPoint(x: toPos.x, y: toPos.y), duration: duration)) {
                 completion?()
             }
@@ -465,14 +541,8 @@ class GameScene: SKScene {
         let dispatchGroup = DispatchGroup()
         for block in blocks {
             dispatchGroup.enter()
-            if block.type == .player {
-                removePlayerBlock(block) {
-                    dispatchGroup.leave()
-                }
-            } else {
-                removeBlock(block) {
-                    dispatchGroup.leave()
-                }
+            removeBlock(block) {
+                dispatchGroup.leave()
             }
         }
         dispatchGroup.notify(queue: DispatchQueue.main, execute: {

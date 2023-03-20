@@ -15,14 +15,41 @@ protocol GameRouterApi: RouterProtocol {
 //MARK: - GameView API
 protocol GameViewApi: UserInterfaceProtocol {
     func initialiseGame(rows: Int, columns: Int)
-    func addPlayer(_ blocks: [Block], to: GridReference) throws
-    func addPlayer(_ blocks: [Block], references: [GridReference], to: GridReference) throws
-    func rotatePlayer(_ degrees: CGFloat, completion: (()->Void)?)
-    func movePlayer(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)?)
-    func movePlayer(_ reference: GridReference, speed: CGFloat, withShake: Bool, completion: (()->Void)?)
-    func removePlayerBlock(_ block: Block, completion: (()->Void)?)
-    func removePlayer()
-    func convertPlayerToBlocks(_ type: BlockType)
+    
+    /**
+     Adds a new shape to the grid, where the shape's origin will be located at the specified reference.
+     */
+    func addShape(_ shape: Shape, to: GridReference)
+    
+    /**
+     Adds a new Ghost shape to the grid, where the shape's origin will be located at the specified reference.
+     */
+    func showShapeGhost(at: GridReference)
+    
+    /**
+     Rotates the active shape clockwise by the specified number of degress
+     */
+    func rotateShape(_ degrees: CGFloat, completion: (()->Void)?)
+    
+    /**
+     Moves the active shape in the given direction, by one block
+     */
+    func moveShape(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)?)
+    
+    /**
+     Moves the active shape to a new location and optionally applies a shaking motion to other blocks in the grid. This is typically the result of a player selecting to drop the shape.
+     */
+    func moveShape(_ reference: GridReference, speed: CGFloat, withShake: Bool, completion: (()->Void)?)
+    
+    /**
+     Removes the active shape from the grid
+     */
+    func removeShape()
+    
+    /**
+     Converts the active shape to be regular blocks. This typically happens when a shape lands and can't move anymore and before effects are run on the grid.
+     */
+    func convertShapeToBlocks(_ type: BlockType)
     
     func addBlocks(_ blocks: [Block], references: [GridReference], completion: (()->Void)?)
     func addBlock(_ block: Block, reference: GridReference, completion: (()->Void)?)
@@ -35,16 +62,22 @@ protocol GameViewApi: UserInterfaceProtocol {
     func displayPoints(_ points: Int, from: GridReference)
     func displayNextShape(_ shape: Shape)
     func displayLevel(_ level: Level)
-    func updateLevelProgress(_ message: String, progress: Double)
+    func updateLevelProgress(_ progressValue: Int, progress: Double)
+    
+    func startGameLoop(_ loopTimeInterval: TimeInterval)
+    func stopGameLoop()
 }
 
 //MARK: - GamePresenter API
 protocol GamePresenterApi: PresenterProtocol {
     func didSelectMove(_ direction: BlockMoveDirection)
+    func didSelectPause()
     func didSelectDrop()
     func didSelectRotate()
     func didCreateNewGame(game: Game, grid: BlockGrid)
     func didSelectNewGame()
+    
+    func didUpdateGameLoop()
 }
 
 //MARK: - GameInteractor API

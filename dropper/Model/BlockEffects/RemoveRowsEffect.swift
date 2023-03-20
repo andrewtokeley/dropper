@@ -41,6 +41,10 @@ class RemoveRowsEffect: GridEffect {
                 effectResults.achievments.addTo(.threeRows,1)
                 effectResults.achievments.addTo(.explodedBlock,grid.columns*3)
                 break
+            case 4:
+                effectResults.achievments.addTo(.fourRows,1)
+                effectResults.achievments.addTo(.explodedBlock,grid.columns*4)
+                break
             default:
                 effectResults.achievments.addTo(.oneRow, 1)
                 effectResults.achievments.addTo(.explodedBlock,grid.columns)

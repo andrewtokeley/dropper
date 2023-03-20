@@ -10,13 +10,12 @@ import SpriteKit
 
 protocol BlockGridDelegate {
     
-    // MARK: - Player
-    func blockGrid(_ blockGrid: BlockGrid, playerAdded playerBlockResults: [BlockResult])
-    func blockGrid(_ blockGrid: BlockGrid, playerRotatedBy degrees: CGFloat)
-    func blockGrid(_ blockGrid: BlockGrid, playerMovedInDirection direction: BlockMoveDirection)
-    func blockGrid(_ blockGrid: BlockGrid, playerBlockRemoved block: Block)
-    func blockGrid(_ blockGrid: BlockGrid, playerDropedTo reference: GridReference)
-    func playerRemoved()
+    // MARK: - Shape Methods
+    func blockGrid(_ blockGrid: BlockGrid, shapeAdded: Shape, to: GridReference)
+    func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat)
+    func blockGrid(_ blockGrid: BlockGrid, shapeMovedInDirection direction: BlockMoveDirection)
+    func blockGrid(_ blockGrid: BlockGrid, shapeDropedTo reference: GridReference)
+    func shapeRemoved()
     
     // MARK: - Blocks
     func blockGrid(_ blockGrid: BlockGrid, blockMoved block: Block, to: GridReference)

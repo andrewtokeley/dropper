@@ -48,14 +48,15 @@ enum BlockColour: Int {
         return result
     }
     
+    /// Debug info
     var description: String {
         switch self {
-        case .colour1: return "Orange"
-        case .colour2: return "Yellow"
-        case .colour3: return "Red"
-        case .colour4: return "Blue"
-        case .colour5: return "Green"
-        case .colour6: return "Ground"
+        case .colour1: return "Colour1"
+        case .colour2: return "Colour2"
+        case .colour3: return "Colour3"
+        case .colour4: return "Colour4"
+        case .colour5: return "Colour5"
+        case .colour6: return "Colour6"
         }
     }
 }
@@ -65,10 +66,15 @@ enum BlockColour: Int {
  move command is issued
  */
 class Block {
+    
+    /// to support equality we create a unique id
     let id = UUID().uuidString
     
     /// Colour of block
     var colour: BlockColour!
+    
+    /// Determines whether the block appears semi-transparent
+    var isGhost: Bool = false
     
     /// Type of block e.g. player, fixed, wall
     var type: BlockType!
@@ -81,9 +87,10 @@ class Block {
     /// - Parameters:
     ///   - colour: BlockColour enum
     ///   - type: BlockType enum
-    init(_ colour: BlockColour, _ type: BlockType) {
+    init(_ colour: BlockColour, _ type: BlockType, _ isGhost: Bool = false) {
         self.colour = colour
         self.type = type
+        self.isGhost = isGhost
     }
 }
 

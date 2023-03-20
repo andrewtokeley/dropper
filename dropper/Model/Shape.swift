@@ -10,6 +10,7 @@ import Foundation
 struct Shape {
     var references: [GridReference]
     var colours: [BlockColour]
+    var isGhost: Bool = false
     
     static func random(_ colour: BlockColour) -> Shape {
         let type = Int.random(in: 0..<6)

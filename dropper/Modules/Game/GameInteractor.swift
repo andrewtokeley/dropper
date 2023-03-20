@@ -16,7 +16,7 @@ final class GameInteractor: Interactor {
 // MARK: - GameInteractor API
 extension GameInteractor: GameInteractorApi {
     func createNewGame() {
-        let grid = try! BlockGrid(rows: 18, columns: 10)
+        let grid = try! BlockGrid(rows: 22, columns: 10)
         let game = Game(genre: .tetrisClassic)
         
         presenter.didCreateNewGame(game: game, grid: grid)

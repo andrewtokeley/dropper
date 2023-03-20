@@ -96,9 +96,7 @@ final class GameView: UserInterface {
         if let input = sender.input {
             switch input {
             case " ":
-                if let gameScene = gameScene {
-                    gameScene.isPaused = !gameScene.isPaused
-                }
+                presenter.didSelectPause()
             case "n":
                 presenter.didSelectNewGame()
             case UIKeyCommand.inputLeftArrow:
@@ -154,8 +152,13 @@ final class GameView: UserInterface {
             presenter.didSelectDrop()
         }
     }
-}
 
+    //MARK: - Game Loop
+    
+    func gameLoopCallback() {
+        presenter.didUpdateGameLoop()
+    }
+}
 
 //MARK: - GameView API
 
@@ -164,16 +167,70 @@ final class GameView: UserInterface {
  */
 extension GameView: GameViewApi {
     
-    func updateLevelProgress(_ message: String, progress: Double) {
-        gameScene?.updateLevelProgress(message, progress: progress)
+    func displayNextShape(_ shape: Shape) {
+        gameScene?.displayNextShape(shape)
+    }
+    
+    // MARK: - Shape Methods
+    
+    func addShape(_ shape: Shape, to: GridReference) {
+        gameScene?.addShape(shape, to: to)
+    }
+    
+    func showShapeGhost(at: GridReference) {
+        gameScene?.showShapeGhost(at)
+    }
+    
+    func convertShapeToBlocks(_ type: BlockType) {
+        gameScene?.convertShapeToType(type)
+    }
+    
+    func removeShape() {
+        gameScene?.removeShape()
+    }
+    
+    func rotateShape(_ degrees: CGFloat, completion: (()->Void)? = nil) {
+        gameScene?.rotateShape(Float(degrees)) {
+            completion?()
+        }
+    }
+    
+    func moveShape(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)?) {
+        gameScene?.moveShape(direction, speed: speed) {
+            completion?()
+        }
+    }
+    
+    func moveShape(_ reference: GridReference, speed: CGFloat, withShake: Bool = false, completion: (()->Void)?) {
+        gameScene?.moveShape(reference, speed: speed) {
+            if withShake {
+                self.gameScene?.shakeBlocks(completion: {
+                    completion?()
+                })
+            } else {
+                completion?()
+            }
+        }
+    }
+    
+    // MARK: - UI Methods
+    
+    func startGameLoop(_ loopTimeInterval: TimeInterval) {
+        gameScene?.startGameLoop(loopTimeInterval)
+    }
+    
+    func stopGameLoop() {
+        gameScene?.stopGameLoop()
+    }
+    
+    func updateLevelProgress(_ progressValue: Int, progress: Double) {
+        gameScene?.updateLevelProgress(progressValue, progress: progress)
     }
     
     func displayLevel(_ level: Level) {
         gameScene?.displayLevel(level)
     }
-    func displayNextShape(_ shape: Shape) {
-        gameScene?.displayNextShape(shape)
-    }
+    
     
     func displayPoints(_ points: Int, from: GridReference) {
         gameScene?.displayPoints(points, from: from)
@@ -182,19 +239,17 @@ extension GameView: GameViewApi {
     func updateScore(_ score: Int) {
         gameScene?.updateScore(score)
     }
-    func addPlayer(_ blocks: [Block], references: [GridReference], to: GridReference) throws {
-        //
-        try gameScene?.addPlayer(blocks, references: references, to: to)
-    }
     
+    //MARK: - Init Game
     
     func initialiseGame(rows: Int, columns: Int) {
-        let scene = GameScene(rows: rows, columns: columns, size: self.view.bounds.size)
+        let scene = GameScene(rows: rows, columns: columns, size: self.view.bounds.size, loopCallback: gameLoopCallback)
         scene.scaleMode = .resizeFill
         scene.backgroundColor = .gameBackground
         gameSKView.presentScene(scene)
     }
     
+    // MARK: - Block Methods
     func addBlocks(_ blocks: [Block], references: [GridReference], completion: (()->Void)? = nil) {
         gameScene?.addBlocks(blocks: blocks, to: references) {
             completion?()
@@ -231,47 +286,7 @@ extension GameView: GameViewApi {
         }
     }
     
-    func addPlayer(_ blocks: [Block], to: GridReference) throws {
-        try gameScene?.addPlayer(blocks, to: to)
-    }
     
-    func convertPlayerToBlocks(_ type: BlockType) {
-        gameScene?.convertPlayerToType(type)
-    }
-    
-    func removePlayer() {
-        gameScene?.removePlayer()
-    }
-    
-    func removePlayerBlock(_ block: Block, completion: (()->Void)? = nil) {
-        gameScene?.removePlayerBlock(block) {
-            completion?()
-        }
-    }
-    
-    func rotatePlayer(_ degrees: CGFloat, completion: (()->Void)? = nil) {
-        gameScene?.rotatePlayer(Float(degrees)) {
-            completion?()
-        }
-    }
-    
-    func movePlayer(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)?) {
-        gameScene?.movePlayer(direction, speed: speed) {
-            completion?()
-        }
-    }
-    
-    func movePlayer(_ reference: GridReference, speed: CGFloat, withShake: Bool = false, completion: (()->Void)?) {
-        gameScene?.movePlayer(reference, speed: speed) {
-            if withShake {
-                self.gameScene?.shakeBlocks(completion: {
-                    completion?()
-                })
-            } else {
-                completion?()
-            }
-        }
-    }
 }
 
 extension GameView: SKSceneDelegate {

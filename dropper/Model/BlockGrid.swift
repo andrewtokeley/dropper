@@ -172,6 +172,7 @@ class BlockGrid {
         }
         return dropTo
     }
+    
     /**
      Returns whether a reference is within the bounds of the grid
      */
@@ -410,8 +411,12 @@ class BlockGrid {
      Note this method does not check whether the destination references maintain the shape of the source references
      */
     func canMove(references: [GridReference], to: [GridReference] ) -> Bool {
-        guard references.count > 0 else { return false }
-        guard references.count == to.count else { return false }
+        guard references.count > 0 else {
+            return false
+        }
+        guard references.count == to.count else {
+            return false
+        }
         
         let targetBlocks = get(to)
         for block in targetBlocks {
@@ -502,7 +507,6 @@ class BlockGrid {
         blocks[from.row][from.column] = nil
         blocks[to.row][to.column] = block
         
-        print("delegate blockMoved \(block.colour.description) to \(to)")
         delegate?.blockGrid(self, blockMoved: block, to: to)
         return true
     }
@@ -538,83 +542,37 @@ class BlockGrid {
     
     
     // MARK: - Player Movement
-    
-    /// Add a player or the given shape definition to the top middle of the grid
+        
+    /// Add a player or the given shape definition to the top middle of the grid. Calls the ``blockGrid(grid:, playerAdded:)`` delegate method, if successfully added.
+    ///
     /// - Parameter shape: shape definition
     /// - Returns: boolean indicating whether the player could be added or not
-    func addPlayer(_ shape: Shape) throws -> Bool {
-        return try addPlayer(references: shape.references, colours: shape.colours)
-    }
-    
-    /// Adds a player shape to the grid. The shape is defermined by an array of grid references.
-    /// - Parameters:
-    ///   - references: grid references describing the shape. The references are all relative to the shape's origin at reference (0,0).
-    ///   - colours: array of colours for each of the shape's blocks
-    func addPlayer(references: [GridReference], colours: [BlockColour]) throws -> Bool {
+    func addShape(_ shape: Shape) throws -> Bool {
         guard !hasPlayer else { return false }
-        guard references.count > 0 else { return false }
-        guard references.count == colours.count else { return false }
         
         // position as high up the grid as possible, in the middle
-        let originRow = rows - references.filter { $0.row > 0 }.count - 1
+        let originRow = rows - shape.references.filter { $0.row > 0 }.count - 1
         let originColumn = Int(columns/2)
-        playerOrigin = GridReference(originRow,originColumn)
-        
+        let origin = GridReference(originRow,originColumn)
         var playerBlocks = [BlockResult]()
         
-        for i in 0..<references.count {
-            let reference = playerOrigin!.offSet(references[i].row, references[i].column)
-            let block = Block(colours[i], .player)
+        for i in 0..<shape.references.count {
+            let reference = origin.offSet(shape.references[i].row, shape.references[i].column)
+            let block = Block(shape.colours[i], .player)
             playerBlocks.append(BlockResult(block: block, isInsideGrid: true, gridReference: reference))
         }
         
         let result = addBlocks(blocks: playerBlocks.map { $0.block! }, references: playerBlocks.map { $0.gridReference })
         
         if result {
-            delegate?.blockGrid(self, playerAdded: playerBlocks)
+            playerOrigin = origin
+            delegate?.blockGrid(self, shapeAdded: shape, to: origin)
             return true
         }
         
         // something went wrong
         return false
     }
-    
-    /**
-     Adds a new set of player blocks to the game. Players can not be added if there is already a player in the game and the size must be between 2 and 5 inclusive.
-     
-     Currently only straiht, horizontal, players are supported.
-     
-     Players are always added at that top of the game, in the centre.
-     */
-//    func addPlayer(colours: [BlockColour], origin: GridReference) throws -> [BlockResult] {
-//        guard !hasPlayer else { throw BlockGridError.PlayerAlreadyExists }
-//        guard colours.count>=2 && colours.count<=5 else { throw BlockGridError.InvalidPlayerSize }
-//        guard get(origin).isInsideGrid else { throw BlockGridError.ReferenceOutOfBounds }
-//        
-//        let size = colours.count
-//        
-//        // centre the player horizontally with it's origin at the specified reference
-//        let leftMostReference = origin.offSet(0, -Int(size/2))
-//        
-//        // only doing horizontal straight players atm
-//        var playerBlocks = [BlockResult]()
-//        for i in 0..<size {
-//            let reference = leftMostReference.offSet(0, i)
-//            if !get(reference).isInsideGrid {
-//                throw BlockGridError.ReferenceOutOfBounds
-//            }
-//            let block = Block(colours[i], .player)
-//            if (reference == origin) {
-//                block.isOrigin = true
-//            }
-//            
-//            addBlock(block: block, reference: reference)
-//            playerBlocks.append(BlockResult(block: block, isInsideGrid: true, gridReference: reference))
-//        }
-//        delegate?.blockGrid(self, playerAdded: playerBlocks)
-//        return playerBlocks
-//    }
-//    
     
     /**
      Moves a play as far down as it will go
@@ -630,7 +588,7 @@ class BlockGrid {
         if let playerOrigin = playerOrigin {
             let delta = playerDropReferences[0] - playerReferences[0]
             self.playerOrigin = playerOrigin + delta
-            delegate?.blockGrid(self, playerDropedTo: self.playerOrigin!)
+            delegate?.blockGrid(self, shapeDropedTo: self.playerOrigin!)
         }
     }
     
@@ -688,7 +646,7 @@ class BlockGrid {
         if result {
             // redefine where the origin is
             playerOrigin = playerOrigin?.adjacent(direction.gridDirection)
-            delegate?.blockGrid(self, playerMovedInDirection: direction)
+            delegate?.blockGrid(self, shapeMovedInDirection: direction)
         }
         return result
         
@@ -745,13 +703,13 @@ class BlockGrid {
     /**
      Rotates the player
      */
-    func rotatePlayer() -> Bool {
+    func rotateShape() -> Bool {
         guard let transformGridReferences = rotatedPlayerGridReference else { return false }
         
         // move the player blocks by the transform
         let player = playerBlocks.map { $0.gridReference }
         let result = moveBlocks(from: player, to: transformGridReferences, suppressDelegateCall: true)
-        delegate?.blockGrid(self, playerRotatedBy: 90.0)
+        delegate?.blockGrid(self, shapeRotatedBy: 90.0)
         return result
     }
     
@@ -769,7 +727,7 @@ class BlockGrid {
             playerBlock.block?.type = type
             delegate?.blockGrid(self, blockAdded: playerBlock.block!, reference: reference)
         }
-        delegate?.playerRemoved()
+        delegate?.shapeRemoved()
     }
     
 }

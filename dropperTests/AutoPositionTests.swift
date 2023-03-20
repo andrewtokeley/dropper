@@ -28,28 +28,28 @@ class AutoPositionTests: XCTestCase {
         let midX = scene.size.width/2
         let midY = scene.size.height/2
         
-        node.autoPositionWithinScene(.centreTop)
+        node.autoPositionWithinParent(.centreTop)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: midX, y: top)))
                       
-        node.autoPositionWithinScene(.leftTop)
+        node.autoPositionWithinParent(.leftTop)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: left, y: top)))
         
-        node.autoPositionWithinScene(.centreTop)
+        node.autoPositionWithinParent(.centreTop)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: midX, y: top)))
         
-        node.autoPositionWithinScene(.leftBottom)
+        node.autoPositionWithinParent(.leftBottom)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: left, y: bottom)))
         
-        node.autoPositionWithinScene(.rightBottom)
+        node.autoPositionWithinParent(.rightBottom)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: right, y: bottom)))
         
-        node.autoPositionWithinScene(.centreBottom)
+        node.autoPositionWithinParent(.centreBottom)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: midX, y: bottom)))
         
-        node.autoPositionWithinScene(.leftCentre)
+        node.autoPositionWithinParent(.leftCentre)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: left, y: midY)))
 
-        node.autoPositionWithinScene(.rightCentre)
+        node.autoPositionWithinParent(.rightCentre)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: right, y: midY)))
     }
 
@@ -70,29 +70,29 @@ class AutoPositionTests: XCTestCase {
         // when label is centred it behaves like spriteNodes as is positioned at an anchor of (0,0)
         node.verticalAlignmentMode = .baseline
         node.horizontalAlignmentMode = .center
-        node.autoPositionWithinScene(.leftCentre)
+        node.autoPositionWithinParent(.leftCentre)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: left, y: midY)))
         
         // when label is left aligned, it's anchor is at (-0.5, 0.5), so it's position should be hard up against the left edge.
         node.verticalAlignmentMode = .baseline
         node.horizontalAlignmentMode = .left
-        node.autoPositionWithinScene(.leftCentre)
+        node.autoPositionWithinParent(.leftCentre)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: 0, y: midY)))
         
         // similarly for right aligned labels
         node.verticalAlignmentMode = .baseline
         node.horizontalAlignmentMode = .right
-        node.autoPositionWithinScene(.rightCentre)
+        node.autoPositionWithinParent(.rightCentre)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: scene.size.width, y: midY)))
         
         node.verticalAlignmentMode = .top
         node.horizontalAlignmentMode = .center
-        node.autoPositionWithinScene(.centreTop)
+        node.autoPositionWithinParent(.centreTop)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: midX, y: scene.size.height)))
         
         node.verticalAlignmentMode = .bottom
         node.horizontalAlignmentMode = .center
-        node.autoPositionWithinScene(.centreBottom)
+        node.autoPositionWithinParent(.centreBottom)
         XCTAssertTrue(node.position.equalTo(CGPoint(x: midX, y: 0)))
     }
 
