@@ -63,7 +63,7 @@ final class GameView: UserInterface {
     }
     
     @objc func settingsTapped(_ sender: UIBarButtonItem) {
-        
+        presenter.didSelectSettings()
     }
     
     private func setConstraints() {
@@ -171,6 +171,9 @@ extension GameView: GameViewApi {
         gameScene?.displayNextShape(shape)
     }
     
+    func showGrid(_ show: Bool) {
+        gameScene?.showGrid(show)
+    }
     // MARK: - Shape Methods
     
     func addShape(_ shape: Shape, to: GridReference) {
@@ -227,8 +230,8 @@ extension GameView: GameViewApi {
         gameScene?.updateLevelProgress(progressValue, progress: progress)
     }
     
-    func displayLevel(_ level: Level) {
-        gameScene?.displayLevel(level)
+    func displayLevel(_ levelNumber: Int) {
+        gameScene?.displayLevel(levelNumber)
     }
     
     

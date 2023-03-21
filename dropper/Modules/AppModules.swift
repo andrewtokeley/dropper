@@ -11,7 +11,7 @@ import Viperit
 enum AppModules: String, ViperitModule {
     case game
     case home
-    
+    case settings
     var viewType: ViperitViewType {
         return .code
     }

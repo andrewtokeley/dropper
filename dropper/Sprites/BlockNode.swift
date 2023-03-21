@@ -73,14 +73,18 @@ class BlockNode: SKSpriteNode {
      Animate the block to simulate an explosion
      */
     public func explode(_ completion: (()->Void)?) {
-        let pulseUp = SKAction.scale(to: 1.3, duration: 0.03)
-        let pulseDown = SKAction.scale(to: 0.0, duration: 0.03)
-        //let pause = SKAction.wait(forDuration: 0.01)
-        let pulse = SKAction.sequence([pulseUp, pulseDown])
-        
-        rectangle.run(pulse) {
+        let pulseDown = SKAction.scale(to: CGFloat.random(in: 0.2..<0.6), duration: 0.05)
+        let move = SKAction.moveBy(x: CGFloat.random(in: -45..<45), y: CGFloat.random(in: 50..<200), duration: 1.2)
+        move.timingMode = .easeOut
+        let fade = SKAction.fadeOut(withDuration: 1.2)
+        rectangle.run(move)
+        rectangle.run(fade) {
+            self.removeFromParent()
+        }
+        rectangle.run(pulseDown) {
             completion?()
         }
+        
     }
     
 }

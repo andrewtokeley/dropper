@@ -575,7 +575,7 @@ class BlockGrid {
     }
     
     /**
-     Moves a play as far down as it will go
+     Moves a play as far down as it will go. Will call ``blockGrid(self, shapeDropedTo: self.playerOrigin!)`` delegate method when dropped.
      */
     func dropPlayer() {
         guard hasPlayer else { return }

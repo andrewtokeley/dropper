@@ -19,6 +19,17 @@
 		D834301B29A47B4A00D9C052 /* BlockGridDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D834301A29A47B4A00D9C052 /* BlockGridDelegate.swift */; };
 		D834301E29A481B600D9C052 /* ScreenPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D834301D29A481B600D9C052 /* ScreenPosition.swift */; };
 		D834302129A48B5900D9C052 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = D834302029A48B5900D9C052 /* Podfile */; };
+		D83DE33929C85C8C005F83A0 /* SettingsDisplayData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE33329C85C8C005F83A0 /* SettingsDisplayData.swift */; };
+		D83DE33A29C85C8C005F83A0 /* SettingsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE33429C85C8C005F83A0 /* SettingsPresenter.swift */; };
+		D83DE33B29C85C8C005F83A0 /* SettingsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE33529C85C8C005F83A0 /* SettingsRouter.swift */; };
+		D83DE33C29C85C8C005F83A0 /* SettingsModuleApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE33629C85C8C005F83A0 /* SettingsModuleApi.swift */; };
+		D83DE33D29C85C8C005F83A0 /* SettingsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE33729C85C8C005F83A0 /* SettingsInteractor.swift */; };
+		D83DE33E29C85C8C005F83A0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE33829C85C8C005F83A0 /* SettingsView.swift */; };
+		D83DE34029C8D2B1005F83A0 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE33F29C8D2B1005F83A0 /* Settings.swift */; };
+		D83DE34229C8E3E2005F83A0 /* SettingsDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE34129C8E3E2005F83A0 /* SettingsDelegate.swift */; };
+		D83DE34429C8E44D005F83A0 /* SettingsSetupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE34329C8E44D005F83A0 /* SettingsSetupData.swift */; };
+		D83DE34629C92416005F83A0 /* GameService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE34529C92416005F83A0 /* GameService.swift */; };
+		D83DE34829C933CE005F83A0 /* ServiceFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE34729C933CE005F83A0 /* ServiceFactory.swift */; };
 		D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D729BAC16C001120C7 /* UIImageExtension.swift */; };
 		D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D929BB1FFC001120C7 /* Cloud.swift */; };
 		D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */; };
@@ -107,6 +118,17 @@
 		D834301A29A47B4A00D9C052 /* BlockGridDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockGridDelegate.swift; sourceTree = "<group>"; };
 		D834301D29A481B600D9C052 /* ScreenPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenPosition.swift; sourceTree = "<group>"; };
 		D834302029A48B5900D9C052 /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		D83DE33329C85C8C005F83A0 /* SettingsDisplayData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDisplayData.swift; sourceTree = "<group>"; };
+		D83DE33429C85C8C005F83A0 /* SettingsPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPresenter.swift; sourceTree = "<group>"; };
+		D83DE33529C85C8C005F83A0 /* SettingsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRouter.swift; sourceTree = "<group>"; };
+		D83DE33629C85C8C005F83A0 /* SettingsModuleApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModuleApi.swift; sourceTree = "<group>"; };
+		D83DE33729C85C8C005F83A0 /* SettingsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsInteractor.swift; sourceTree = "<group>"; };
+		D83DE33829C85C8C005F83A0 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		D83DE33F29C8D2B1005F83A0 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		D83DE34129C8E3E2005F83A0 /* SettingsDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDelegate.swift; sourceTree = "<group>"; };
+		D83DE34329C8E44D005F83A0 /* SettingsSetupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSetupData.swift; sourceTree = "<group>"; };
+		D83DE34529C92416005F83A0 /* GameService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameService.swift; sourceTree = "<group>"; };
+		D83DE34729C933CE005F83A0 /* ServiceFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceFactory.swift; sourceTree = "<group>"; };
 		D83F62D729BAC16C001120C7 /* UIImageExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtension.swift; sourceTree = "<group>"; };
 		D83F62D929BB1FFC001120C7 /* Cloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cloud.swift; sourceTree = "<group>"; };
 		D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKOutlinedLabelNode.swift; sourceTree = "<group>"; };
@@ -216,6 +238,7 @@
 				D869176C29B528D8008C60F0 /* Shape.swift */,
 				D83F62E729BDBF35001120C7 /* Level.swift */,
 				D83F62EE29BE4C39001120C7 /* Game.swift */,
+				D83DE33F29C8D2B1005F83A0 /* Settings.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -224,17 +247,34 @@
 			isa = PBXGroup;
 			children = (
 				D8FDAE2F29A48DC9007AA40B /* AppModules.swift */,
+				D83DE33229C85C77005F83A0 /* Settings */,
 				D8FDAE2E29A48D91007AA40B /* Game */,
 				D83F630429C032C4001120C7 /* Home */,
-				D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */,
 			);
 			path = Modules;
+			sourceTree = "<group>";
+		};
+		D83DE33229C85C77005F83A0 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				D83DE33329C85C8C005F83A0 /* SettingsDisplayData.swift */,
+				D83DE33429C85C8C005F83A0 /* SettingsPresenter.swift */,
+				D83DE33529C85C8C005F83A0 /* SettingsRouter.swift */,
+				D83DE33629C85C8C005F83A0 /* SettingsModuleApi.swift */,
+				D83DE33729C85C8C005F83A0 /* SettingsInteractor.swift */,
+				D83DE33829C85C8C005F83A0 /* SettingsView.swift */,
+				D83DE34129C8E3E2005F83A0 /* SettingsDelegate.swift */,
+				D83DE34329C8E44D005F83A0 /* SettingsSetupData.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		D83F62E929BDC243001120C7 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				D83DE34729C933CE005F83A0 /* ServiceFactory.swift */,
 				D83F62EA29BDC24F001120C7 /* LevelService.swift */,
+				D83DE34529C92416005F83A0 /* GameService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -332,6 +372,7 @@
 		D88D555529A174B9003A0478 /* Sprites */ = {
 			isa = PBXGroup;
 			children = (
+				D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */,
 				D869176A29B48182008C60F0 /* ShapeNode.swift */,
 				D88D555629A174CE003A0478 /* BlockNode.swift */,
 				D8036E3C29A199EA0081CF41 /* Button.swift */,
@@ -571,6 +612,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D83DE33929C85C8C005F83A0 /* SettingsDisplayData.swift in Sources */,
 				D8FDAE2B29A48D88007AA40B /* GameInteractor.swift in Sources */,
 				D834301E29A481B600D9C052 /* ScreenPosition.swift in Sources */,
 				D8FDAE2C29A48D88007AA40B /* GameModuleApi.swift in Sources */,
@@ -579,6 +621,7 @@
 				D8036E3D29A199EA0081CF41 /* Button.swift in Sources */,
 				D869176B29B48183008C60F0 /* ShapeNode.swift in Sources */,
 				D869177329B80BF7008C60F0 /* ScoreNode.swift in Sources */,
+				D83DE34029C8D2B1005F83A0 /* Settings.swift in Sources */,
 				D83F630629C0E9B2001120C7 /* SKNodeExtension.swift in Sources */,
 				D8036E4129A218090081CF41 /* Block.swift in Sources */,
 				D83F62E629BDA3D3001120C7 /* Achievement.swift in Sources */,
@@ -589,8 +632,12 @@
 				D88D555729A174CE003A0478 /* BlockNode.swift in Sources */,
 				D83F62E029BC5FC7001120C7 /* SKLabelNodeExtension.swift in Sources */,
 				D869177129B6B612008C60F0 /* DropIntoEmptyRowsEffect.swift in Sources */,
+				D83DE34829C933CE005F83A0 /* ServiceFactory.swift in Sources */,
 				D83F62F329BEBB82001120C7 /* EffectsRunner.swift in Sources */,
+				D83DE34229C8E3E2005F83A0 /* SettingsDelegate.swift in Sources */,
 				D83F62EF29BE4C39001120C7 /* Game.swift in Sources */,
+				D83DE33E29C85C8C005F83A0 /* SettingsView.swift in Sources */,
+				D83DE33B29C85C8C005F83A0 /* SettingsRouter.swift in Sources */,
 				D8FDAE2829A48D88007AA40B /* GameView.swift in Sources */,
 				D869176029AB1215008C60F0 /* DropBlocksEffect.swift in Sources */,
 				D83F630129C032BA001120C7 /* HomeModuleApi.swift in Sources */,
@@ -599,6 +646,7 @@
 				D8036E3B29A18F830081CF41 /* Ground.swift in Sources */,
 				D8FDAE2929A48D88007AA40B /* GamePresenter.swift in Sources */,
 				D869176F29B6B416008C60F0 /* RemoveRowsEffect.swift in Sources */,
+				D83DE33A29C85C8C005F83A0 /* SettingsPresenter.swift in Sources */,
 				D83F630329C032BA001120C7 /* HomeView.swift in Sources */,
 				D834301B29A47B4A00D9C052 /* BlockGridDelegate.swift in Sources */,
 				D8FDAE2A29A48D88007AA40B /* GameDisplayData.swift in Sources */,
@@ -610,8 +658,12 @@
 				D869176D29B528D8008C60F0 /* Shape.swift in Sources */,
 				D8FDAE3029A48DC9007AA40B /* AppModules.swift in Sources */,
 				D88D551F29A16D79003A0478 /* AppDelegate.swift in Sources */,
+				D83DE34629C92416005F83A0 /* GameService.swift in Sources */,
 				D83F62FE29C032BA001120C7 /* HomeDisplayData.swift in Sources */,
+				D83DE33D29C85C8C005F83A0 /* SettingsInteractor.swift in Sources */,
+				D83DE33C29C85C8C005F83A0 /* SettingsModuleApi.swift in Sources */,
 				D869176829B2BFA2008C60F0 /* GridRange.swift in Sources */,
+				D83DE34429C8E44D005F83A0 /* SettingsSetupData.swift in Sources */,
 				D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */,
 				D83F62FF29C032BA001120C7 /* HomePresenter.swift in Sources */,
 				D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */,

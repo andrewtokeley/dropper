@@ -15,16 +15,15 @@ final class GamePresenter: Presenter {
     
     private var nextShape: Shape?
     
-    private var gamePaused: Bool = false
+    private var gameLoopInterval = TimeInterval(1)
     
-    private var game: Game!
+    private var gamePaused: Bool = true
     
     private var grid: BlockGrid!
     
-    private var isDropping: Bool = false
+    private var gridEffects = [GridEffect]()
     
-    /// Flag to store whether the grid has changed and requires special effects to be processed.
-    private var requireEffectsCheck = false
+    private var isDropping: Bool = false
     
     override func viewHasLoaded() {
         interactor.createNewGame()
@@ -35,9 +34,64 @@ final class GamePresenter: Presenter {
 // MARK: - GamePresenter API
 extension GamePresenter: GamePresenterApi {
     
+    // MARK: - From Interactor
+    
+    func didFetchNextLevel(_ level: Level) {
+        
+        // remember the gameLoopInterval
+        self.gameLoopInterval = level.moveDuration
+        self.gridEffects = level.effects
+        
+        // Update the view
+        view.displayLevel(level.number)
+        
+        // Remove all the blocks and the player
+        let blocks = grid.getAll().map { $0.block! }
+        grid.removeBlocks(grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
+        grid.replacePlayerWithBlocksOfType(.block)
+        view.removeBlocks(blocks) {
+            self.interactor.didLoadLevel()
+        }
+    }
+    
+    func didUpdateTotals(points: Int, score: Int, rows: Int) {
+        view.displayPoints(points, from: GridReference(5,10))
+        view.updateScore(score)
+        view.updateLevelProgress(rows, progress: 0)
+    }
+    
+    func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool = false) {
+        view.displayNextShape(nextShape)
+        if pauseBeforeStarting {
+            self.gamePaused = true
+            view.stopGameLoop()
+        } else {
+            self.gamePaused = false
+            view.startGameLoop(gameLoopInterval)
+        }
+        if let result = try? grid.addShape(shape) {
+            if result {
+                if let ghostReference = grid.playerCanDropTo {
+                    view.showShapeGhost(at: ghostReference)
+                }
+            } else {
+                // can't add a new player because there's no room :-(
+                self.lifeLost()
+            }
+        } else {
+            view.stopGameLoop()
+        }
+    }
+    
+    func didEndGame() {
+        // game completed! no more levels
+    }
+    
+    // MARK: - From View
+    
     func didSelectPause() {
         if gamePaused {
-            view.startGameLoop(self.game.currentLevel.moveDuration)
+            view.startGameLoop(self.gameLoopInterval)
         } else {
             view.stopGameLoop()
         }
@@ -45,6 +99,7 @@ extension GamePresenter: GamePresenterApi {
     }
     
     func didUpdateGameLoop() {
+        guard !gamePaused else { return }
         if grid.movePlayer(.down) {
             view.moveShape(.down, speed: 0.1, completion: nil)
         } else {
@@ -57,42 +112,12 @@ extension GamePresenter: GamePresenterApi {
         interactor.createNewGame()
     }
     
-    func didCreateNewGame(game: Game, grid: BlockGrid) {
-        self.grid = grid
-        self.game = game
-        
+    func didCreateNewGame(_ rows: Int, _ columns: Int) {
+        self.grid = try! BlockGrid(rows: rows, columns: columns)
         grid.delegate = self
-        
         let all = grid.getAll()
         view.initialiseGame(rows: grid.rows, columns: grid.columns)
         view.addBlocks(all.map { $0.block! }, references: all.map { $0.gridReference }, completion: nil)
-        view.displayLevel(game.currentLevel)
-        view.updateScore(0)
-        view.updateLevelProgress(0, progress: 0)
-        addNewPlayer()
-    }
-    
-    /**
-     Move to the next level
-     */
-    func nextLevel() {
-        // move to next level
-        self.game.moveToNextLevel()
-        
-        // Reset level state
-        self.nextShape = nil
-        self.game.levelAchievements = Achievements.zero
-        
-        // Update the view
-        view.displayLevel(self.game.currentLevel)
-        
-        // Remove all the blocsk
-        let blocks = grid.getAll().map { $0.block! }
-        grid.removeBlocks(grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
-        view.removeBlocks(blocks) {
-            // Add a new shape
-            self.addNewPlayer()
-        }
     }
     
     func didSelectMove(_ direction: BlockMoveDirection) {
@@ -103,7 +128,8 @@ extension GamePresenter: GamePresenterApi {
     
     func didSelectDrop() {
         if !isDropping && !gamePaused {
-            dropPlayer()
+            self.isDropping = true
+            grid.dropPlayer()
         }
     }
     
@@ -113,47 +139,15 @@ extension GamePresenter: GamePresenterApi {
         }
     }
     
-    /**
-     Add a new play to the grid, if we can't it means a life is lost!
-     */
-    func addNewPlayer() {
-        // initialise the next shape if this is the first time
-        if nextShape == nil {
-            nextShape = game.currentLevel.nextShape()
-        }
-        if let shape = nextShape {
-            nextShape = game.currentLevel.nextShape()
-            view.displayNextShape(nextShape!)
-            
-            if let result = try? grid.addShape(shape) {
-                // all good, start the game loop
-                if result {
-                    if let ghostReference = grid.playerCanDropTo {
-                        print("add \(ghostReference)")  
-                        view.showShapeGhost(at: ghostReference)
-                    }
-                    view.startGameLoop(self.game.currentLevel.moveDuration)
-                } else {
-                    // can't add a new player because there's no room :-(
-                    self.lifeLost()
-                }
-            } else {
-                view.stopGameLoop()
-                print("Illegal player add")
-            }
-        }
-    }
-    
     private func lifeLost() {
         view.stopGameLoop()
-        //view.displayLifeLost(livesLeft: self.game.lives)
     }
     
     private func applyEffects() {
         self.grid.replacePlayerWithBlocksOfType(.block)
         self.view.convertShapeToBlocks(.block)
         
-        let runner = EffectsRunner(grid: grid, effects: self.game.currentLevel.effects)
+        let runner = EffectsRunner(grid: grid, effects: self.gridEffects)
         runner.applyEffectsToView = self.applyEffectsToView
         runner.delegate = self
         
@@ -166,7 +160,6 @@ extension GamePresenter: GamePresenterApi {
         // Apply removes
         if effects.blocksRemoved.count > 0 {
             dispatch.enter()
-            self.view.displayPoints(self.game.currentLevel.pointsFor(effects.achievments), from: GridReference(5,10))
             self.view.removeBlocks(effects.blocksRemoved) {
                 dispatch.leave()
             }
@@ -186,15 +179,19 @@ extension GamePresenter: GamePresenterApi {
         })
     }
     
-    func dropPlayer() {
-        // this will raise a delegate call playerdropped
-        self.isDropping = true
-        grid.dropPlayer()
-    }
+}
 
+extension GamePresenter: SettingsDelegate {
+    func didUpdateSettings(_ settings: Settings) {
+        view.showGrid(settings.showGrid)
+    }
 }
 
 extension GamePresenter: BlockGridDelegate {
+    
+    func didSelectSettings() {
+        router.showSettings()
+    }
     
     func shapeRemoved() {
         view.removeShape()
@@ -203,7 +200,7 @@ extension GamePresenter: BlockGridDelegate {
     func blockGrid(_ blockGrid: BlockGrid, blocksRemoved blocks: [Block]) {
         // remove the blocks from the view too
         view.removeBlocks(blocks) {
-            self.view.updateScore(self.game.score)
+            //self.view.updateScore(self.game.score)
         }
     }
     
@@ -270,24 +267,9 @@ extension GamePresenter: BlockGridDelegate {
 extension GamePresenter: EffectsRunnerDelegate {
     
     func didFinishEffectsRun(_ runner: EffectsRunner, achievements: Achievements) {
-        
-        let level = self.game.currentLevel
-        self.game.levelAchievements.merge(achievements)
-        let points = level.pointsFor(achievements, hardDrop: self.isDropping)
+        interactor.recordAchievements(achievements, with: self.isDropping)
         self.isDropping = false
-        
-        self.view.displayPoints(points, from: GridReference(5,10))
-        self.game.score += points
-        self.view.updateScore(self.game.score)
-        
-        self.view.updateLevelProgress(level.goalProgressValue(self.game.levelAchievements), progress: Double(level.goalProgressValue(self.game.levelAchievements))/Double(level.goalValue))
-        
-        // see if level complete
-        if game.currentLevel.goalAchieved(self.game.levelAchievements) {
-            nextLevel()
-        } else {
-            self.addNewPlayer()
-        }
+        interactor.readyForNewShape()
     }
 }
 

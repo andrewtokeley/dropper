@@ -10,6 +10,7 @@ import Viperit
 
 //MARK: - GameRouter API
 protocol GameRouterApi: RouterProtocol {
+    func showSettings()
 }
 
 //MARK: - GameView API
@@ -61,8 +62,10 @@ protocol GameViewApi: UserInterfaceProtocol {
     func updateScore(_ score: Int)
     func displayPoints(_ points: Int, from: GridReference)
     func displayNextShape(_ shape: Shape)
-    func displayLevel(_ level: Level)
+    func displayLevel(_ levelNumber: Int)
     func updateLevelProgress(_ progressValue: Int, progress: Double)
+    
+    func showGrid(_ show: Bool)
     
     func startGameLoop(_ loopTimeInterval: TimeInterval)
     func stopGameLoop()
@@ -74,13 +77,57 @@ protocol GamePresenterApi: PresenterProtocol {
     func didSelectPause()
     func didSelectDrop()
     func didSelectRotate()
-    func didCreateNewGame(game: Game, grid: BlockGrid)
     func didSelectNewGame()
-    
+    func didSelectSettings()
     func didUpdateGameLoop()
+    
+    // from interactor
+    
+    /**
+     Called by Interactor when a new grid, game and levels have been created
+     */
+    func didCreateNewGame(_ rows: Int, _ columns: Int)
+    
+    /**
+     Called by Interactor to let Presenter know to load a new level
+     */
+    func didFetchNextLevel(_ level: Level)
+    
+    /**
+     Called by Interactor to let the presenter know to add a new shape and display the next shape
+     */
+    func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool)
+    
+    /**
+     Called by interactor to let the presenter know some points/progress has been made
+     
+     */
+    func didUpdateTotals(points: Int, score: Int, rows: Int)
+        
+    /**
+     Called by the Interactor when the game is over.
+     */
+    func didEndGame()
 }
 
 //MARK: - GameInteractor API
 protocol GameInteractorApi: InteractorProtocol {
     func createNewGame()
+    
+    /**
+     Record when some achievements have been gained.
+     
+     Achievements are earned whenever effects are run and the shape has stopped dropping
+     */
+    func recordAchievements(_ achievements: Achievements, with hardDrop: Bool)
+    
+    /**
+     Called by the Presenter to let the Interactor know the grid and level have been loaded and it's time to play the level.
+     */
+    func didLoadLevel()
+    
+    /**
+     Called by the Presenter to let the Interactor know all the UI effects have been done and a new shape can be added, or a new level started in the case of enough rows being exploded.
+     */
+    func readyForNewShape()
 }

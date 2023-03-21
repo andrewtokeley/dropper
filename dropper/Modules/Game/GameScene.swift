@@ -19,7 +19,7 @@ enum CollisionTypes: UInt32 {
     case platform = 4
 }
 
-struct GridBuffer {
+struct LayoutDimensions {
     var gridLeft: CGFloat = 0
     var gridRight: CGFloat = 0
     var gridTop: CGFloat = 0
@@ -64,7 +64,7 @@ class GameScene: SKScene {
     
     // MARK: - Variables
     
-    private var gridBuffer = GridBuffer()
+    private var layout = LayoutDimensions()
     
     /// The number of rows in the grid
     private var rows: Int = 0
@@ -169,15 +169,13 @@ class GameScene: SKScene {
         let gridTop: CGFloat = 150
         self.blockSize = min(self.size.width/CGFloat(columns + 2), (self.size.height-gridTop)/CGFloat(rows + 3))
         let gridLeftRight = (self.size.width - CGFloat(columns) * self.blockSize)/2
-        let gridBottom = gridLeftRight
-        self.gridBuffer = GridBuffer(
+        self.layout = LayoutDimensions(
             gridLeft: gridLeftRight,
             gridRight: gridLeftRight,
             gridTop: gridTop,
             gridBottom: 2.0 * blockSize)
         
         self.loopCallback = loopCallback
-        //drawGrid()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -233,11 +231,11 @@ class GameScene: SKScene {
         let textLevel1_OffSet: CGFloat = 100
         let textLevel2_OffSet: CGFloat = 125
         
-        nextHeadingLabel.autoPositionWithinParent(.leftTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel1_OffSet)
-        nextShape.autoPositionWithinParent(.leftTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel2_OffSet)
+        nextHeadingLabel.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: textLevel1_OffSet)
+        nextShape.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: textLevel2_OffSet)
         goalBlock.autoPositionWithinParent(.leftTop, xOffSet: 0.35*size.width, yOffSet: textLevel1_OffSet)
-        scoreHeadingLabel.autoPositionWithinParent(.rightTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel1_OffSet)
-        scoreLabel.autoPositionWithinParent(.rightTop, xOffSet: gridBuffer.spacer, yOffSet: textLevel2_OffSet)
+        scoreHeadingLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: textLevel1_OffSet)
+        scoreLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: textLevel2_OffSet)
         levelBlock.autoPositionWithinParent(.rightTop, xOffSet: 0.40*size.width, yOffSet: textLevel1_OffSet)
     }
     /**
@@ -246,11 +244,11 @@ class GameScene: SKScene {
     private func getPosition(_ reference: GridReference, centre: Bool = true) -> CGPoint {
         
         var position = CGPoint.zero
-        position.x = CGFloat(reference.column) * blockSize + gridBuffer.gridLeft
+        position.x = CGFloat(reference.column) * blockSize + layout.gridLeft
         if centre {
             position.x += blockSize/2.0
         }
-        position.y = CGFloat(reference.row) * blockSize + gridBuffer.gridBottom
+        position.y = CGFloat(reference.row) * blockSize + layout.gridBottom
         if centre {
             position.y += blockSize/2.0
         }
@@ -270,28 +268,40 @@ class GameScene: SKScene {
         self.loopTimeInterval = TimeInterval(0)
     }
     
-    private func drawGrid() {
-        for row in 0..<rows + 1 {
-            let horizontal = UIBezierPath()
-            let rowHeight = getPosition(GridReference(row, 0), centre: false).y
-            let left = getPosition(GridReference(0, 0), centre: false).x
-            let right = getPosition(GridReference(0, columns), centre: false).x
-            horizontal.move(to: CGPoint(x: left, y: rowHeight))
-            horizontal.addLine(to: CGPoint(x: right, y: rowHeight))
-            let line = SKShapeNode(path: horizontal.cgPath)
-            line.strokeColor = .white
-            self.addChild(line)
-            for column in 0..<columns + 1 {
-                let columnWidth = getPosition(GridReference(0, column), centre: false).x
-                let bottom = getPosition(GridReference(0, 0), centre: false).y
-                let top = getPosition(GridReference(rows, 0), centre: false).y
-                
-                let vertical = UIBezierPath()
-                vertical.move(to: CGPoint(x: columnWidth, y: bottom))
-                vertical.addLine(to: CGPoint(x: columnWidth, y: top))
-                let line = SKShapeNode(path: vertical.cgPath)
-                line.strokeColor = .white
+    
+    public func showGrid(_ show: Bool) {
+        if !show {
+            let lines = self.children.filter({$0.name?.starts(with: "_line") ?? false })
+            for line in lines {
+                line.removeFromParent()
+            }
+        } else {
+            for row in 0..<rows + 1 {
+                let horizontal = UIBezierPath()
+                let rowHeight = getPosition(GridReference(row, 0), centre: false).y
+                let left = getPosition(GridReference(0, 0), centre: false).x
+                let right = getPosition(GridReference(0, columns), centre: false).x
+                horizontal.move(to: CGPoint(x: left, y: rowHeight))
+                horizontal.addLine(to: CGPoint(x: right, y: rowHeight))
+                let line = SKShapeNode(path: horizontal.cgPath)
+                line.strokeColor = show ? .white : .gameBackground
+                line.name = "_line\(left)-\(right)"
+                line.zPosition = -100
                 self.addChild(line)
+                for column in 0..<columns + 1 {
+                    let columnWidth = getPosition(GridReference(0, column), centre: false).x
+                    let bottom = getPosition(GridReference(0, 0), centre: false).y
+                    let top = getPosition(GridReference(rows, 0), centre: false).y
+                    
+                    let vertical = UIBezierPath()
+                    vertical.move(to: CGPoint(x: columnWidth, y: bottom))
+                    vertical.addLine(to: CGPoint(x: columnWidth, y: top))
+                    let line = SKShapeNode(path: vertical.cgPath)
+                    line.name = "_line\(top)-\(bottom)"
+                    line.zPosition = -100
+                    line.strokeColor = show ? .white : .gameBackground
+                    self.addChild(line)
+                }
             }
         }
     }
@@ -322,10 +332,8 @@ class GameScene: SKScene {
     
     // MARK: - User Interface
     
-    public func displayLevel(_ level: Level) {
-        levelLabel.text = "\(level.number)"
-        goalMessageLabel.text = "\(String(describing: level.goalProgressValue))"
-        //progressNode.updateProgress(0)
+    public func displayLevel(_ levelNumber: Int) {
+        levelLabel.text = "\(levelNumber)"
     }
     
     func updateLevelProgress(_ progressValue: Int, progress: Double) {
@@ -524,7 +532,6 @@ class GameScene: SKScene {
     public func removeBlock(_ block: Block, completion: (()->Void)? = nil) {
         if let node = getNode(block) {
             node.explode {
-                node.removeFromParent()
                 self.blockNodes.removeAll(where: { $0 == node })
                 completion?()
             }

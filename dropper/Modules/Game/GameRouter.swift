@@ -15,6 +15,11 @@ final class GameRouter: Router {
 
 // MARK: - GameRouter API
 extension GameRouter: GameRouterApi {
+    func showSettings() {
+        let module = AppModules.settings.build()
+        let setupData = SettingsSetupData(delegate: presenter as! GamePresenter)
+        module.router.show(from: viewController, embedInNavController: true, setupData: setupData)
+    }
 }
 
 // MARK: - Game Viper Components

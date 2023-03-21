@@ -87,6 +87,9 @@ struct Level {
         return points
     }
     
+    /**
+     Returns a random shape
+     */
     func nextShape() -> Shape {
         // for now just returning classic tetris shapes/colours
         let shapes = [

@@ -14,7 +14,15 @@ enum GameType: Int {
 
 class Game {
     
-    var service: LevelService
+    var levelService: LevelServiceContract
+    
+    var genre: GameType
+    
+    var rows: Int = 24
+    var columns: Int = 10
+    
+    ///
+    var levels = [Level]()
     
     /// Total score for the game
     var score: Int = 0
@@ -23,21 +31,29 @@ class Game {
     var levelAchievements = Achievements()
     
     private var currentLevelIndex: Int
-    private var levels: [Level]
     
-    var currentLevel: Level {
+    var currentLevel: Level? {
+        guard currentLevelIndex >= 0 && currentLevelIndex < levels.count else { return nil }
         return levels[currentLevelIndex]
     }
     
-    init(genre: GameType) {
-        self.service = LevelService(genre)
-        self.currentLevelIndex = 0
-        self.levels = self.service.levels
+    init(genre: GameType, levelService: LevelServiceContract, rows: Int, columns: Int) {
+        self.currentLevelIndex = -1
+        self.genre = genre
+        self.levelService = levelService
+        self.rows = rows
+        self.columns = columns
+    }
+    
+    func fetchLevels(completion: (()->Void)?) {
+        levelService.getLevelDefinitions(gameType: genre, completion: { (levels) in
+            self.currentLevelIndex = 0
+            self.levels = levels
+            completion?()
+        })
     }
     
     func moveToNextLevel() {
-        if currentLevelIndex < levels.count {
-            currentLevelIndex += 1
-        }
+        self.currentLevelIndex += 1
     }
 }
