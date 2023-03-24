@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Settings {
+struct Settings: Codable {
     var showGrid: Bool = false
     var enableHaptics: Bool = false
     var showGhost: Bool = true

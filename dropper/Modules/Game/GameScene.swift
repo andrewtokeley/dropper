@@ -64,6 +64,8 @@ class GameScene: SKScene {
     
     // MARK: - Variables
     
+    private var showGhost: Bool = false
+    
     private var layout = LayoutDimensions()
     
     /// The number of rows in the grid
@@ -92,6 +94,7 @@ class GameScene: SKScene {
         node.horizontalAlignmentMode = .center
         node.fontColor = .white
         node.fontSize = 50
+        node.text = "888"
         return node
     }()
     
@@ -148,13 +151,13 @@ class GameScene: SKScene {
 //        return node
 //    }()
     
-    var sideBar: SKShapeNode {
-        let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:0,y:0), size: CGSize(width: side_space, height: self.size.height - headerHeight)))
-        node.fillColor = .clear
-        node.lineWidth = 2
-        node.strokeColor = .clear
-        return node
-    }
+//    var sideBar: SKShapeNode {
+//        let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:0,y:0), size: CGSize(width: side_space, height: self.size.height - headerHeight)))
+//        node.fillColor = .clear
+//        node.lineWidth = 2
+//        node.strokeColor = .clear
+//        return node
+//    }
     
     //MARK: - Initialisers
     
@@ -195,26 +198,19 @@ class GameScene: SKScene {
     }
     
     override func sceneDidLoad() {
-
+        pointLabel.position = CGPoint(x:-100, y:-100)
+        addChild(pointLabel)
         addChild(scoreLabel)
         addChild(scoreHeadingLabel)
-//        addChild(levelLabel)
-//        addChild(levelHeadingLabel)
         addChild(levelBlock)
-//        addChild(goalMessageLabel)
-//        addChild(goalHeadingLabel)
         addChild(goalBlock)
         addChild(nextHeadingLabel)
         addChild(nextShape)
-        //addChild(progressNode)
-        self.columns = 10
-        //self.blockSize = (self.size.width-2*side_space)/CGFloat(self.columns)
+        //self.columns = 10
         
         // TODO - calculate this
-        let headerHeight: CGFloat = 300.0
-        self.rows = Int((self.size.height-headerHeight-side_space)/self.blockSize)
-        
-        
+        // let headerHeight: CGFloat = 300.0
+        //self.rows = Int((self.size.height-headerHeight-side_space)/self.blockSize)
     }
     
     override func didChangeSize(_ oldSize: CGSize) {
@@ -268,6 +264,10 @@ class GameScene: SKScene {
         self.loopTimeInterval = TimeInterval(0)
     }
     
+    public func showGhost(_ show: Bool) {
+        self.showGhost = show
+        self.ghostNode?.alpha = show ? 1 : 0
+    }
     
     public func showGrid(_ show: Bool) {
         if !show {
@@ -312,22 +312,30 @@ class GameScene: SKScene {
     }
     
     public func displayPoints(_ points: Int, from: GridReference) {
-        pointLabel.text = "\(points)"
-        let move = SKAction.move(to: CGPoint(x:self.size.width/2, y:groundHeight + 0.5 * gridHeight), duration: 0)
-        move.timingMode = SKActionTimingMode.easeInEaseOut
-        let scale = SKAction.scale(by: 2, duration: 0.2)
-        scale.timingMode = SKActionTimingMode.easeInEaseOut
+        guard points > 0 else { return }
         
-        pointLabel.run(SKAction.moveBy(x: 40, y: 40, duration: 1.0))
-        pointLabel.run(scale)
-        let sequence = SKAction.sequence([
-            move,
-            SKAction.fadeIn(withDuration: 0.2),
-            SKAction.wait(forDuration: 0.5),
-            SKAction.scale(by: -2, duration: 3),
-            SKAction.fadeOut(withDuration: 0.2),
-        ])
-        pointLabel.run(sequence)
+        pointLabel.text = "\(points)"
+        pointLabel.alpha = 1
+        pointLabel.autoPositionWithinParent(.centre)
+        
+        let move = SKAction.moveBy(x: CGFloat.random(in: -30..<30), y: CGFloat.random(in: 30..<90), duration: 2.0)
+        move.timingMode = .easeOut
+        
+        let fade = SKAction.fadeOut(withDuration: 2.0)
+        
+        pointLabel.run(move)
+        pointLabel.run(fade)
+//
+//        pointLabel.run(SKAction.moveBy(x: 40, y: 40, duration: 1.0))
+//        pointLabel.run(scale)
+//        let sequence = SKAction.sequence([
+//            move,
+//            SKAction.fadeIn(withDuration: 0.2),
+//            SKAction.wait(forDuration: 0.5),
+//            SKAction.scale(by: -2, duration: 3),
+//            SKAction.fadeOut(withDuration: 0.2),
+//        ])
+//        pointLabel.run(sequence)
     }
     
     // MARK: - User Interface
@@ -358,12 +366,13 @@ class GameScene: SKScene {
     }
     
     func showShapeGhost(_ at: GridReference) {
+        guard self.showGhost else { return }
+        
         self.ghostNode?.removeFromParent()
         self.ghostNode = self.shapeNode?.ghostShapeNode
+        self.ghostNode?.alpha = self.showGhost ? 1 : 0
         if let node = self.ghostNode {
             node.position = getPosition(at)
-            print("ghost pos = \(node.position)")
-            print("ghost ref = \(at)")
             addChild(node)
         }
     }

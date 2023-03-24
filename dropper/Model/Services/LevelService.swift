@@ -12,7 +12,7 @@ protocol LevelServiceContract {
 }
 
 
-class LevelService {
+class LevelService: ServiceBase {
     
     fileprivate var levels = [Level]()
     

@@ -25,16 +25,56 @@ final class GamePresenter: Presenter {
     
     private var isDropping: Bool = false
     
-    override func viewHasLoaded() {
-        interactor.createNewGame()
+    private var setup: GameSetupData?
+    /**
+     This is the entry point for the Module and kicks of the Interactor's first call to create a new Game instance for the given genre.
+     */
+    override func setupView(data: Any) {
+        self.setup = data as? GameSetupData
+    }
+    override func viewIsAboutToAppear() {
+        if let setup = setup {
+            interactor.createNewGame(setup.genre)
+        }
+    }
+
+    private func lifeLost() {
+        view.stopGameLoop()
+        
+        let closeButtonText = "Close"
+        self.router.showPopup(title: "Oh No!", message: "The blocks beat you this time!", buttonText: closeButtonText, secondaryButtonText: nil) { buttonText in
+            
+            self.router.navigateHome()
+        }
     }
     
 }
 
-// MARK: - GamePresenter API
+// MARK: - GamePresenterApi
+
 extension GamePresenter: GamePresenterApi {
     
     // MARK: - From Interactor
+    
+    func didRestoreState(_ state: GameState, settings: Settings) {
+        didCreateNewGame(rows: state.rows, columns: state.columns, settings: settings)
+    }
+    
+    func didCreateNewGame(rows: Int, columns: Int, settings: Settings) {
+        
+        // create the grid to manage the UI
+        self.grid = try! BlockGrid(rows: rows, columns: columns)
+        self.grid.delegate = self
+        
+        // create the initial ui interface
+        view.initialiseGame(rows: rows, columns: columns, showGrid: settings.showGrid)
+        
+        // add the blocks
+        let all = grid.getAll()
+        view.addBlocks(all.map { $0.block! }, references: all.map { $0.gridReference }, completion: nil)
+        view.showGrid(settings.showGrid)
+        view.showGhost(settings.showGhost)
+    }
     
     func didFetchNextLevel(_ level: Level) {
         
@@ -43,14 +83,21 @@ extension GamePresenter: GamePresenterApi {
         self.gridEffects = level.effects
         
         // Update the view
-        view.displayLevel(level.number)
+        self.view.displayLevel(level.number)
         
         // Remove all the blocks and the player
-        let blocks = grid.getAll().map { $0.block! }
-        grid.removeBlocks(grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
-        grid.replacePlayerWithBlocksOfType(.block)
-        view.removeBlocks(blocks) {
-            self.interactor.didLoadLevel()
+        let blocks = self.grid.getAll().map { $0.block! }
+        self.grid.removeBlocks(self.grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
+        self.grid.replacePlayerWithBlocksOfType(.block)
+        
+        let title = level.number == 1 ? "New Game!" : "Next Level"
+        let message = level.number == 1 ? "Complete 10 rows to move to the next level." : "Things are about to get a little faster!"
+        
+        self.router.showPopup(title: title, message: message, buttonText: "Start", secondaryButtonText: nil) { _ in
+            self.view.removeBlocks(blocks) {
+                self.view.startGameLoop(self.gameLoopInterval)
+                self.interactor.didLoadLevel()
+            }
         }
     }
     
@@ -62,18 +109,10 @@ extension GamePresenter: GamePresenterApi {
     
     func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool = false) {
         view.displayNextShape(nextShape)
-        if pauseBeforeStarting {
-            self.gamePaused = true
-            view.stopGameLoop()
-        } else {
-            self.gamePaused = false
-            view.startGameLoop(gameLoopInterval)
-        }
         if let result = try? grid.addShape(shape) {
             if result {
-                if let ghostReference = grid.playerCanDropTo {
-                    view.showShapeGhost(at: ghostReference)
-                }
+                self.gamePaused = false 
+                view.startGameLoop(gameLoopInterval)
             } else {
                 // can't add a new player because there's no room :-(
                 self.lifeLost()
@@ -89,13 +128,41 @@ extension GamePresenter: GamePresenterApi {
     
     // MARK: - From View
     
-    func didSelectPause() {
-        if gamePaused {
-            view.startGameLoop(self.gameLoopInterval)
-        } else {
-            view.stopGameLoop()
+    func willCloseView(completion: @escaping (Bool)->Void) {
+        view.stopGameLoop()
+        router.showPopup(title: "Quiter!", message: "Are you sure you want to bail now?" , buttonText: "Keep Going!", secondaryButtonText: "Leave") { buttonText in
+            if buttonText == "Leave" {
+                // let the close happen
+                completion(true)
+            } else {
+                // Keep going, cancel the close
+                completion(false)
+                self.view.startGameLoop(self.gameLoopInterval)
+            }
         }
-        gamePaused = !gamePaused
+    }
+    
+    func didSelectSettings() {
+        didSelectPause()
+        router.showSettings()
+    }
+    
+    func didSelectPause() {
+        gamePaused = true
+        view.stopGameLoop()
+    }
+    
+    func didSelectUnPause() {
+        gamePaused = false
+        view.startGameLoop(self.gameLoopInterval)
+    }
+    
+    func didSelectPauseToggle() {
+        if gamePaused {
+            didSelectUnPause()
+        } else {
+            didSelectPause()
+        }
     }
     
     func didUpdateGameLoop() {
@@ -106,18 +173,6 @@ extension GamePresenter: GamePresenterApi {
             // you've hit the ground or landed on another block
             applyEffects()
         }
-    }
-    
-    func didSelectNewGame() {
-        interactor.createNewGame()
-    }
-    
-    func didCreateNewGame(_ rows: Int, _ columns: Int) {
-        self.grid = try! BlockGrid(rows: rows, columns: columns)
-        grid.delegate = self
-        let all = grid.getAll()
-        view.initialiseGame(rows: grid.rows, columns: grid.columns)
-        view.addBlocks(all.map { $0.block! }, references: all.map { $0.gridReference }, completion: nil)
     }
     
     func didSelectMove(_ direction: BlockMoveDirection) {
@@ -137,10 +192,6 @@ extension GamePresenter: GamePresenterApi {
         if !isDropping && !gamePaused {
             let _ = grid.rotateShape()
         }
-    }
-    
-    private func lifeLost() {
-        view.stopGameLoop()
     }
     
     private func applyEffects() {
@@ -184,14 +235,13 @@ extension GamePresenter: GamePresenterApi {
 extension GamePresenter: SettingsDelegate {
     func didUpdateSettings(_ settings: Settings) {
         view.showGrid(settings.showGrid)
+        view.showGhost(settings.showGhost)
     }
 }
 
+// MARK: - BlockGridDelegate
+
 extension GamePresenter: BlockGridDelegate {
-    
-    func didSelectSettings() {
-        router.showSettings()
-    }
     
     func shapeRemoved() {
         view.removeShape()
@@ -214,15 +264,20 @@ extension GamePresenter: BlockGridDelegate {
     }
     
     func blockGrid(_ blockGrid: BlockGrid, shapeMovedInDirection direction: BlockMoveDirection) {
-        guard direction == .left || direction == .right else { return }
-        view.moveShape(direction, speed: 0.0, completion: nil)
         if let ghostReference = grid.playerCanDropTo {
             view.showShapeGhost(at: ghostReference)
         }
+        if direction == .left || direction == .right {
+            view.moveShape(direction, speed: 0.0, completion: nil)
+        }
+        
     }
     
     func blockGrid(_ blockGrid: BlockGrid, shapeAdded: Shape, to: GridReference) {
         view.addShape(shapeAdded, to: to)
+        if let ghostReference = grid.playerCanDropTo {
+            view.showShapeGhost(at: ghostReference)
+        }
     }
     
     func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat) {
@@ -272,6 +327,7 @@ extension GamePresenter: EffectsRunnerDelegate {
         interactor.readyForNewShape()
     }
 }
+
 
 // MARK: - Game Viper Components
 private extension GamePresenter {

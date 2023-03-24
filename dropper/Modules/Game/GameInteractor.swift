@@ -11,10 +11,13 @@ import Viperit
 
 // MARK: - GameInteractor Class
 final class GameInteractor: Interactor {
-    var game: Game?
+    var game: Game!
     var nextShape: Shape?
     var firstShapeOfGame: Bool = true
     
+    /**
+     Called by some Interator methods to let the Presenter know to add a new Shape to the game.
+     */
     fileprivate func addNewShape() {
         guard let level = self.game?.currentLevel else { return }
         
@@ -33,22 +36,69 @@ final class GameInteractor: Interactor {
 // MARK: - GameInteractor API
 extension GameInteractor: GameInteractorApi {
    
-    func createNewGame() {
-        let rows: Int = 22
-        let columns: Int = 10
-        
-        self.game = Game(genre: .tetrisClassic,
-                        levelService: ServiceFactory.sharedInstance.levelService,
-                        rows: rows,
-                        columns: columns)
-        
-        self.game!.fetchLevels {
-            if let level = self.game!.currentLevel {
-                self.presenter.didCreateNewGame(rows, columns)
-                self.presenter.didFetchNextLevel(level)
-                self.presenter.didUpdateTotals(points: 0, score: 0, rows: 0)
+    
+    func saveState(game: Game, grid: BlockGrid) {
+        let state = GameState(blocks: grid.blocks, score: game.score, rows: game.goalProgressValue, level: game.currentLevel?.number ?? 1, genre: .tetrisClassic)
+        ServiceFactory.sharedInstance.gameService.saveGameState(state) { error in
+            if let error = error {
+                print(error.localizedDescription)
             }
         }
+    }
+    
+    func restoreFromState(_ state: GameState, completion: (()->Void)?) {
+//        ServiceFactory.sharedInstance.gameService.getGameState { state in
+//            if let state = state {
+//                let rows: Int = state.blocks.count
+//                let columns: Int = state.blocks[0].count
+//                
+//                self.game = Game(genre: .tetrisClassic,
+//                                 levelService: ServiceFactory.sharedInstance.levelService,
+//                                 rows: rows,
+//                                 columns: columns)
+//                
+//                self.game?.setLevel(state.level)
+//                
+//                // get the latest settings
+//                ServiceFactory.sharedInstance.gameService.getSettings { settings in
+//                    if let settings = settings {
+//                        
+//                        self.game.fetchLevels {
+//                            if let level = self.game!.currentLevel {
+//                                self.presenter.didRestoreState(state, settings: settings)
+//                                self.presenter.didFetchNextLevel(level)
+//                                self.presenter.didUpdateTotals(points: 0, score: 0, rows: 0)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            completion?()
+//        }
+    }
+    
+    func createNewGame(_ genre : GameType) {
+        
+        ServiceFactory.sharedInstance.gameService.createGame(genre) { game in
+            if let game = game {
+                self.game = game
+                
+                ServiceFactory.sharedInstance.gameService.getSettings { settings in
+                    if let settings = settings {
+                        
+                        self.presenter.didCreateNewGame(rows: self.game.rows, columns: self.game.columns, settings: settings)
+                        
+                        if let level = self.game.currentLevel {
+                            self.presenter.didFetchNextLevel(level)
+                        }
+                        
+                        self.presenter.didUpdateTotals(points: 0, score: 0, rows: 0)
+                    }
+                }
+            }
+        }
+        
         
     }
     
@@ -64,10 +114,12 @@ extension GameInteractor: GameInteractorApi {
         let points = level.pointsFor(achievements, hardDrop: hardDrop)
         game.score += points
         
-        presenter.didUpdateTotals(
-            points: points,
-            score: game.score,
-            rows: level.goalProgressValue(game.levelAchievements))
+        if (points > 0) {
+            presenter.didUpdateTotals(
+                points: points,
+                score: game.score,
+                rows: level.goalProgressValue(game.levelAchievements))
+        }
     }
     
     func readyForNewShape() {

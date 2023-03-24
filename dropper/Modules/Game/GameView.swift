@@ -44,26 +44,57 @@ final class GameView: UserInterface {
         return view
     }()
 
-    override func loadView() {
-        super.loadView()
-        self.view.backgroundColor = .gameBackground
+    lazy var settingsButton: UIBarButtonItem = {
         
-        let settingsButton = UIBarButtonItem(title: NSString(string: "\u{2699}\u{0000FE0E}") as String, style: .plain, target: self, action: #selector(settingsTapped))
+        let view = UIBarButtonItem(title: NSString(string: "\u{2699}\u{0000FE0E}") as String, style: .plain, target: self, action: #selector(handleSettings))
         let font = UIFont.systemFont(ofSize: 40)
         let attributes = [NSAttributedString.Key.font : font, NSAttributedString.Key.foregroundColor: UIColor.white]
-        settingsButton.setTitleTextAttributes(attributes, for: .normal)
+        view.setTitleTextAttributes(attributes, for: .normal)
+        return view
+    }()
     
-        let add = UIBarButtonItem(barButtonSystemItem: .organize, target: self, action: #selector(settingsTapped))
-        add.tintColor = .white
+    lazy var closeButton: UIBarButtonItem = {
+        let view = UIBarButtonItem(title: NSString(string: "\u{2715}\u{0000FE0E}") as String, style: .plain, target: self, action: #selector(handleClose))
+        let font = UIFont.systemFont(ofSize: 25)
+        let attributes = [
+            NSAttributedString.Key.font : font,
+            NSAttributedString.Key.foregroundColor: UIColor.white
+        ]
+        let pressedAttributes = [
+            NSAttributedString.Key.font : font,
+            NSAttributedString.Key.foregroundColor: UIColor.gameHighlight
+        ]
+        view.setTitleTextAttributes(attributes, for: .normal)
+        view.setTitleTextAttributes(pressedAttributes, for: .highlighted)
+        view.setTitleTextAttributes(pressedAttributes, for: .selected)
+        view.setTitleTextAttributes(pressedAttributes, for: .focused)
+        return view
+    }()
+    
+    override func viewDidLoad() {
+        self.view.backgroundColor = .gameBackground
+
         navigationItem.rightBarButtonItems = [settingsButton]
+        navigationItem.leftBarButtonItems = [closeButton]
         
         registerSwipes()
         view.addSubview(gameSKView)
         setConstraints()
     }
     
-    @objc func settingsTapped(_ sender: UIBarButtonItem) {
+    @objc func handleSettings(_ sender: UIBarButtonItem) {
         presenter.didSelectSettings()
+    }
+    
+    @objc func handleClose(_ sender: UIBarButtonItem) {
+        
+        self.presenter.willCloseView { allow in
+            if allow {
+                self.presentingViewController?.dismiss(animated: true)
+            } else {
+                // don't need to do anything
+            }
+        }
     }
     
     private func setConstraints() {
@@ -96,9 +127,7 @@ final class GameView: UserInterface {
         if let input = sender.input {
             switch input {
             case " ":
-                presenter.didSelectPause()
-            case "n":
-                presenter.didSelectNewGame()
+                presenter.didSelectPauseToggle()
             case UIKeyCommand.inputLeftArrow:
                 presenter.didSelectMove(.left)
                 return
@@ -174,6 +203,11 @@ extension GameView: GameViewApi {
     func showGrid(_ show: Bool) {
         gameScene?.showGrid(show)
     }
+    
+    func showGhost(_ show: Bool) {
+        gameScene?.showGhost(show)
+    }
+    
     // MARK: - Shape Methods
     
     func addShape(_ shape: Shape, to: GridReference) {
@@ -245,11 +279,13 @@ extension GameView: GameViewApi {
     
     //MARK: - Init Game
     
-    func initialiseGame(rows: Int, columns: Int) {
+    func initialiseGame(rows: Int, columns: Int, showGrid: Bool = false) {
         let scene = GameScene(rows: rows, columns: columns, size: self.view.bounds.size, loopCallback: gameLoopCallback)
         scene.scaleMode = .resizeFill
         scene.backgroundColor = .gameBackground
         gameSKView.presentScene(scene)
+        
+        self.showGrid(showGrid)
     }
     
     // MARK: - Block Methods

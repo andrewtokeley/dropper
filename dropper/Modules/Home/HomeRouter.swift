@@ -17,8 +17,8 @@ final class HomeRouter: Router {
 extension HomeRouter: HomeRouterApi {
     func showGame() {
         let module = AppModules.game.build()
-        self.viewController.navigationController?.pushViewController(module.view.viewController, animated: true)
-//        module.router.present(from: self.viewController, embedInNavController: true, presentationStyle: .fullScreen, transitionStyle: .partialCurl, setupData: nil, completion: nil)
+        var data = GameSetupData(genre: .tetrisClassic)
+        module.router.present(from: self.viewController, embedInNavController: true, presentationStyle: .fullScreen, transitionStyle: .crossDissolve, setupData: data, completion: nil)
     }
 }
 

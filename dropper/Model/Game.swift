@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum GameType: Int {
+enum GameType: Int, Codable {
     case tetrisClassic = 1
     case matcher
 }
@@ -32,6 +32,10 @@ class Game {
     
     private var currentLevelIndex: Int
     
+    var goalProgressValue: Int {
+        return currentLevel?.goalProgressValue(levelAchievements) ?? 0
+    }
+    
     var currentLevel: Level? {
         guard currentLevelIndex >= 0 && currentLevelIndex < levels.count else { return nil }
         return levels[currentLevelIndex]
@@ -51,6 +55,13 @@ class Game {
             self.levels = levels
             completion?()
         })
+    }
+    
+    func setLevel(_ level: Int) {
+        guard level > 0 else { return }
+        if level < levels.count {
+            self.currentLevelIndex = level
+        }
     }
     
     func moveToNextLevel() {

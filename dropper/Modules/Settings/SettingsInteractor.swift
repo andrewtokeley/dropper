@@ -11,16 +11,24 @@ import Viperit
 
 // MARK: - SettingsInteractor Class
 final class SettingsInteractor: Interactor {
+    let gameService = ServiceFactory.sharedInstance.gameService
 }
 
 // MARK: - SettingsInteractor API
 extension SettingsInteractor: SettingsInteractorApi {
+    
     func loadSettings() {
-        presenter.didLoadSettings(Settings())
+        gameService.getSettings { settings in
+            if let settings = settings {
+                self.presenter.didLoadSettings(settings)
+            }
+        }
     }
     
     func saveSettings(_ settings: Settings) {
-        presenter.didSaveSettings(settings)
+        gameService.saveSettings(settings) {
+            self.presenter.didSaveSettings(settings)
+        }
     }
     
 }

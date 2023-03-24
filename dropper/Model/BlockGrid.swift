@@ -121,12 +121,12 @@ class BlockGrid {
         try self.init(rows: rows, columns: columns, blocks: result)
     }
     /**
-     Initialise new TileSet
+     Initialise new BlockGrid
      
      - Parameters:
         - rows: number of rows in the grid
         - columns: number of columns in the grid
-        - blockTypes: zero index based, 2D array of blocks. Importantly, the rows in the array are in reverse order to make it easier when setting this parameter from unit tests. That is, the row at index 0 is actually row 4 of a 4x4 grid.
+        - blocks: matrix of blocks, where blocks[0,0] is the block at row 0, column 0.
      */
     init(rows: Int, columns: Int, blocks: [[Block?]]) throws {
         guard rows > 0 && columns > 0 else { throw BlockGridError.InvalidInitialBlocks }

@@ -56,13 +56,17 @@ final class SettingsView: UserInterface {
     
     override func loadView() {
         super.loadView()
-        
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(handleClose(_:)))
         self.view.addSubview(tableView)
         setConstraints()
     }
     
     private func setConstraints() {
         tableView.autoPinEdgesToSuperviewEdges()
+    }
+    
+    @objc private func handleClose(_ sender: UIBarButtonItem) {
+        presenter.didSelectClose()
     }
     
     @objc private func handleSwitchToggle(_ sender: UISwitch) {
@@ -81,11 +85,14 @@ final class SettingsView: UserInterface {
 
 //MARK: - SettingsView API
 extension SettingsView: SettingsViewApi {
+    
     func displaySettings(_ settings: Settings) {
         self.title = "Settings"
         self.view.backgroundColor = .white
 
         showGridSwitch.isOn = settings.showGrid
+        showGhostSwitch.isOn = settings.showGhost
+        
         self.tableView.reloadData()
     }
     

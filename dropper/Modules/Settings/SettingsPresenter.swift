@@ -46,6 +46,12 @@ extension SettingsPresenter: SettingsPresenterApi {
     
     func didSaveSettings(_ settings: Settings) {
         delegate?.didUpdateSettings(settings)
+        didSelectClose()
+    }
+    
+    func didSelectClose() {
+        // close but don't tell the delegate to save
+        view.viewController.dismiss(animated: true, completion: nil)
     }
 }
 

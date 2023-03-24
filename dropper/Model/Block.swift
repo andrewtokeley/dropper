@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 /// Enumerated value for each visual type of block
-enum BlockType: Int {
+enum BlockType: Int, Codable {
     /// The block is part of the player's shape
     case player = 0
     /// The block is a standard block in the grid and will be affected by gravity
@@ -27,7 +27,7 @@ enum BlockType: Int {
 }
 
 /// Enumerated value for each visual type of block
-enum BlockColour: Int {
+enum BlockColour: Int, Codable {
     
     case colour1 = 0
     case colour2
@@ -65,10 +65,10 @@ enum BlockColour: Int {
  Represents a single block in the game. Blocks can be marked as fixed or dynamic, if dynamic they will move within a BlockGrid if a
  move command is issued
  */
-class Block {
+class Block: Codable {
     
     /// to support equality we create a unique id
-    let id = UUID().uuidString
+    var id = UUID().uuidString
     
     /// Colour of block
     var colour: BlockColour!

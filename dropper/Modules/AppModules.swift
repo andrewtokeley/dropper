@@ -12,6 +12,7 @@ enum AppModules: String, ViperitModule {
     case game
     case home
     case settings
+    case popup
     var viewType: ViperitViewType {
         return .code
     }

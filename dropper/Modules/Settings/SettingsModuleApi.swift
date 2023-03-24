@@ -23,6 +23,7 @@ protocol SettingsPresenterApi: PresenterProtocol {
     func didUpdateShowGrid(show: Bool)
     func didUpdateShowGhost(show: Bool)
     func didSaveSettings(_ settings: Settings)
+    func didSelectClose()
 }
 
 //MARK: - SettingsInteractor API

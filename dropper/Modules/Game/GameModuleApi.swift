@@ -11,11 +11,19 @@ import Viperit
 //MARK: - GameRouter API
 protocol GameRouterApi: RouterProtocol {
     func showSettings()
+    func navigateHome()
+    func showPopup(title: String, message: String, buttonText: String, secondaryButtonText: String?, callback: ((String)->Void)?)
 }
 
 //MARK: - GameView API
 protocol GameViewApi: UserInterfaceProtocol {
-    func initialiseGame(rows: Int, columns: Int)
+    
+    //MARK: - Presenter -> View
+    
+    /**
+     Called by the Presenter to get the View to render and empty state, with an empty grid and display elements, but before any Shapes are added.
+     */
+    func initialiseGame(rows: Int, columns: Int, showGrid: Bool)
     
     /**
      Adds a new shape to the grid, where the shape's origin will be located at the specified reference.
@@ -23,9 +31,21 @@ protocol GameViewApi: UserInterfaceProtocol {
     func addShape(_ shape: Shape, to: GridReference)
     
     /**
+     Called by the Presenter to get the View to start the game loop. Once set the View will call the Presenter's ``didUpdateGameLoop`` method every ``loopTimeInterval`` seconds.
+     */
+    func startGameLoop(_ loopTimeInterval: TimeInterval)
+    
+    /**
+     Called by the Presenter to stop the game loop from firing. Essentially pausing the game.
+     */
+    func stopGameLoop()
+    
+    //MARK: Display/Move Shapes and Blocks
+    /**
      Adds a new Ghost shape to the grid, where the shape's origin will be located at the specified reference.
      */
     func showShapeGhost(at: GridReference)
+    
     
     /**
      Rotates the active shape clockwise by the specified number of degress
@@ -58,38 +78,74 @@ protocol GameViewApi: UserInterfaceProtocol {
     func moveBlocks(_ blocks: [Block], to: [GridReference], completion: (()->Void)?)
     func removeBlock(_ block: Block, completion: (()->Void)?)
     func removeBlocks(_ blocks: [Block], completion: (()->Void)?)
+
+    //MARK: Display update methods
     
     func updateScore(_ score: Int)
     func displayPoints(_ points: Int, from: GridReference)
     func displayNextShape(_ shape: Shape)
     func displayLevel(_ levelNumber: Int)
     func updateLevelProgress(_ progressValue: Int, progress: Double)
-    
     func showGrid(_ show: Bool)
-    
-    func startGameLoop(_ loopTimeInterval: TimeInterval)
-    func stopGameLoop()
+    func showGhost(_ show: Bool)
+
 }
 
 //MARK: - GamePresenter API
 protocol GamePresenterApi: PresenterProtocol {
-    func didSelectMove(_ direction: BlockMoveDirection)
-    func didSelectPause()
-    func didSelectDrop()
-    func didSelectRotate()
-    func didSelectNewGame()
-    func didSelectSettings()
-    func didUpdateGameLoop()
     
-    // from interactor
-    
+    //MARK: - View -> Presenter
     /**
-     Called by Interactor when a new grid, game and levels have been created
+     Called by the View just before it's about to close itself. The View will use the completionThe Presenter can call the completion closure passing in a flag to cancel the close.
+     
+     If there is no competion handler, the View will close.
      */
-    func didCreateNewGame(_ rows: Int, _ columns: Int)
+    func willCloseView(completion: @escaping (Bool)->Void)
     
     /**
-     Called by Interactor to let Presenter know to load a new level
+     Called by the View when the play selects to move the active Shape in the given direction
+     */
+    func didSelectMove(_ direction: BlockMoveDirection)
+    
+    /**
+     Called by the View when the play selects to (un)pause the game
+     */
+    func didSelectPauseToggle()
+    
+    /**
+     Called by the View when the player selects to drop the active Shape
+     */
+    func didSelectDrop()
+    
+    /**
+     Called by the View when the player wants to rotate the active Shape
+     */
+    func didSelectRotate()
+    
+    /**
+     Called by the View when the player selects to view the settings page
+     */
+    func didSelectSettings()
+    
+    /**
+     Called by the View to let the Presenter know the game loop has made another pass and it's time to move the active Shape down
+     */
+    func didUpdateGameLoop()
+
+    //MARK: - Interactor -> Presenter
+    
+    /**
+     Called by Interactor when a game has been restored from state. The Presenter will work with the View to update levels and scores and add the blocks back to the grid.
+     */
+    func didRestoreState(_ state: GameState, settings: Settings)
+    
+    /**
+     Called by Interactor when a ``Game`` instance has been created the Presenter can now communicate with the View to put stuff on the screen ready to play.
+     */
+    func didCreateNewGame(rows: Int, columns: Int, settings: Settings)
+    
+    /**
+     Called by the Interactor whenever a new level is ready to be played. The Presenter will reset the UI, update the level description and initiate a new player by calling back to the Interactor via the ``didLoadLevel`` method.
      */
     func didFetchNextLevel(_ level: Level)
     
@@ -112,17 +168,29 @@ protocol GamePresenterApi: PresenterProtocol {
 
 //MARK: - GameInteractor API
 protocol GameInteractorApi: InteractorProtocol {
-    func createNewGame()
+    
+    //MARK: - Presenter -> Interactor
     
     /**
-     Record when some achievements have been gained.
+     The first call made by the Presenter when the module loads and we know what game genre we're playing.
      
-     Achievements are earned whenever effects are run and the shape has stopped dropping
+     Calls back to the following Presenter methods;
+     - ``didCreateNewGame(rows:columns:columnssettings)``
+     - ``didFetchNextLevel(level)``
+     -  ``didUpdateTotals(score:level:rows)``
+     */
+    func createNewGame(_ genre : GameType)
+    
+    /**
+     Record when some achievements have been gained. Achievements are earned whenever effects are run and the shape has stopped dropping
+     
+     Calls back to the following Presenter method(s);
+     -  ``didUpdateTotals(score:level:rows)``
      */
     func recordAchievements(_ achievements: Achievements, with hardDrop: Bool)
     
     /**
-     Called by the Presenter to let the Interactor know the grid and level have been loaded and it's time to play the level.
+     Called by the Presenter to let the Interactor know a new level has been loaded, blocks cleared, level number updated and the user is ready to continue.
      */
     func didLoadLevel()
     
@@ -130,4 +198,5 @@ protocol GameInteractorApi: InteractorProtocol {
      Called by the Presenter to let the Interactor know all the UI effects have been done and a new shape can be added, or a new level started in the case of enough rows being exploded.
      */
     func readyForNewShape()
+    
 }

@@ -7,15 +7,23 @@
 
 import Foundation
 
+enum ServiceError: Error {
+    case Failed
+}
+
 class ServiceFactory {
     
     static let sharedInstance = ServiceFactory()
     
+    var runningInTestMode: Bool {
+        return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+    }
+    
     lazy var gameService: GameServiceContract = {
-        return GameService()
+        return GameService(runningInTestMode)
     }()
     
     lazy var levelService: LevelServiceContract = {
-        return LevelService()
+        return LevelService(runningInTestMode)
     }()
 }

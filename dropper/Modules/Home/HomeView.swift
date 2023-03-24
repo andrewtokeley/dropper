@@ -12,8 +12,7 @@ import Viperit
 //MARK: HomeView Class
 final class HomeView: UserInterface {
     
-    override func loadView() {
-        super.loadView()
+    override func viewDidLoad() {
         self.view.backgroundColor = .gameBackground
         self.view.addSubview(button)
         self.navigationController?.navigationBar.backgroundColor = .gameBackground
