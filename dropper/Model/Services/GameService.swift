@@ -12,108 +12,108 @@ protocol GameServiceContract {
     /**
      Creats a new game instance for the given game type
      */
-    func createGame(_ genre: GameType, completion: ((Game?) -> Void)?)
+    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?)
     
-    func saveGameState(_ state: GameState, completion: ((Error?)->Void)?)
-    func getGameState(completion: ((GameState?)->Void)?)
-    func clearGameState(completion: ((Bool)->Void)?)
+    func saveGameState(for title: GameTitle, state: GameState, completion: ((Error?)->Void)?)
+    func getGameState(for title: GameTitle, completion: ((GameState?)->Void)?)
+    func clearGameState(for title: GameTitle, completion: ((Bool)->Void)?)
     
-    func getSettings(completion: ((Settings?) -> Void)?)
-    func saveSettings(_ settings: Settings, completion: (()->Void)?)
-    func clearSettingsState(completion: ((Bool)->Void)?)
+    func getSettings(for title: GameTitle, completion: ((Settings?) -> Void)?)
+    func saveSettings(for title: GameTitle, settings: Settings, completion: (()->Void)?)
+    func clearSettingsState(for title: GameTitle, completion: ((Bool)->Void)?)
     
-    func getScoreHistory(completion: (([Int]) -> Void)?)
-    func addScore(_ score: Int, completion: ((Bool?, ServiceError?) -> Void)?)
-    func clearScoreState(completion: ((Bool)->Void)?)
+    func getScoreHistory(for title: GameTitle, completion: (([Int]) -> Void)?)
+    func addScore(for title: GameTitle, score: Int, completion: ((Bool?, ServiceError?) -> Void)?)
+    func clearScoreState(for title: GameTitle, completion: ((Bool)->Void)?)
 }
 
 class GameService: ServiceBase {
-    var SETTINGS_KEY: String {
-        return KEY_PREFIX + "dropper_settings"
+    enum KeyType: String {
+        case SETTINGS = "dropper_settings"
+        case SCORES = "dropper_scores"
+        case STATE = "dropper_state"
     }
-    var SCORES_KEY: String {
-        return KEY_PREFIX + "dropper_scores"
-    }
-    var STATE_KEY: String {
-        return KEY_PREFIX + "dropper_state"
-    }
+    
     let userDefaults = UserDefaults.standard
+    
+    func keyFor(_ title: GameTitle, key: KeyType) -> String {
+        return title.id + KEY_PREFIX + key.rawValue
+    }
 }
 
 extension GameService: GameServiceContract {
     
     // MARK: - Game
-    func createGame(_ genre: GameType, completion: ((Game?) -> Void)?) {
-        guard genre == .tetrisClassic else {
+    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) {
+        if let _ = title as? TetrisClassicTitle {
+            completion?(TetrisClassic())
+        } else {
             completion?(nil)
-            return
-        }
-        
-        var game = Game(genre: genre,
-                        levelService: ServiceFactory.sharedInstance.levelService,
-                        rows: 22,
-                        columns: 10)
-        game.fetchLevels {
-            completion?(game)
         }
     }
     
     // MARK: - State
     
-    func saveGameState(_ state: GameState, completion: ((Error?)->Void)?) {
+    func saveGameState(for title: GameTitle, state: GameState, completion: ((Error?)->Void)?) {
         do {
-            try userDefaults.setObject(state, forKey: STATE_KEY)
+            try userDefaults.setObject(state, forKey: keyFor(title, key: .STATE))
             completion?(nil)
         } catch let error {
             completion?(error)
         }
     }
     
-    func getGameState(completion: ((GameState?)->Void)?) {
-        let state = try? userDefaults.getObject(forKey: STATE_KEY, castTo: GameState.self)
+    func getGameState(for title: GameTitle, completion: ((GameState?)->Void)?) {
+        let state = try? userDefaults.getObject(forKey: keyFor(title, key: .STATE), castTo: GameState.self)
         completion?(state)
     }
     
-    func clearGameState(completion: ((Bool)->Void)?) {
-        userDefaults.removeObject(forKey: STATE_KEY)
+    func clearGameState(for title: GameTitle, completion: ((Bool)->Void)?) {
+        userDefaults.removeObject(forKey: keyFor(title, key: .STATE))
         completion?(true)
     }
     
     // MARK: - Settings
     
-    func getSettings(completion: ((Settings?) -> Void)?) {
-        let settings = try? userDefaults.getObject(forKey: SETTINGS_KEY, castTo: Settings.self)
-        completion?(settings)
+    func getSettings(for title: GameTitle, completion: ((Settings?) -> Void)?) {
+        let settings = try? userDefaults.getObject(forKey: keyFor(title, key: .SETTINGS), castTo: Settings.self)
+        if let settings = settings {
+            completion?(settings)
+        } else {
+            completion?(Settings.defaultSettings)
+        }
     }
     
-    func saveSettings(_ settings: Settings, completion: (()->Void)?) {
-        if let _ = try? userDefaults.setObject(settings, forKey: SETTINGS_KEY) {
+    func saveSettings(for title: GameTitle, settings: Settings, completion: (()->Void)?) {
+        if let _ = try? userDefaults.setObject(settings, forKey: keyFor(title, key: .SETTINGS)) {
             completion?()
         }
     }
     
-    func clearSettingsState(completion: ((Bool)->Void)?) {
-        userDefaults.removeObject(forKey: SETTINGS_KEY)
+    func clearSettingsState(for title: GameTitle, completion: ((Bool)->Void)?) {
+        userDefaults.removeObject(forKey: keyFor(title, key: .SETTINGS))
         completion?(true)
     }
     
     //MARK: - Scores
     
-    func getScoreHistory(completion: (([Int]) -> Void)?) {
-        if let scores = try? userDefaults.getObject(forKey: SCORES_KEY, castTo: Array<Int>.self) {
+    func getScoreHistory(for title: GameTitle, completion: (([Int]) -> Void)?) {
+        if let scores = try? userDefaults.getObject(forKey: keyFor(title, key: .SCORES), castTo: [Int].self) {
             completion?(scores)
         } else {
-            completion?([])
+            completion?([Int]())
         }
     }
 
-    func clearScoreState(completion: ((Bool)->Void)?) {
-        userDefaults.removeObject(forKey: SCORES_KEY)
+    func clearScoreState(for title: GameTitle, completion: ((Bool)->Void)?) {
+        userDefaults.removeObject(forKey: keyFor(title, key: .SCORES))
         completion?(true)
     }
     
-    func addScore(_ score: Int, completion: ((Bool?, ServiceError?) -> Void)?) {
-        self.getScoreHistory { scores in
+    func addScore(for title: GameTitle, score: Int, completion: ((Bool?, ServiceError?) -> Void)?)
+    {
+        self.getScoreHistory(for: title) { scores in
+            
             var isHighScore = false
             var maxScore = scores.max() ?? 0
             var newScores = [Int]()
@@ -136,11 +136,11 @@ extension GameService: GameServiceContract {
                     isHighScore = true
                     if let indexOfMax = scores.firstIndex(of: maxScore) {
                         newScores[indexOfMax] = score
-                    } 
+                    }
                 }
             }
             
-            if let _ = try? self.userDefaults.setObject(newScores, forKey: self.SCORES_KEY) {
+            if let _ = try? self.userDefaults.setObject(newScores, forKey: self.keyFor(title, key: .SCORES)) {
                 completion?(isHighScore, nil)
             } else {
                 completion?(false, ServiceError.Failed)

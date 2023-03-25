@@ -1,11 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "cloud.png",
+      "filename" : "pause.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "001-video-pause-button.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

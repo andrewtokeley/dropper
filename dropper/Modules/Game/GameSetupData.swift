@@ -8,5 +8,5 @@
 import Foundation
 
 struct GameSetupData {
-    var genre: GameType
+    var title: GameTitle
 }

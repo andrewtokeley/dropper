@@ -10,13 +10,19 @@ import XCTest
 
 final class GameServiceScoreTests: XCTestCase {
     let gameService = ServiceFactory.sharedInstance.gameService
-    
+    let TITLE_TETRIS = TetrisClassicTitle()
+    let TITLE_COLOURS = ColourMatcherTitle()
+
     override func setUp() {
         let expect = expectation(description: "setup")
-        gameService.clearScoreState { (result) in
+        gameService.clearScoreState(for: TITLE_TETRIS) { (result) in
             XCTAssertTrue(result)
-            expect.fulfill()
+            self.gameService.clearScoreState(for: self.TITLE_COLOURS) { (result) in
+                XCTAssertTrue(result)
+                expect.fulfill()
+            }
         }
+        
         waitForExpectations(timeout: 100) { (error) in
             if let e = error {
                 XCTFail(e.localizedDescription)
@@ -31,11 +37,11 @@ final class GameServiceScoreTests: XCTestCase {
     func testClearState() throws {
         let expect = expectation(description: "testClearState")
         
-        self.gameService.addScore(100) { result, error in
+        self.gameService.addScore(for: TITLE_TETRIS, score: 100) { result, error in
             XCTAssertNil(error)
-            self.gameService.clearScoreState { (result) in
+            self.gameService.clearScoreState(for: self.TITLE_TETRIS) { (result) in
                 XCTAssertTrue(result)
-                self.gameService.getScoreHistory { scores in
+                self.gameService.getScoreHistory(for: self.TITLE_TETRIS) { scores in
                     XCTAssertEqual(scores.count, 0)
                     expect.fulfill()
                 }
@@ -52,8 +58,8 @@ final class GameServiceScoreTests: XCTestCase {
     func testGetScores() throws {
         let expect = expectation(description: "testGetScores")
         
-        self.gameService.addScore(200) { _, error in
-            self.gameService.getScoreHistory { scores in
+        self.gameService.addScore(for: TITLE_COLOURS, score: 200) { _, error in
+            self.gameService.getScoreHistory(for: self.TITLE_COLOURS) { scores in
                 XCTAssertEqual(scores.count, 1)
                 XCTAssertEqual(scores[0], 200)
                 expect.fulfill()
@@ -70,7 +76,7 @@ final class GameServiceScoreTests: XCTestCase {
     func testSaveScores() throws {
         let expect = expectation(description: "testSaveScores")
         
-        gameService.addScore(100) { isHighScore, error in
+        gameService.addScore(for: TITLE_COLOURS, score: 100) { isHighScore, error in
             XCTAssertNotNil(isHighScore)
             XCTAssertTrue(isHighScore!)
             expect.fulfill()
@@ -86,12 +92,12 @@ final class GameServiceScoreTests: XCTestCase {
     func testScoresFull() throws {
         let expect = expectation(description: "testSaveScores")
         
-        gameService.addScore(100) { _, _ in
-            self.gameService.addScore(200) { _, _ in
-                self.gameService.addScore(300) { _, _ in
-                    self.gameService.addScore(400) { isHighScore, _ in
+        gameService.addScore(for: TITLE_COLOURS, score: 100) { _, _ in
+            self.gameService.addScore(for: self.TITLE_COLOURS, score: 200) { _, _ in
+                self.gameService.addScore(for: self.TITLE_COLOURS, score: 300) { _, _ in
+                    self.gameService.addScore(for: self.TITLE_COLOURS, score: 400) { isHighScore, _ in
                         XCTAssertTrue(isHighScore!)
-                        self.gameService.getScoreHistory { scores in
+                        self.gameService.getScoreHistory(for: self.TITLE_COLOURS) { scores in
                             
                             // should only be 3 not 4
                             XCTAssertEqual(scores.count, 3)

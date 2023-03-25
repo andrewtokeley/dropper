@@ -14,6 +14,7 @@ protocol SettingsRouterApi: RouterProtocol {
 
 //MARK: - SettingsView API
 protocol SettingsViewApi: UserInterfaceProtocol {
+    func displayTitle(_ title: String)
     func displaySettings(_ settings: Settings)
 }
 
@@ -28,6 +29,6 @@ protocol SettingsPresenterApi: PresenterProtocol {
 
 //MARK: - SettingsInteractor API
 protocol SettingsInteractorApi: InteractorProtocol {
-    func loadSettings()
-    func saveSettings(_ settings: Settings)
+    func loadSettings(for title: GameTitle)
+    func saveSettings(for title: GameTitle, settings: Settings)
 }

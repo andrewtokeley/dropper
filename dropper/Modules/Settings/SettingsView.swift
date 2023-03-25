@@ -96,6 +96,9 @@ extension SettingsView: SettingsViewApi {
         self.tableView.reloadData()
     }
     
+    func displayTitle(_ title: String) {
+        self.title = title
+    }
 }
 
 extension SettingsView: UITableViewDelegate {

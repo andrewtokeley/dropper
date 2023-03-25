@@ -549,9 +549,11 @@ class BlockGrid {
     /// - Returns: boolean indicating whether the player could be added or not
     func addShape(_ shape: Shape) throws -> Bool {
         guard !hasPlayer else { return false }
-        
+        guard let topRelativeRow = shape.references.map({ $0.row }).max() else { return false }
+
         // position as high up the grid as possible, in the middle
-        let originRow = rows - shape.references.filter { $0.row > 0 }.count - 1
+        
+        let originRow = (rows - 1) - topRelativeRow
         let originColumn = Int(columns/2)
         let origin = GridReference(originRow,originColumn)
         var playerBlocks = [BlockResult]()

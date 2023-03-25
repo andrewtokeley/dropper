@@ -25,7 +25,7 @@ struct Level {
      */
     var moveDuration: TimeInterval {
         // slowest 0.3, fastest 0.05
-        let speeds = [0.5, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05]
+        let speeds = [0.5, 0.4, 0.3, 0.2, 0.1, 0.08, 0.06]
         if self.number < 5 {
             return speeds[self.number-1]
         } else {
@@ -42,7 +42,7 @@ struct Level {
     
     /// Set this to calculate the progress made
     var goalProgressValue: ((Achievements) -> Int) = { (a) in
-        return a.get(.oneRow) + a.get(.twoRows)*2 + a.get(.threeRows)*3
+        return a.get(.oneRow) + a.get(.twoRows)*2 + a.get(.threeRows)*3 + a.get(.fourRows)*4
     }
     
     /// The effects that will be applied after each shape lands. Default is only removing rows.

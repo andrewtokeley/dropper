@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		81BE02EE360487416451D343 /* Pods_dropper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAA71E73B37A4B953D069DCE /* Pods_dropper.framework */; };
 		D8036E3B29A18F830081CF41 /* Ground.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8036E3A29A18F830081CF41 /* Ground.swift */; };
-		D8036E3D29A199EA0081CF41 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8036E3C29A199EA0081CF41 /* Button.swift */; };
+		D8036E3D29A199EA0081CF41 /* ButtonNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8036E3C29A199EA0081CF41 /* ButtonNode.swift */; };
 		D8036E4129A218090081CF41 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8036E4029A218090081CF41 /* Block.swift */; };
 		D8036E4329A218F80081CF41 /* BlockGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8036E4229A218F80081CF41 /* BlockGrid.swift */; };
 		D8036E4529A21AFA0081CF41 /* GridReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8036E4429A21AFA0081CF41 /* GridReference.swift */; };
@@ -44,6 +44,7 @@
 		D83DE36529CAF24F005F83A0 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36429CAF24F005F83A0 /* GameState.swift */; };
 		D83DE36729CB8071005F83A0 /* GameServiceStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36629CB8071005F83A0 /* GameServiceStateTests.swift */; };
 		D83DE36929CC43AF005F83A0 /* GameSetupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36829CC43AF005F83A0 /* GameSetupData.swift */; };
+		D83DE36B29CE5A27005F83A0 /* GameTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36A29CE5A27005F83A0 /* GameTitle.swift */; };
 		D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D729BAC16C001120C7 /* UIImageExtension.swift */; };
 		D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D929BB1FFC001120C7 /* Cloud.swift */; };
 		D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */; };
@@ -122,7 +123,7 @@
 		CB4528A6368C8997B4517826 /* Pods_dropperTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_dropperTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D68427ABB23B349268D78A01 /* Pods-dropper.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-dropper.debug.xcconfig"; path = "Target Support Files/Pods-dropper/Pods-dropper.debug.xcconfig"; sourceTree = "<group>"; };
 		D8036E3A29A18F830081CF41 /* Ground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ground.swift; sourceTree = "<group>"; };
-		D8036E3C29A199EA0081CF41 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
+		D8036E3C29A199EA0081CF41 /* ButtonNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonNode.swift; sourceTree = "<group>"; };
 		D8036E4029A218090081CF41 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
 		D8036E4229A218F80081CF41 /* BlockGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockGrid.swift; sourceTree = "<group>"; };
 		D8036E4429A21AFA0081CF41 /* GridReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridReference.swift; sourceTree = "<group>"; };
@@ -157,6 +158,7 @@
 		D83DE36429CAF24F005F83A0 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		D83DE36629CB8071005F83A0 /* GameServiceStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameServiceStateTests.swift; sourceTree = "<group>"; };
 		D83DE36829CC43AF005F83A0 /* GameSetupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSetupData.swift; sourceTree = "<group>"; };
+		D83DE36A29CE5A27005F83A0 /* GameTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTitle.swift; sourceTree = "<group>"; };
 		D83F62D729BAC16C001120C7 /* UIImageExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtension.swift; sourceTree = "<group>"; };
 		D83F62D929BB1FFC001120C7 /* Cloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cloud.swift; sourceTree = "<group>"; };
 		D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKOutlinedLabelNode.swift; sourceTree = "<group>"; };
@@ -268,6 +270,7 @@
 				D83F62EE29BE4C39001120C7 /* Game.swift */,
 				D83DE33F29C8D2B1005F83A0 /* Settings.swift */,
 				D83DE36429CAF24F005F83A0 /* GameState.swift */,
+				D83DE36A29CE5A27005F83A0 /* GameTitle.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -424,7 +427,7 @@
 				D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */,
 				D869176A29B48182008C60F0 /* ShapeNode.swift */,
 				D88D555629A174CE003A0478 /* BlockNode.swift */,
-				D8036E3C29A199EA0081CF41 /* Button.swift */,
+				D8036E3C29A199EA0081CF41 /* ButtonNode.swift */,
 				D8036E3A29A18F830081CF41 /* Ground.swift */,
 				D869175829A97685008C60F0 /* PlayerNode.swift */,
 				D869177229B80BF7008C60F0 /* ScoreNode.swift */,
@@ -668,7 +671,7 @@
 				D8FDAE2C29A48D88007AA40B /* GameModuleApi.swift in Sources */,
 				D8036E4329A218F80081CF41 /* BlockGrid.swift in Sources */,
 				D869176429ABE928008C60F0 /* GridEffects.swift in Sources */,
-				D8036E3D29A199EA0081CF41 /* Button.swift in Sources */,
+				D8036E3D29A199EA0081CF41 /* ButtonNode.swift in Sources */,
 				D83DE36529CAF24F005F83A0 /* GameState.swift in Sources */,
 				D869176B29B48183008C60F0 /* ShapeNode.swift in Sources */,
 				D869177329B80BF7008C60F0 /* ScoreNode.swift in Sources */,
@@ -676,6 +679,7 @@
 				D83DE35B29C98616005F83A0 /* UserDefaultsExtension.swift in Sources */,
 				D83F630629C0E9B2001120C7 /* SKNodeExtension.swift in Sources */,
 				D8036E4129A218090081CF41 /* Block.swift in Sources */,
+				D83DE36B29CE5A27005F83A0 /* GameTitle.swift in Sources */,
 				D83F62E629BDA3D3001120C7 /* Achievement.swift in Sources */,
 				D83F62E829BDBF35001120C7 /* Level.swift in Sources */,
 				D83DE36929CC43AF005F83A0 /* GameSetupData.swift in Sources */,

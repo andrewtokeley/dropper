@@ -25,13 +25,25 @@ struct LayoutDimensions {
     var gridTop: CGFloat = 0
     var gridBottom: CGFloat = 0
     
+    var labelsRow: CGFloat = 100
+    var valuesRow: CGFloat = 125
+    
+    var blockSize: CGFloat = 30
+    
+    var bottomButtonsRow:CGFloat = 40
+    
     var spacer: CGFloat = 30
+}
+
+protocol GameSceneDelegate {
+    func gameScene(_ scene: GameScene, didClickButton withTag: String)
 }
 
 class GameScene: SKScene {
 
     // MARK: - Constants
-
+    var gameSceneDelegate: GameSceneDelegate?
+    
     /// The duration between calls to the loopCallback
     private var loopTimeInterval = TimeInterval(0)
     
@@ -85,9 +97,26 @@ class GameScene: SKScene {
     private var ghostNode: ShapeNode?
     
     /// Dimension of each block - blocks are always square
-    private var blockSize: CGFloat = 10
+    private var blockSize: CGFloat {
+        return layout.blockSize
+    }
     
     // MARK: - Nodes
+    
+    lazy var pauseButton: ButtonNode = {
+        let node = ButtonNode(texture: SKTexture(imageNamed: "pause"), color: .white, size: CGSize(width:40, height: 40))
+        node.delegate = self
+        node.tag = "pause"
+        return node
+    }()
+    
+    lazy var playButton: SKSpriteNode = {
+        let node = ButtonNode(texture: SKTexture(imageNamed: "play"), color: .white, size: CGSize(width:40, height: 40))
+        node.delegate = self
+        node.tag = "play"
+        node.alpha = 0
+        return node
+    }()
     
     lazy var pointLabel: SKLabelNode = {
         let node = SKLabelNode(fontNamed: "Copperplate-Bold")
@@ -146,19 +175,6 @@ class GameScene: SKScene {
         return node
     }()
     
-//    lazy var progressNode: ProgressNode = {
-//        let node = ProgressNode(size: CGSize.zero)
-//        return node
-//    }()
-    
-//    var sideBar: SKShapeNode {
-//        let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:0,y:0), size: CGSize(width: side_space, height: self.size.height - headerHeight)))
-//        node.fillColor = .clear
-//        node.lineWidth = 2
-//        node.strokeColor = .clear
-//        return node
-//    }
-    
     //MARK: - Initialisers
     
     init(rows: Int, columns: Int, size: CGSize, loopCallback: (()->Void)? = nil) {
@@ -166,23 +182,34 @@ class GameScene: SKScene {
         self.rows = rows
         self.columns = columns
         
-        // calculate a block size that gaurantees the grid will fit the visible screen and have at least a blocksize to the left and right.
-        
-        // Reserve this much space above the grid, for headings/scores etc.
-        let gridTop: CGFloat = 150
-        self.blockSize = min(self.size.width/CGFloat(columns + 2), (self.size.height-gridTop)/CGFloat(rows + 3))
-        let gridLeftRight = (self.size.width - CGFloat(columns) * self.blockSize)/2
-        self.layout = LayoutDimensions(
-            gridLeft: gridLeftRight,
-            gridRight: gridLeftRight,
-            gridTop: gridTop,
-            gridBottom: 2.0 * blockSize)
+        self.layout = getLayout(from: self.size)
         
         self.loopCallback = loopCallback
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    private func getLayout(from size: CGSize) -> LayoutDimensions {
+        
+        var layout = LayoutDimensions()
+        layout.gridBottom = 100
+        layout.labelsRow = 100
+        layout.valuesRow = 125
+        layout.gridTop = layout.valuesRow + 50
+
+        
+        // Define a block size to gaurantee it will fit in the space.
+        layout.blockSize = min(size.width/CGFloat(columns + 2), (size.height-(layout.gridTop+layout.gridBottom))/CGFloat(rows))
+        
+        // Give to the left and right of the grid an equal amount of space
+        layout.gridLeft = (size.width - CGFloat(columns) * layout.blockSize)/2
+        layout.gridRight = layout.gridLeft
+        
+        layout.bottomButtonsRow = 40
+        
+        return layout
     }
     
     //MARK: - Overrides
@@ -198,7 +225,10 @@ class GameScene: SKScene {
     }
     
     override func sceneDidLoad() {
-        pointLabel.position = CGPoint(x:-100, y:-100)
+        let offScreen = CGPoint(x:-100, y:-100)
+        pointLabel.position = offScreen
+        pauseButton.position = offScreen
+        playButton.position = offScreen
         addChild(pointLabel)
         addChild(scoreLabel)
         addChild(scoreHeadingLabel)
@@ -206,11 +236,8 @@ class GameScene: SKScene {
         addChild(goalBlock)
         addChild(nextHeadingLabel)
         addChild(nextShape)
-        //self.columns = 10
-        
-        // TODO - calculate this
-        // let headerHeight: CGFloat = 300.0
-        //self.rows = Int((self.size.height-headerHeight-side_space)/self.blockSize)
+        addChild(pauseButton)
+        addChild(playButton)
     }
     
     override func didChangeSize(_ oldSize: CGSize) {
@@ -224,15 +251,16 @@ class GameScene: SKScene {
      Whenever the scene size changes we need to manually reposition nodes.
      */
     private func repositionNodes() {
-        let textLevel1_OffSet: CGFloat = 100
-        let textLevel2_OffSet: CGFloat = 125
         
-        nextHeadingLabel.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: textLevel1_OffSet)
-        nextShape.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: textLevel2_OffSet)
-        goalBlock.autoPositionWithinParent(.leftTop, xOffSet: 0.35*size.width, yOffSet: textLevel1_OffSet)
-        scoreHeadingLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: textLevel1_OffSet)
-        scoreLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: textLevel2_OffSet)
-        levelBlock.autoPositionWithinParent(.rightTop, xOffSet: 0.40*size.width, yOffSet: textLevel1_OffSet)
+        nextHeadingLabel.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: layout.labelsRow)
+        nextShape.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: layout.valuesRow)
+        goalBlock.autoPositionWithinParent(.leftTop, xOffSet: 0.35*size.width, yOffSet: layout.labelsRow)
+        scoreHeadingLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: layout.labelsRow)
+        scoreLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: layout.valuesRow)
+        levelBlock.autoPositionWithinParent(.rightTop, xOffSet: 0.40*size.width, yOffSet: layout.labelsRow)
+        
+        pauseButton.autoPositionWithinParent(.centreBottom, yOffSet: layout.bottomButtonsRow)
+        playButton.autoPositionWithinParent(.centreBottom, yOffSet: layout.bottomButtonsRow)
     }
     /**
      Gets the screen point at the centre of a GridReference
@@ -240,13 +268,13 @@ class GameScene: SKScene {
     private func getPosition(_ reference: GridReference, centre: Bool = true) -> CGPoint {
         
         var position = CGPoint.zero
-        position.x = CGFloat(reference.column) * blockSize + layout.gridLeft
+        position.x = CGFloat(reference.column) * layout.blockSize + layout.gridLeft
         if centre {
-            position.x += blockSize/2.0
+            position.x += layout.blockSize/2.0
         }
-        position.y = CGFloat(reference.row) * blockSize + layout.gridBottom
+        position.y = CGFloat(reference.row) * layout.blockSize + layout.gridBottom
         if centre {
-            position.y += blockSize/2.0
+            position.y += layout.blockSize/2.0
         }
         return position
     }
@@ -564,6 +592,22 @@ class GameScene: SKScene {
         dispatchGroup.notify(queue: DispatchQueue.main, execute: {
             completion?()
         })
+    }
+}
+
+extension GameScene: ButtonNodeDelegate {
+    func buttonClicked(sender: ButtonNode) {
+        //presenter.didSelectPauseToggle()
+        if let tag = sender.tag {
+            if tag == "pause" {
+                pauseButton.alpha = 0
+                playButton.alpha = 1
+            } else if tag == "play" {
+                pauseButton.alpha = 1
+                playButton.alpha = 0
+            }
+            gameSceneDelegate?.gameScene(self, didClickButton: tag)
+        }
     }
 }
 

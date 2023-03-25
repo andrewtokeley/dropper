@@ -8,5 +8,6 @@
 import Foundation
 
 struct SettingsSetupData {
+    var gameTitle: GameTitle
     var delegate: SettingsDelegate?
 }

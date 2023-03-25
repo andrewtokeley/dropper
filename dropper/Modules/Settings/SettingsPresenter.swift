@@ -14,14 +14,18 @@ final class SettingsPresenter: Presenter {
     
     private var settings: Settings = Settings()
     private var delegate: SettingsDelegate?
+    private var gameTitle: GameTitle?
     
     override func viewHasLoaded() {
-        interactor.loadSettings()
+        if let title = self.gameTitle {
+            interactor.loadSettings(for: title)
+        }
     }
     
     override func setupView(data: Any) {
         if let setupData = data as? SettingsSetupData {
-            delegate = setupData.delegate
+            self.delegate = setupData.delegate
+            self.gameTitle = setupData.gameTitle
         }
     }
 }
@@ -32,16 +36,23 @@ extension SettingsPresenter: SettingsPresenterApi {
     func didLoadSettings(_ settings: Settings) {
         self.settings = settings
         view.displaySettings(settings)
+        if let title = self.gameTitle {
+            view.displayTitle("\(title.title) Settings")
+        }
     }
     
     func didUpdateShowGhost(show: Bool) {
-        settings.showGhost = show
-        interactor.saveSettings(settings)
+        if let title = self.gameTitle {
+            settings.showGhost = show
+            interactor.saveSettings(for: title, settings: settings)
+        }
     }
     
     func didUpdateShowGrid(show: Bool) {
-        settings.showGrid = show
-        interactor.saveSettings(settings)
+        if let title = self.gameTitle {
+            settings.showGrid = show
+            interactor.saveSettings(for: title, settings: settings)
+        }
     }
     
     func didSaveSettings(_ settings: Settings) {

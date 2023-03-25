@@ -8,16 +8,22 @@
 import Foundation
 import SpriteKit
 
-class Button: SKSpriteNode {
-    var delegate: (() -> Void)?
+protocol ButtonNodeDelegate {
+    func buttonClicked(sender: ButtonNode)
+}
+
+class ButtonNode: SKSpriteNode {
+    var delegate: ButtonNodeDelegate?
+    var tag: String?
     
-    init (size: CGSize, color: UIColor, text: String, delegate: (()->Void)?) {
-        
-        super.init(texture: nil, color: color, size: size)
-        
-        self.delegate = delegate
+    override init(texture: SKTexture?, color: SKColor, size: CGSize) {
+        super.init(texture: texture, color: color, size: size)
         isUserInteractionEnabled = true
-        
+    }
+    
+    convenience init (text: String, size: CGSize, color: UIColor) {
+        self.init(texture: nil, color: color, size: size)
+        isUserInteractionEnabled = true
         let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
         label.text = text
         label.position = CGPoint(x: 0, y: -label.calculateAccumulatedFrame().height/2)
@@ -29,7 +35,7 @@ class Button: SKSpriteNode {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        delegate?()
+        self.delegate?.buttonClicked(sender: self)
     }
-    
+
 }

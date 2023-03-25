@@ -11,14 +11,31 @@ import Viperit
 
 // MARK: - HomePresenter Class
 final class HomePresenter: Presenter {
+    
+    override func setupView(data: Any) {
+        //
+    }
+    override func viewHasLoaded() {
+        let titles = interactor.getGameTitles()
+        view.displayGameTitles(titles)
+    }
+    
 }
 
 // MARK: - HomePresenter API
 extension HomePresenter: HomePresenterApi {
-    
-    func didSelectPlay() {
-        router.showGame()
+    func didGetHighScores(highScores: [GameTitle : Int]) {
+        
     }
+    
+    func didSelectPlay(gameTitle: GameTitle) {
+        router.showGame(gameTitle)
+    }
+    
+    func didGetGameTitles(gameTitles: [GameTitle]) {
+        view.displayGameTitles(gameTitles)
+    }
+    
 }
 
 // MARK: - Home Viper Components

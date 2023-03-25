@@ -17,16 +17,16 @@ final class SettingsInteractor: Interactor {
 // MARK: - SettingsInteractor API
 extension SettingsInteractor: SettingsInteractorApi {
     
-    func loadSettings() {
-        gameService.getSettings { settings in
+    func loadSettings(for title: GameTitle) {
+        gameService.getSettings(for: title) { settings in
             if let settings = settings {
                 self.presenter.didLoadSettings(settings)
             }
         }
     }
     
-    func saveSettings(_ settings: Settings) {
-        gameService.saveSettings(settings) {
+    func saveSettings(for title: GameTitle, settings: Settings) {
+        gameService.saveSettings(for: title, settings: settings) {
             self.presenter.didSaveSettings(settings)
         }
     }

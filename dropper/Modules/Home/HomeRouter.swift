@@ -15,9 +15,10 @@ final class HomeRouter: Router {
 
 // MARK: - HomeRouter API
 extension HomeRouter: HomeRouterApi {
-    func showGame() {
+    func showGame(_ gameTitle: GameTitle) {
+        
         let module = AppModules.game.build()
-        var data = GameSetupData(genre: .tetrisClassic)
+        let data = GameSetupData(title: gameTitle)
         module.router.present(from: self.viewController, embedInNavController: true, presentationStyle: .fullScreen, transitionStyle: .crossDissolve, setupData: data, completion: nil)
     }
 }

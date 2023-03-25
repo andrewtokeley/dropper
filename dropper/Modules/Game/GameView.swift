@@ -151,13 +151,13 @@ final class GameView: UserInterface {
         left.direction = .left
         let right = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
         right.direction = .right
-        let tap = UITapGestureRecognizer(target: self, action: #selector(tap))
+        //let tap = UITapGestureRecognizer(target: self, action: #selector(tap))
         //up.direction = .up
         let down = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
         down.direction = .down
         self.view.addGestureRecognizer(left)
         self.view.addGestureRecognizer(right)
-        self.view.addGestureRecognizer(tap)
+        //self.view.addGestureRecognizer(tap)
         self.view.addGestureRecognizer(down)
     }
 
@@ -282,6 +282,7 @@ extension GameView: GameViewApi {
     func initialiseGame(rows: Int, columns: Int, showGrid: Bool = false) {
         let scene = GameScene(rows: rows, columns: columns, size: self.view.bounds.size, loopCallback: gameLoopCallback)
         scene.scaleMode = .resizeFill
+        scene.gameSceneDelegate = self
         scene.backgroundColor = .gameBackground
         gameSKView.presentScene(scene)
         
@@ -328,7 +329,10 @@ extension GameView: GameViewApi {
     
 }
 
-extension GameView: SKSceneDelegate {
+extension GameView: GameSceneDelegate {
+    func gameScene(_ scene: GameScene, didClickButton withTag: String) {
+        presenter.didSelectPauseToggle()
+    }    
     
 }
 

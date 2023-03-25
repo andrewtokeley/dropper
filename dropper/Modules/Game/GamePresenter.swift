@@ -33,12 +33,12 @@ final class GamePresenter: Presenter {
         self.setup = data as? GameSetupData
     }
     override func viewIsAboutToAppear() {
-        if let setup = setup {
-            interactor.createNewGame(setup.genre)
+        if let setup = self.setup {
+            interactor.createNewGame(setup.title)
         }
     }
 
-    private func lifeLost() {
+    private func gameOver() {
         view.stopGameLoop()
         
         let closeButtonText = "Close"
@@ -78,11 +78,11 @@ extension GamePresenter: GamePresenterApi {
     
     func didFetchNextLevel(_ level: Level) {
         
-        // remember the gameLoopInterval
+        // set the level specific attributes
         self.gameLoopInterval = level.moveDuration
         self.gridEffects = level.effects
         
-        // Update the view
+        // Update the level number
         self.view.displayLevel(level.number)
         
         // Remove all the blocks and the player
@@ -90,21 +90,27 @@ extension GamePresenter: GamePresenterApi {
         self.grid.removeBlocks(self.grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
         self.grid.replacePlayerWithBlocksOfType(.block)
         
-        let title = level.number == 1 ? "New Game!" : "Next Level"
-        let message = level.number == 1 ? "Complete 10 rows to move to the next level." : "Things are about to get a little faster!"
+        let title = level.number == 1 ? "Get Ready!" : "Nice!"
+        let message = level.number == 1 ? "Complete 10 rows to move to the next level." : "You completed \(level.goalDescription), now things are about to get a little faster!"
         
-        self.router.showPopup(title: title, message: message, buttonText: "Start", secondaryButtonText: nil) { _ in
-            self.view.removeBlocks(blocks) {
+        self.view.removeBlocks(blocks) {
+            self.router.showPopup(title: title, message: message, buttonText: "Start", secondaryButtonText: nil) { _ in
                 self.view.startGameLoop(self.gameLoopInterval)
                 self.interactor.didLoadLevel()
             }
         }
     }
     
-    func didUpdateTotals(points: Int, score: Int, rows: Int) {
-        view.displayPoints(points, from: GridReference(5,10))
-        view.updateScore(score)
-        view.updateLevelProgress(rows, progress: 0)
+    func didUpdateTotals(points: Int? = nil, score: Int? = nil, goalProgressValue: Int? = nil) {
+        if let points = points {
+            view.displayPoints(points, from: GridReference(5,10))
+        }
+        if let score = score {
+            view.updateScore(score)
+        }
+        if let goalProgressValue = goalProgressValue {
+            view.updateLevelProgress(goalProgressValue, progress: 0)
+        }
     }
     
     func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool = false) {
@@ -115,7 +121,7 @@ extension GamePresenter: GamePresenterApi {
                 view.startGameLoop(gameLoopInterval)
             } else {
                 // can't add a new player because there's no room :-(
-                self.lifeLost()
+                self.gameOver()
             }
         } else {
             view.stopGameLoop()
@@ -130,7 +136,7 @@ extension GamePresenter: GamePresenterApi {
     
     func willCloseView(completion: @escaping (Bool)->Void) {
         view.stopGameLoop()
-        router.showPopup(title: "Quiter!", message: "Are you sure you want to bail now?" , buttonText: "Keep Going!", secondaryButtonText: "Leave") { buttonText in
+        router.showPopup(title: "Are You Sure?", message: "Are you sure you want to bail now?" , buttonText: "Keep Going!", secondaryButtonText: "Leave") { buttonText in
             if buttonText == "Leave" {
                 // let the close happen
                 completion(true)
@@ -144,7 +150,9 @@ extension GamePresenter: GamePresenterApi {
     
     func didSelectSettings() {
         didSelectPause()
-        router.showSettings()
+        if let title = setup?.title {
+            router.showSettings(title)
+        }
     }
     
     func didSelectPause() {
@@ -324,6 +332,7 @@ extension GamePresenter: EffectsRunnerDelegate {
     func didFinishEffectsRun(_ runner: EffectsRunner, achievements: Achievements) {
         interactor.recordAchievements(achievements, with: self.isDropping)
         self.isDropping = false
+        
         interactor.readyForNewShape()
     }
 }

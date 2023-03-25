@@ -36,14 +36,13 @@ final class GameInteractor: Interactor {
 // MARK: - GameInteractor API
 extension GameInteractor: GameInteractorApi {
    
-    
     func saveState(game: Game, grid: BlockGrid) {
-        let state = GameState(blocks: grid.blocks, score: game.score, rows: game.goalProgressValue, level: game.currentLevel?.number ?? 1, genre: .tetrisClassic)
-        ServiceFactory.sharedInstance.gameService.saveGameState(state) { error in
-            if let error = error {
-                print(error.localizedDescription)
-            }
-        }
+//        let state = GameState(blocks: grid.blocks, score: game.score, rows: game.goalProgressValue, level: game.currentLevel?.number ?? 1, genre: .tetrisClassic)
+//        ServiceFactory.sharedInstance.gameService.saveGameState(state) { error in
+//            if let error = error {
+//                print(error.localizedDescription)
+//            }
+//        }
     }
     
     func restoreFromState(_ state: GameState, completion: (()->Void)?) {
@@ -78,13 +77,13 @@ extension GameInteractor: GameInteractorApi {
 //        }
     }
     
-    func createNewGame(_ genre : GameType) {
+    func createNewGame(_ title : GameTitle) {
         
-        ServiceFactory.sharedInstance.gameService.createGame(genre) { game in
+        ServiceFactory.sharedInstance.gameService.createGame(for: title) { game in
             if let game = game {
                 self.game = game
                 
-                ServiceFactory.sharedInstance.gameService.getSettings { settings in
+                ServiceFactory.sharedInstance.gameService.getSettings(for: title) { settings in
                     if let settings = settings {
                         
                         self.presenter.didCreateNewGame(rows: self.game.rows, columns: self.game.columns, settings: settings)
@@ -93,7 +92,7 @@ extension GameInteractor: GameInteractorApi {
                             self.presenter.didFetchNextLevel(level)
                         }
                         
-                        self.presenter.didUpdateTotals(points: 0, score: 0, rows: 0)
+                        self.presenter.didUpdateTotals(points: 0, score: 0, goalProgressValue: 0)
                     }
                 }
             }
@@ -118,7 +117,7 @@ extension GameInteractor: GameInteractorApi {
             presenter.didUpdateTotals(
                 points: points,
                 score: game.score,
-                rows: level.goalProgressValue(game.levelAchievements))
+                goalProgressValue: level.goalProgressValue(game.levelAchievements))
         }
     }
     
@@ -130,7 +129,10 @@ extension GameInteractor: GameInteractorApi {
         if level.goalAchieved(game.levelAchievements) {
             game.moveToNextLevel()
             if let level = game.currentLevel {
-                game.levelAchievements = Achievements.zero
+                
+                // reset goal progress count
+                self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: 0)
+                
                 self.presenter.didFetchNextLevel(level)
             } else {
                 presenter.didEndGame()

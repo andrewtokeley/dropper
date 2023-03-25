@@ -14,57 +14,91 @@ enum GameType: Int, Codable {
 
 class Game {
     
-    var levelService: LevelServiceContract
+    /**
+     Current score for the game
+     */
+    var score = 0
     
-    var genre: GameType
-    
+    /**
+     How many rows are in the game
+     */
     var rows: Int = 24
+    
+    /**
+     How many columns are in the game
+     */
     var columns: Int = 10
     
-    ///
+    /**
+     An array containing the definitions of each level in the game.
+     
+     This property must be set by Game classes that inherit from this base class.
+     */
     var levels = [Level]()
     
-    /// Total score for the game
-    var score: Int = 0
+    /**
+     Variable to track the current level being played.
+     */
+    private var currentLevelIndex = 0
     
-    /// Achievements (and points) gained for the current level
-    var levelAchievements = Achievements()
+    /**
+     Combined achievements gained for the current level
+     */
+    var levelAchievements = Achievements.zero
     
-    private var currentLevelIndex: Int
-    
+    /**
+     The progress made towards a goal.
+     
+     For example, if playing TetrisClassic, the goal may be 10 rows and the goalProgressValue might by 5, meaning you're half way there!
+     */
     var goalProgressValue: Int {
         return currentLevel?.goalProgressValue(levelAchievements) ?? 0
     }
     
+    /**
+     Set the level to be played by it's zero based index.
+     */
+    func setLevel(_ levelIndex: Int) {
+        guard levelIndex >= 0 && levelIndex < levels.count else { return }
+        self.currentLevelIndex = levelIndex
+    }
+    
+    /**
+     Active level being played
+     */
     var currentLevel: Level? {
         guard currentLevelIndex >= 0 && currentLevelIndex < levels.count else { return nil }
         return levels[currentLevelIndex]
     }
     
-    init(genre: GameType, levelService: LevelServiceContract, rows: Int, columns: Int) {
-        self.currentLevelIndex = -1
-        self.genre = genre
-        self.levelService = levelService
-        self.rows = rows
-        self.columns = columns
-    }
-    
-    func fetchLevels(completion: (()->Void)?) {
-        levelService.getLevelDefinitions(gameType: genre, completion: { (levels) in
-            self.currentLevelIndex = 0
-            self.levels = levels
-            completion?()
-        })
-    }
-    
-    func setLevel(_ level: Int) {
-        guard level > 0 else { return }
-        if level < levels.count {
-            self.currentLevelIndex = level
-        }
-    }
-    
+    /**
+     Move the game to the next level
+     */
     func moveToNextLevel() {
+        guard levels.count > 0 else { return }
+        guard currentLevelIndex < (levels.count - 1) else { return }
+        
         self.currentLevelIndex += 1
+        self.levelAchievements = Achievements.zero
     }
+}
+
+class TetrisClassic: Game {
+    
+    private lazy var tetrisClassic: [Level] = {
+        for i in 0..<10 {
+            var level = Level()
+            level.number = i + 1
+            levels.append(level)
+        }
+        return levels
+    }()
+    
+    override init() {
+        super.init()
+        self.rows = 21
+        self.columns = 10
+        self.levels = tetrisClassic
+    }
+    
 }

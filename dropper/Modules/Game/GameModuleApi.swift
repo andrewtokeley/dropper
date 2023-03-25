@@ -10,7 +10,7 @@ import Viperit
 
 //MARK: - GameRouter API
 protocol GameRouterApi: RouterProtocol {
-    func showSettings()
+    func showSettings(_ title: GameTitle)
     func navigateHome()
     func showPopup(title: String, message: String, buttonText: String, secondaryButtonText: String?, callback: ((String)->Void)?)
 }
@@ -155,10 +155,9 @@ protocol GamePresenterApi: PresenterProtocol {
     func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool)
     
     /**
-     Called by interactor to let the presenter know some points/progress has been made
-     
+     Called by interactor to let the Presenter know some points/progress has been made. Each value can be set to nil, if there is no change.
      */
-    func didUpdateTotals(points: Int, score: Int, rows: Int)
+    func didUpdateTotals(points: Int?, score: Int?, goalProgressValue: Int?)
         
     /**
      Called by the Interactor when the game is over.
@@ -179,7 +178,7 @@ protocol GameInteractorApi: InteractorProtocol {
      - ``didFetchNextLevel(level)``
      -  ``didUpdateTotals(score:level:rows)``
      */
-    func createNewGame(_ genre : GameType)
+    func createNewGame(_ title : GameTitle)
     
     /**
      Record when some achievements have been gained. Achievements are earned whenever effects are run and the shape has stopped dropping
