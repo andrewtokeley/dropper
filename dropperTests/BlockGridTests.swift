@@ -550,4 +550,31 @@ class BlockGridTests: XCTestCase {
             XCTFail()
         }
     }
+    
+    func testWallKick2() throws {
+        
+//  We're trying to create this scenario - need to addShape manually for things to work
+//        ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+//        ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+//        ["  ", "PB", "PB", "  ", "  ", "  ", "  "],
+//        ["PB", "PB", "  ", "XB", "  ", "  ", "  "],
+//        ["  ", "  ", "XB", "  ", "  ", "  ", "  "],
+//        ["  ", "XB", "XB", "  ", "  ", "  ", "  "],
+//        ["  ", "XB", "  ", "  ", "  ", "  ", "  "],
+
+        let grid = try! BlockGrid([
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
+                ["  ", "  ", "XB", "  ", "  ", "  ", "  "],
+                ["  ", "XB", "XB", "  ", "  ", "  ", "  "],
+                ["  ", "XB", "  ", "  ", "  ", "  ", "  "],
+            ])
+        
+        let result = try! grid.addShape(Shape.S(.colour1), reference: GridReference(3, 1))
+        XCTAssertTrue(result)
+        XCTAssertTrue(grid.rotateShape())
+    }
+
 }

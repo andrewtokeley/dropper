@@ -147,36 +147,50 @@ final class GameView: UserInterface {
     // MARK: - Swipes
 
     func registerSwipes() {
-        let left = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
-        left.direction = .left
-        let right = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
-        right.direction = .right
-        //let tap = UITapGestureRecognizer(target: self, action: #selector(tap))
-        //up.direction = .up
-        let down = UISwipeGestureRecognizer(target: self, action: #selector(swipe))
-        down.direction = .down
-        self.view.addGestureRecognizer(left)
-        self.view.addGestureRecognizer(right)
-        //self.view.addGestureRecognizer(tap)
-        self.view.addGestureRecognizer(down)
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(pan))
+        self.view.addGestureRecognizer(pan)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tap))
+        self.view.addGestureRecognizer(tap)
+        
     }
 
+    private var lastPanPoint = CGPoint(x:0, y:0)
     @objc func pan(sender: UIPanGestureRecognizer) {
-        presenter.didSelectMove(.left)
+        guard let blockSize = gameScene?.blockSize else { return }
+        let panVelocity = sender.velocity(in: self.view)
+        let panPoint = sender.location(in: self.view)
+        let swipeVelocityThreshold:CGFloat = 300
+        
+        if sender.state == .began {
+            lastPanPoint = panPoint
+        } else if sender.state == .changed {
+            
+            if abs(panPoint.y - lastPanPoint.y) > blockSize && panVelocity.y > swipeVelocityThreshold {
+                presenter.didSelectDrop()
+            } else if abs(panPoint.x - lastPanPoint.x) > 0.5  * blockSize {
+                if panPoint.x > lastPanPoint.x {
+                    presenter.didSelectMove(.right)
+                } else {
+                    presenter.didSelectMove(.left)
+                }
+                lastPanPoint = panPoint
+            }
+        }
     }
     
     @objc func tap(sender: UITapGestureRecognizer) {
-        presenter.didSelectRotate()
+        let point = sender.location(in: self.view)
+        let skViewPoint = CGPoint(x: point.x, y: self.view.frame.height - point.y)
+        if let isInGrid = gameScene?.isInGrid(skViewPoint) {
+            if isInGrid {
+                print("rotate")
+                presenter.didSelectRotate()
+            }
+        }
     }
     
     @objc func swipe(sender: UISwipeGestureRecognizer) {
-        //print(sender.direction)
-        if sender.direction == .left {
-            presenter.didSelectMove(.left)
-        }
-        if sender.direction == .right {
-            presenter.didSelectMove(.right)
-        }
         if sender.direction == .down {
             presenter.didSelectDrop()
         }
@@ -260,8 +274,8 @@ extension GameView: GameViewApi {
         gameScene?.stopGameLoop()
     }
     
-    func updateLevelProgress(_ progressValue: Int, progress: Double) {
-        gameScene?.updateLevelProgress(progressValue, progress: progress)
+    func updateLevelProgress(_ progressValue: Int, goalUnit: String? = nil) {
+        gameScene?.updateLevelProgress(progressValue, goalUnit: goalUnit)
     }
     
     func displayLevel(_ levelNumber: Int) {

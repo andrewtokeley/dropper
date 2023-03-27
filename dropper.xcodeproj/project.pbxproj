@@ -45,6 +45,9 @@
 		D83DE36729CB8071005F83A0 /* GameServiceStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36629CB8071005F83A0 /* GameServiceStateTests.swift */; };
 		D83DE36929CC43AF005F83A0 /* GameSetupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36829CC43AF005F83A0 /* GameSetupData.swift */; };
 		D83DE36B29CE5A27005F83A0 /* GameTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36A29CE5A27005F83A0 /* GameTitle.swift */; };
+		D83DE36D29CF906A005F83A0 /* LevelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36C29CF906A005F83A0 /* LevelTests.swift */; };
+		D83DE36F29CFE671005F83A0 /* GridOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36E29CFE671005F83A0 /* GridOffset.swift */; };
+		D83DE37129D0176D005F83A0 /* ShapeRotationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE37029D0176D005F83A0 /* ShapeRotationResult.swift */; };
 		D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D729BAC16C001120C7 /* UIImageExtension.swift */; };
 		D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D929BB1FFC001120C7 /* Cloud.swift */; };
 		D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */; };
@@ -159,6 +162,9 @@
 		D83DE36629CB8071005F83A0 /* GameServiceStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameServiceStateTests.swift; sourceTree = "<group>"; };
 		D83DE36829CC43AF005F83A0 /* GameSetupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSetupData.swift; sourceTree = "<group>"; };
 		D83DE36A29CE5A27005F83A0 /* GameTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTitle.swift; sourceTree = "<group>"; };
+		D83DE36C29CF906A005F83A0 /* LevelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelTests.swift; sourceTree = "<group>"; };
+		D83DE36E29CFE671005F83A0 /* GridOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridOffset.swift; sourceTree = "<group>"; };
+		D83DE37029D0176D005F83A0 /* ShapeRotationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeRotationResult.swift; sourceTree = "<group>"; };
 		D83F62D729BAC16C001120C7 /* UIImageExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtension.swift; sourceTree = "<group>"; };
 		D83F62D929BB1FFC001120C7 /* Cloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cloud.swift; sourceTree = "<group>"; };
 		D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKOutlinedLabelNode.swift; sourceTree = "<group>"; };
@@ -271,6 +277,8 @@
 				D83DE33F29C8D2B1005F83A0 /* Settings.swift */,
 				D83DE36429CAF24F005F83A0 /* GameState.swift */,
 				D83DE36A29CE5A27005F83A0 /* GameTitle.swift */,
+				D83DE36E29CFE671005F83A0 /* GridOffset.swift */,
+				D83DE37029D0176D005F83A0 /* ShapeRotationResult.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -408,6 +416,7 @@
 				D83F630729C1A039001120C7 /* AutoPositionTests.swift */,
 				D83DE36229CAC474005F83A0 /* GameServiceScoreTests.swift */,
 				D83DE36629CB8071005F83A0 /* GameServiceStateTests.swift */,
+				D83DE36C29CF906A005F83A0 /* LevelTests.swift */,
 			);
 			path = dropperTests;
 			sourceTree = "<group>";
@@ -691,6 +700,7 @@
 				D83F62E029BC5FC7001120C7 /* SKLabelNodeExtension.swift in Sources */,
 				D869177129B6B612008C60F0 /* DropIntoEmptyRowsEffect.swift in Sources */,
 				D83DE34829C933CE005F83A0 /* ServiceFactory.swift in Sources */,
+				D83DE36F29CFE671005F83A0 /* GridOffset.swift in Sources */,
 				D83F62F329BEBB82001120C7 /* EffectsRunner.swift in Sources */,
 				D83DE34229C8E3E2005F83A0 /* SettingsDelegate.swift in Sources */,
 				D83DE35629C98084005F83A0 /* PopupRouter.swift in Sources */,
@@ -716,6 +726,7 @@
 				D83DE35729C98084005F83A0 /* PopupModuleApi.swift in Sources */,
 				D88D552729A16D79003A0478 /* GameViewController.swift in Sources */,
 				D80B0A7B29A2932D00E7B43A /* BlockResult.swift in Sources */,
+				D83DE37129D0176D005F83A0 /* ShapeRotationResult.swift in Sources */,
 				D8FDAE2D29A48D88007AA40B /* GameRouter.swift in Sources */,
 				D869176D29B528D8008C60F0 /* Shape.swift in Sources */,
 				D83DE35F29C99DD6005F83A0 /* PopupSetupData.swift in Sources */,
@@ -754,6 +765,7 @@
 				D8036E4729A221650081CF41 /* BlockTests.swift in Sources */,
 				D8036E4929A225010081CF41 /* BlockGridTests.swift in Sources */,
 				D83DE36729CB8071005F83A0 /* GameServiceStateTests.swift in Sources */,
+				D83DE36D29CF906A005F83A0 /* LevelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

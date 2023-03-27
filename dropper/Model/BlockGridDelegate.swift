@@ -12,7 +12,7 @@ protocol BlockGridDelegate {
     
     // MARK: - Shape Methods
     func blockGrid(_ blockGrid: BlockGrid, shapeAdded: Shape, to: GridReference)
-    func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat)
+    func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat, withKick moveTo: GridReference)
     func blockGrid(_ blockGrid: BlockGrid, shapeMovedInDirection direction: BlockMoveDirection)
     func blockGrid(_ blockGrid: BlockGrid, shapeDropedTo reference: GridReference)
     func shapeRemoved()

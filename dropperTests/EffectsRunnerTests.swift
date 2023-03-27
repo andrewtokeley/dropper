@@ -34,7 +34,8 @@ class EffectsRunnerTests: XCTestCase {
         
         
         XCTAssertEqual(runner.achievements.get(.oneRow), 1)
-        XCTAssertEqual(runner.achievements.get(.explodedBlock), 4)
+        // 7 for the row and another 4 from the XB colour matches
+        XCTAssertEqual(runner.achievements.get(.explodedBlock), 11)
         
 //        let effect1 = RemoveRowsEffect(grid: grid)
 //        let result1 = effect1.apply()

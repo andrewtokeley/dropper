@@ -24,14 +24,15 @@ class BlockNode: SKSpriteNode {
             case .colour3: return .gameBlock3
             case .colour4: return .gameBlock4
             case .colour5: return .gameBlock5
+            case .colour6: return .gameBlock6
         default: return .white
         }
     }
     
     private lazy var rectangle: SKShapeNode = {
         let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:-self.size.width/2, y:-self.size.height/2), size: self.size), cornerRadius: 0)
-        node.strokeColor = UIColor.gameBackground
-        node.lineWidth = 4
+        node.strokeColor = UIColor.white
+        node.lineWidth = 2
         node.fillColor = blockColour
         node.name = "bodyNode"
         if block.isGhost {

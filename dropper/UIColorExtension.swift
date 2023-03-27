@@ -86,6 +86,12 @@ extension UIColor {
         return UIColor(hex: "#21B20CFF")!
     }
     
+    static var gameBlock6: UIColor {
+        //return UIColor(217, 94, 51, 100)
+        //return UIColor(hex: "#F2380FFF")!
+        return UIColor.lightGray
+    }
+    
     
 }
 

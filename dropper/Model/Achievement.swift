@@ -18,6 +18,7 @@ enum Achievement: Int {
     case explodedBlock
     case match10
     case match20
+    case colourMatch
 }
 
 class Achievements {
@@ -38,6 +39,7 @@ class Achievements {
         state[.explodedBlock] = 0
         state[.match10] = 0
         state[.match20] = 0
+        state[.colourMatch] = 0
     }
     
     init() {
@@ -75,5 +77,6 @@ class Achievements {
         addTo(.explodedBlock, achievements.get(.explodedBlock))
         addTo(.match10, achievements.get(.match10))
         addTo(.match20, achievements.get(.match20))
+        addTo(.colourMatch, achievements.get(.colourMatch))
     }
 }

@@ -44,12 +44,8 @@ class RemoveMatchedBlocksEffect: GridEffect {
         effectResults.blocksRemoved = removeBlocks
         effectResults.achievments.addTo(.explodedBlock, removeBlocks.count)
         
-        if minimumMatchCount >= 10 && minimumMatchCount < 20 {
-            effectResults.achievments.addTo(.match10, groups.count)
-        }
-        if minimumMatchCount >= 20 {
-            effectResults.achievments.addTo(.match20, groups.count)
-        }
+        // You get an achievement for every block that was matched and removed across all groups
+        effectResults.achievments.addTo(.colourMatch, removeBlocks.count)
         
         return effectResults
     }

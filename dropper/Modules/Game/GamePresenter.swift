@@ -13,6 +13,8 @@ import CoreImage
 // MARK: - GamePresenter Class
 final class GamePresenter: Presenter {
     
+    private var isRotating = false
+    
     private var nextShape: Shape?
     
     private var gameLoopInterval = TimeInterval(1)
@@ -41,10 +43,14 @@ final class GamePresenter: Presenter {
     private func gameOver() {
         view.stopGameLoop()
         
-        let closeButtonText = "Close"
-        self.router.showPopup(title: "Oh No!", message: "The blocks beat you this time!", buttonText: closeButtonText, secondaryButtonText: nil) { buttonText in
+        self.interactor.saveScores { (highscore) in
             
-            self.router.navigateHome()
+            let title = highscore ? "Highscore!" : "Oh No!"
+            let message = highscore ? "The blocks beat you, but that's a great score!" : "The blocks beat you this time!"
+            let closeButtonText = "Close"
+            self.router.showPopup(title: title, message: message, buttonText: closeButtonText, secondaryButtonText: nil) { buttonText in
+                    self.router.navigateHome()
+            }
         }
     }
     
@@ -91,7 +97,7 @@ extension GamePresenter: GamePresenterApi {
         self.grid.replacePlayerWithBlocksOfType(.block)
         
         let title = level.number == 1 ? "Get Ready!" : "Nice!"
-        let message = level.number == 1 ? "Complete 10 rows to move to the next level." : "You completed \(level.goalDescription), now things are about to get a little faster!"
+        let message = level.goalDescription
         
         self.view.removeBlocks(blocks) {
             self.router.showPopup(title: title, message: message, buttonText: "Start", secondaryButtonText: nil) { _ in
@@ -101,7 +107,7 @@ extension GamePresenter: GamePresenterApi {
         }
     }
     
-    func didUpdateTotals(points: Int? = nil, score: Int? = nil, goalProgressValue: Int? = nil) {
+    func didUpdateTotals(points: Int? = nil, score: Int? = nil, goalProgressValue: Int? = nil, goalUnit: String?) {
         if let points = points {
             view.displayPoints(points, from: GridReference(5,10))
         }
@@ -109,7 +115,7 @@ extension GamePresenter: GamePresenterApi {
             view.updateScore(score)
         }
         if let goalProgressValue = goalProgressValue {
-            view.updateLevelProgress(goalProgressValue, progress: 0)
+            view.updateLevelProgress(goalProgressValue, goalUnit: goalUnit)
         }
     }
     
@@ -197,8 +203,12 @@ extension GamePresenter: GamePresenterApi {
     }
     
     func didSelectRotate() {
-        if !isDropping && !gamePaused {
-            let _ = grid.rotateShape()
+        if !isDropping && !gamePaused && !isRotating {
+            isRotating = true
+            let result = grid.rotateShape()
+            if !result {
+                isRotating = false
+            }
         }
     }
     
@@ -288,10 +298,13 @@ extension GamePresenter: BlockGridDelegate {
         }
     }
     
-    func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat) {
-        view.rotateShape(degrees) {
-            if let ghostReference = self.grid.playerCanDropTo {
-                self.view.showShapeGhost(at: ghostReference)
+    func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat, withKick moveTo: GridReference) {
+        view.moveShape(moveTo, speed: 0, withShake: false) {
+            self.isRotating = false
+            self.view.rotateShape(degrees) {
+                if let ghostReference = self.grid.playerCanDropTo {
+                    self.view.showShapeGhost(at: ghostReference)
+                }
             }
         }
     }
@@ -319,10 +332,6 @@ extension GamePresenter: BlockGridDelegate {
             // drop any suspended blocks
             //self.applyGravity()
         }
-    }
-    
-    func blockGrid(_ blockGrid: BlockGrid, blocksRotated blocks: [Block], degrees: CGFloat) {
-        view.rotateShape(degrees, completion: nil)
     }
     
 }

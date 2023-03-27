@@ -15,27 +15,22 @@ final class HomePresenter: Presenter {
     override func setupView(data: Any) {
         //
     }
-    override func viewHasLoaded() {
-        let titles = interactor.getGameTitles()
-        view.displayGameTitles(titles)
-    }
     
+    override func viewIsAboutToAppear() {
+        interactor.getGameTitles()
+    }
 }
 
 // MARK: - HomePresenter API
 extension HomePresenter: HomePresenterApi {
-    func didGetHighScores(highScores: [GameTitle : Int]) {
-        
-    }
     
     func didSelectPlay(gameTitle: GameTitle) {
         router.showGame(gameTitle)
     }
     
-    func didGetGameTitles(gameTitles: [GameTitle]) {
-        view.displayGameTitles(gameTitles)
+    func didGetGameTitles(titles: [GameTitle]) {
+        view.displayGameTitles(titles: titles)
     }
-    
 }
 
 // MARK: - Home Viper Components

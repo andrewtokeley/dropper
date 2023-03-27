@@ -9,6 +9,8 @@ import Foundation
 
 protocol GameServiceContract {
     
+    func getGameTitles(completion: (([GameTitle])->Void)?)
+    
     /**
      Creats a new game instance for the given game type
      */
@@ -44,11 +46,28 @@ class GameService: ServiceBase {
 extension GameService: GameServiceContract {
     
     // MARK: - Game
+    
+    func getGameTitles(completion: (([GameTitle])->Void)?) {
+        let dispatch = DispatchGroup()
+        
+        let gameTitles = [TetrisClassicTitle(), ColourMatcherTitle()]
+        for title in gameTitles {
+            dispatch.enter()
+            getScoreHistory(for: title) { scores in
+                title.highScore = scores.max() ?? 0
+                dispatch.leave()
+            }
+        }
+        dispatch.notify(queue: DispatchQueue.main, execute: {
+            completion?(gameTitles)
+        })
+    }
+    
     func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) {
         if let _ = title as? TetrisClassicTitle {
             completion?(TetrisClassic())
-        } else {
-            completion?(nil)
+        } else if let _ = title as? ColourMatcherTitle {
+            completion?(ColourMatcherGame())
         }
     }
     

@@ -85,7 +85,7 @@ protocol GameViewApi: UserInterfaceProtocol {
     func displayPoints(_ points: Int, from: GridReference)
     func displayNextShape(_ shape: Shape)
     func displayLevel(_ levelNumber: Int)
-    func updateLevelProgress(_ progressValue: Int, progress: Double)
+    func updateLevelProgress(_ progressValue: Int, goalUnit: String?)
     func showGrid(_ show: Bool)
     func showGhost(_ show: Bool)
 
@@ -157,7 +157,7 @@ protocol GamePresenterApi: PresenterProtocol {
     /**
      Called by interactor to let the Presenter know some points/progress has been made. Each value can be set to nil, if there is no change.
      */
-    func didUpdateTotals(points: Int?, score: Int?, goalProgressValue: Int?)
+    func didUpdateTotals(points: Int?, score: Int?, goalProgressValue: Int?, goalUnit: String?)
         
     /**
      Called by the Interactor when the game is over.
@@ -198,4 +198,8 @@ protocol GameInteractorApi: InteractorProtocol {
      */
     func readyForNewShape()
     
+    /**
+     Saves the score at the end of the game and returns whether it was a highscore
+     */
+    func saveScores(completion: ((Bool)->Void)?)
 }

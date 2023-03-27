@@ -97,7 +97,7 @@ class GameScene: SKScene {
     private var ghostNode: ShapeNode?
     
     /// Dimension of each block - blocks are always square
-    private var blockSize: CGFloat {
+    public var blockSize: CGFloat {
         return layout.blockSize
     }
     
@@ -185,10 +185,41 @@ class GameScene: SKScene {
         self.layout = getLayout(from: self.size)
         
         self.loopCallback = loopCallback
+        
+        //self.registerGestures()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+//    var panColumn: Int = 0
+//    public func gridReferenceFromPoint(_ point: CGPoint) -> GridReference? {
+//
+//        // normalise the point to be relative to the grid, normalPoint(0,0) will be at the bottom left of the grid
+//        let normalPoint = CGPoint(x: point.x - layout.gridLeft, y: point.y - layout.gridBottom)
+//        let column = Int(normalPoint.y/layout.blockSize)
+//        if column != panColumn {
+//            self.panColumn = column
+//            return self.panColumn
+//        }
+//        return nil
+//    }
+    
+//    private func registerGestures() {
+//        let left = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+//        self.view?.addGestureRecognizer(left)
+//    }
+//
+//    @objc private func handlePan(_ sender: UIPanGestureRecognizer) {
+//        print(sender.location(in: self.view))
+//    }
+    
+    public func isInGrid(_ point: CGPoint) -> Bool {
+        print(point)
+        let hOK = point.x > layout.gridLeft && point.x < (self.size.width - layout.gridRight)
+        let vOK = point.y > layout.gridBottom && point.y < (self.size.height - layout.gridTop)
+        return vOK && hOK
     }
     
     private func getLayout(from size: CGSize) -> LayoutDimensions {
@@ -372,9 +403,11 @@ class GameScene: SKScene {
         levelLabel.text = "\(levelNumber)"
     }
     
-    func updateLevelProgress(_ progressValue: Int, progress: Double) {
+    func updateLevelProgress(_ progressValue: Int, goalUnit: String? = nil) {
         goalMessageLabel.text = "\(progressValue)"
-        //progressNode.updateProgress(progress)
+        if let goalUnit = goalUnit {
+            goalHeadingLabel.text = "\(goalUnit.uppercased())"
+        }
     }
     
     public func displayNextShape(_ shape: Shape) {
@@ -406,7 +439,7 @@ class GameScene: SKScene {
     }
     
     public func rotateShape(_ degrees: Float, completion: (()->Void)? = nil) {
-        self.shapeNode?.run(SKAction.rotate(byAngle: -CGFloat(GLKMathDegreesToRadians(degrees)), duration: 0)) {
+        self.shapeNode?.run(SKAction.rotate(byAngle: -CGFloat(GLKMathDegreesToRadians(degrees)), duration: 0.1)) {
             completion?()
         }
     }

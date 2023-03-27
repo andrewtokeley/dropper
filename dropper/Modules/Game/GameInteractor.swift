@@ -14,6 +14,7 @@ final class GameInteractor: Interactor {
     var game: Game!
     var nextShape: Shape?
     var firstShapeOfGame: Bool = true
+    let gameService = ServiceFactory.sharedInstance.gameService
     
     /**
      Called by some Interator methods to let the Presenter know to add a new Shape to the game.
@@ -38,7 +39,7 @@ extension GameInteractor: GameInteractorApi {
    
     func saveState(game: Game, grid: BlockGrid) {
 //        let state = GameState(blocks: grid.blocks, score: game.score, rows: game.goalProgressValue, level: game.currentLevel?.number ?? 1, genre: .tetrisClassic)
-//        ServiceFactory.sharedInstance.gameService.saveGameState(state) { error in
+//        self.gameService.saveGameState(state) { error in
 //            if let error = error {
 //                print(error.localizedDescription)
 //            }
@@ -46,7 +47,7 @@ extension GameInteractor: GameInteractorApi {
     }
     
     func restoreFromState(_ state: GameState, completion: (()->Void)?) {
-//        ServiceFactory.sharedInstance.gameService.getGameState { state in
+//        self.gameService.getGameState { state in
 //            if let state = state {
 //                let rows: Int = state.blocks.count
 //                let columns: Int = state.blocks[0].count
@@ -59,7 +60,7 @@ extension GameInteractor: GameInteractorApi {
 //                self.game?.setLevel(state.level)
 //                
 //                // get the latest settings
-//                ServiceFactory.sharedInstance.gameService.getSettings { settings in
+//                self.gameService.getSettings { settings in
 //                    if let settings = settings {
 //                        
 //                        self.game.fetchLevels {
@@ -79,11 +80,11 @@ extension GameInteractor: GameInteractorApi {
     
     func createNewGame(_ title : GameTitle) {
         
-        ServiceFactory.sharedInstance.gameService.createGame(for: title) { game in
+        self.gameService.createGame(for: title) { game in
             if let game = game {
                 self.game = game
                 
-                ServiceFactory.sharedInstance.gameService.getSettings(for: title) { settings in
+                self.gameService.getSettings(for: title) { settings in
                     if let settings = settings {
                         
                         self.presenter.didCreateNewGame(rows: self.game.rows, columns: self.game.columns, settings: settings)
@@ -92,7 +93,7 @@ extension GameInteractor: GameInteractorApi {
                             self.presenter.didFetchNextLevel(level)
                         }
                         
-                        self.presenter.didUpdateTotals(points: 0, score: 0, goalProgressValue: 0)
+                        self.presenter.didUpdateTotals(points: 0, score: 0, goalProgressValue: 0, goalUnit: self.game.currentLevel?.goalUnit)
                     }
                 }
             }
@@ -117,7 +118,8 @@ extension GameInteractor: GameInteractorApi {
             presenter.didUpdateTotals(
                 points: points,
                 score: game.score,
-                goalProgressValue: level.goalProgressValue(game.levelAchievements))
+                goalProgressValue: level.goalProgressValue(game.levelAchievements),
+                goalUnit: level.goalUnit)
         }
     }
     
@@ -131,7 +133,7 @@ extension GameInteractor: GameInteractorApi {
             if let level = game.currentLevel {
                 
                 // reset goal progress count
-                self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: 0)
+                self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: 0, goalUnit: level.goalUnit)
                 
                 self.presenter.didFetchNextLevel(level)
             } else {
@@ -142,6 +144,12 @@ extension GameInteractor: GameInteractorApi {
         }
     }
     
+    func saveScores(completion: ((Bool)->Void)?) {
+        guard let game = self.game else { return }
+        self.gameService.addScore(for: game.title, score: game.score) { isHighScore, error in
+            completion?(isHighScore ?? false)
+        }
+    }
 }
 
 // MARK: - Interactor Viper Components Api

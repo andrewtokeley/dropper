@@ -14,6 +14,8 @@ enum GameType: Int, Codable {
 
 class Game {
     
+    var title: GameTitle
+    
     /**
      Current score for the game
      */
@@ -55,6 +57,10 @@ class Game {
         return currentLevel?.goalProgressValue(levelAchievements) ?? 0
     }
     
+    init(_ title: GameTitle) {
+        self.title = title
+    }
+    
     /**
      Set the level to be played by it's zero based index.
      */
@@ -89,16 +95,62 @@ class TetrisClassic: Game {
         for i in 0..<10 {
             var level = Level()
             level.number = i + 1
+            level.goalUnit = "ROWS"
+            if i == 0 {
+                level.goalDescription = "Match 10 rows to move to the next level."
+            } else {
+                level.goalDescription = "Keep it up, things are getting faster"
+            }
+            
+            level.goalProgressValue = {(a: Achievements) -> Int in
+                return a.get(.oneRow) + a.get(.twoRows)*2 + a.get(.threeRows)*3 + a.get(.fourRows)*4
+            }
+                
             levels.append(level)
         }
         return levels
     }()
     
-    override init() {
-        super.init()
+    init() {
+        super.init(TetrisClassicTitle())
         self.rows = 21
         self.columns = 10
         self.levels = tetrisClassic
+        
+    }
+    
+}
+
+class ColourMatcherGame: Game {
+    
+    private func getLevels() -> [Level] {
+        var result = [Level]()
+        for i in 0..<10 {
+            var level = Level()
+            level.goalValue = 10
+            level.goalUnit = "MATCHES"
+            if i == 0 {
+                level.goalDescription = "Colour match 10 groups of 15 or more blocks"
+            } else {
+                level.goalDescription = "You crushed it, keep matching those blocks!"
+            }
+            level.effects = [
+                RemoveMatchedBlocksEffect(minimumMatchCount: 15)
+                ]
+            level.goalProgressValue = {(a: Achievements) -> Int in
+                return a.get(.match10)
+            }
+            level.number = i + 1
+            result.append(level)
+        }
+        return result
+    }
+    
+    init() {
+        super.init(ColourMatcherTitle())
+        self.rows = 21
+        self.columns = 10
+        self.levels = getLevels()
     }
     
 }

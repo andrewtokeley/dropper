@@ -37,12 +37,15 @@ struct Level {
     // e.g. 100
     var goalValue: Int = 10
     
-    // e.g. 100 Points
-    var goalDescription: String = "10 ROWS"
+    /// Word describing the goal unit e.g. ROWS or MATCHES
+    var goalUnit = ""
     
-    /// Set this to calculate the progress made
+    // Sentence describing the goal
+    var goalDescription: String = ""
+    
+    /// Instances of Levels must override this to calculate the progress made from Achievements
     var goalProgressValue: ((Achievements) -> Int) = { (a) in
-        return a.get(.oneRow) + a.get(.twoRows)*2 + a.get(.threeRows)*3 + a.get(.fourRows)*4
+        return 0
     }
     
     /// The effects that will be applied after each shape lands. Default is only removing rows.
@@ -61,28 +64,33 @@ struct Level {
     
     /**
      Returns the points awarded for the given achievements
-     
+    
      - 100*levei points for each single row
      - 300*level* poiints for each double row
      - 500*level points for each triple row
      - 800*level points for each quad row
-     - 500 points for each group of between 10 and 19 (inclusice) blocks exploded
-     - 1000 points for each group of more than 19 blocks exploded
+     
+     - 300 points for each colour matched block * level + 100 points for each block over the block count
      */
     func pointsFor(_ achievements: Achievements, hardDrop: Bool = false) -> Int {
         var points = 0
 
         let blockPoint = hardDrop ? 2 : 1
         
+        // these are Tetris Clasic points
         points += achievements.get(.oneRow) * 100 * number
         points += achievements.get(.twoRows) * 300 * number
         points += achievements.get(.threeRows) * 500 * number
         points += achievements.get(.fourRows) * 800 * number
-        
         points += achievements.get(.explodedBlock) * blockPoint
         
-        points += achievements.get(.match10) * 500
-        points += achievements.get(.match20) * 1000
+        // Matcher points
+        // e.g. if the goal was to match 15 blocks of the same colour,
+        // and they match 20, then they get 300 base points + 20-15=5 * 100 extra points
+        let numberOfBlocksMatched = achievements.get(.colourMatch)
+        let numberOfMatches = numberOfBlocksMatched/15
+        let numberOfExtraBlocks = numberOfBlocksMatched - numberOfMatches * 15
+        points += (300 * numberOfMatches + numberOfExtraBlocks * 100)
         
         return points
     }

@@ -47,6 +47,8 @@ class BlockGrid {
     /// A reference to the matrix of blocks in the game. A nil means there is no block at the given position. Blocks are referenced such that blocks[r][c] is the block at row, r, and column, c, using a zero based indexing.
     var blocks: [[Block?]]!
     
+    var shape: Shape?
+    
     /**
      Returns an array of BlockResults for each of the player blocks
      */
@@ -542,37 +544,50 @@ class BlockGrid {
     
     
     // MARK: - Player Movement
-        
-    /// Add a player or the given shape definition to the top middle of the grid. Calls the ``blockGrid(grid:, playerAdded:)`` delegate method, if successfully added.
-    ///
-    /// - Parameter shape: shape definition
-    /// - Returns: boolean indicating whether the player could be added or not
-    func addShape(_ shape: Shape) throws -> Bool {
+    func addShape(_ shape: Shape, reference: GridReference) throws -> Bool {
         guard !hasPlayer else { return false }
-        guard let topRelativeRow = shape.references.map({ $0.row }).max() else { return false }
-
-        // position as high up the grid as possible, in the middle
         
-        let originRow = (rows - 1) - topRelativeRow
-        let originColumn = Int(columns/2)
-        let origin = GridReference(originRow,originColumn)
+        // keep a reference to the shape
+        self.shape = shape
+        
+        // create an array of BlockResults
         var playerBlocks = [BlockResult]()
         
         for i in 0..<shape.references.count {
-            let reference = origin.offSet(shape.references[i].row, shape.references[i].column)
+            let blockReference = reference.offSet(shape.references[i].row, shape.references[i].column)
+            if !isInGrid(blockReference) {
+                return false
+            }
             let block = Block(shape.colours[i], .player)
-            playerBlocks.append(BlockResult(block: block, isInsideGrid: true, gridReference: reference))
+            playerBlocks.append(BlockResult(block: block, isInsideGrid: true, gridReference: blockReference))
         }
         
         let result = addBlocks(blocks: playerBlocks.map { $0.block! }, references: playerBlocks.map { $0.gridReference })
         
         if result {
-            playerOrigin = origin
-            delegate?.blockGrid(self, shapeAdded: shape, to: origin)
+            playerOrigin = reference
+            delegate?.blockGrid(self, shapeAdded: shape, to: reference)
             return true
         }
         
         // something went wrong
+        return false
+    }
+    
+    /// Add a player or the given shape definition to the top middle of the grid. Calls the ``blockGrid(grid:, playerAdded:)`` delegate method, if successfully added.
+    ///
+    /// - Parameter shape: shape definition
+    /// - Returns: boolean indicating whether the player could be added or not
+    func addShape(_ shape: Shape) throws -> Bool {
+        
+        // default position is top middle
+        if let topRelativeRow = shape.references.map({ $0.row }).max() {
+            
+            // position as high up the grid as possible, in the middle
+            let origin = GridReference((rows - 1) - topRelativeRow, Int(columns/2))
+            return try self.addShape(shape, reference: origin)
+        }
+
         return false
     }
     
@@ -682,37 +697,62 @@ class BlockGrid {
     /**
      Returns the transformed grid references for the player, or nil if the player can't be rotated
      */
-    var rotatedPlayerGridReference: [GridReference]? {
-        guard let playerOrigin = playerOrigin else { return nil }
+    var rotatedPlayerGridReference: ShapeRotationResult {
+        
+        var result = ShapeRotationResult(canRotate: false)
         
         let playerReferences = playerBlocks.map { $0.gridReference }
-        let transformedReferences = getRotatedGridReferences(references: playerReferences, origin: playerOrigin)
         
-        // make sure none of the transformed references are outside of the grid or land on another block
-        if canMove(references: playerReferences, to: transformedReferences) {
-            return transformedReferences
+        if let shape = self.shape, let playerOrigin = self.playerOrigin {
+            if let wallKicks = shape.wallKicks[shape.orientation] {
+                
+                // iterate the wallKicks offsets
+                for kick in wallKicks {
+                    
+                    // Offset the player and its origin by the kick and see if that can be rotated.
+                    let playerReferencesKick = playerReferences.map { $0.offSet(kick.rowOffset, kick.columnOffset)}
+                    let playerOriginKick = playerOrigin.offSet(kick.rowOffset, kick.columnOffset)
+                    
+                    let transformedReferences = getRotatedGridReferences(references: playerReferencesKick, origin: playerOriginKick)
+                    
+                    // Make sure none of the transformed references are outside of the grid or land on another block
+                    if canMove(references: playerReferences, to: transformedReferences) {
+                        
+                        // this kick worked!
+                        result.canRotate = true
+                        result.transformedReferences = transformedReferences
+                        result.wallKick = kick
+                        return result
+                    }
+                }
+            }
         }
-        return nil
+        
+        return result
     }
-    
+  
     /**
-     Returns whether the player can be rotated
-     */
-    var canRotatePlayer: Bool {
-        return rotatedPlayerGridReference != nil
-    }
-    
-    /**
-     Rotates the player
+     Rotates the player and calls the delegate method ``blockGrid(_: shapeRotatedBy: withKick)``
      */
     func rotateShape() -> Bool {
-        guard let transformGridReferences = rotatedPlayerGridReference else { return false }
+        let transformResult = rotatedPlayerGridReference
         
-        // move the player blocks by the transform
-        let player = playerBlocks.map { $0.gridReference }
-        let result = moveBlocks(from: player, to: transformGridReferences, suppressDelegateCall: true)
-        delegate?.blockGrid(self, shapeRotatedBy: 90.0)
-        return result
+        if transformResult.canRotate {
+            let player = playerBlocks.map { $0.gridReference }
+            
+            // if there's a kick to do before rotating...
+            if let kick = transformResult.wallKick {
+                let player = playerBlocks.map { $0.gridReference }
+                if let transformedReferences = transformResult.transformedReferences {
+                    if moveBlocks(from: player, to: transformedReferences, suppressDelegateCall: true) {
+                        self.shape?.rotate()
+                        self.playerOrigin = self.playerOrigin?.offSet(kick.rowOffset, kick.columnOffset)
+                        delegate?.blockGrid(self, shapeRotatedBy: 90.0, withKick: self.playerOrigin!)
+                    }
+                }
+            }
+        }
+        return transformResult.canRotate
     }
     
     /**

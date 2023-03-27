@@ -15,18 +15,16 @@ protocol HomeRouterApi: RouterProtocol {
 
 //MARK: - HomeView API
 protocol HomeViewApi: UserInterfaceProtocol {
-    
-    func displayGameTitles(_ titles: [GameTitle])
-    
+
+    func displayGameTitles(titles: [GameTitle])
 }
 
 //MARK: - HomePresenter API
 protocol HomePresenterApi: PresenterProtocol {
+    
     func didSelectPlay(gameTitle: GameTitle)
     
-    func didGetGameTitles(gameTitles: [GameTitle])
-    
-    func didGetHighScores(highScores: [GameTitle: Int])
+    func didGetGameTitles(titles: [GameTitle])
 }
 
 //MARK: - HomeInteractor API
@@ -34,12 +32,6 @@ protocol HomeInteractorApi: InteractorProtocol {
     /**
      Retrieves the available games to play.
      */
-    func getGameTitles() -> [GameTitle]
-    
-    /**
-     Retrieves the highscores of each type of game.
-     
-     Once retrieved, will call the Presenter's ``didGetHighScores`` method
-     */
-    func getHighScores()
+    func getGameTitles()
+
 }

@@ -53,7 +53,7 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
         let result = effect.apply(grid)
         
         XCTAssertTrue(result.isMaterial)
-        XCTAssertEqual(result.achievments.get(.match10), 1)
+        XCTAssertEqual(result.achievments.get(.colourMatch), 11)
         
         // there should be no blocks left
         XCTAssertEqual(grid.getAll().count, 0)
