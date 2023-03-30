@@ -16,6 +16,24 @@ final class GameInteractor: Interactor {
     var firstShapeOfGame: Bool = true
     let gameService = ServiceFactory.sharedInstance.gameService
     
+    private func configurePresenter(_ game: Game, fromState: Bool) {
+        self.game = game
+        
+        self.gameService.getSettings(for: game.title) { settings in
+            if let settings = settings {
+                
+                self.presenter.didCreateNewGame(game: game, settings: settings)
+                
+                if let level = game.currentLevel {
+                    self.presenter.didFetchNextLevel(level, fromState: fromState)
+                }
+                
+                let currentProgressValue = game.currentLevel?.goalProgressValue(game.levelAchievements) ?? 0
+                self.presenter.didUpdateTotals(points: 0, score: game.score, goalProgressValue: currentProgressValue, goalUnit: self.game.currentLevel?.goalUnit)
+            }
+        }
+    }
+    
     /**
      Called by some Interator methods to let the Presenter know to add a new Shape to the game.
      */
@@ -36,70 +54,21 @@ final class GameInteractor: Interactor {
 
 // MARK: - GameInteractor API
 extension GameInteractor: GameInteractorApi {
-   
-    func saveState(game: Game, grid: BlockGrid) {
-//        let state = GameState(blocks: grid.blocks, score: game.score, rows: game.goalProgressValue, level: game.currentLevel?.number ?? 1, genre: .tetrisClassic)
-//        self.gameService.saveGameState(state) { error in
-//            if let error = error {
-//                print(error.localizedDescription)
-//            }
-//        }
-    }
     
-    func restoreFromState(_ state: GameState, completion: (()->Void)?) {
-//        self.gameService.getGameState { state in
-//            if let state = state {
-//                let rows: Int = state.blocks.count
-//                let columns: Int = state.blocks[0].count
-//                
-//                self.game = Game(genre: .tetrisClassic,
-//                                 levelService: ServiceFactory.sharedInstance.levelService,
-//                                 rows: rows,
-//                                 columns: columns)
-//                
-//                self.game?.setLevel(state.level)
-//                
-//                // get the latest settings
-//                self.gameService.getSettings { settings in
-//                    if let settings = settings {
-//                        
-//                        self.game.fetchLevels {
-//                            if let level = self.game!.currentLevel {
-//                                self.presenter.didRestoreState(state, settings: settings)
-//                                self.presenter.didFetchNextLevel(level)
-//                                self.presenter.didUpdateTotals(points: 0, score: 0, rows: 0)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            completion?()
-//        }
+    func restoreFromState(_ state: GameState) {
+        self.gameService.createGame(from: state) { game in
+            if let game = game {
+                self.configurePresenter(game, fromState: true)
+            }
+        }
     }
     
     func createNewGame(_ title : GameTitle) {
-        
         self.gameService.createGame(for: title) { game in
             if let game = game {
-                self.game = game
-                
-                self.gameService.getSettings(for: title) { settings in
-                    if let settings = settings {
-                        
-                        self.presenter.didCreateNewGame(rows: self.game.rows, columns: self.game.columns, settings: settings)
-                        
-                        if let level = self.game.currentLevel {
-                            self.presenter.didFetchNextLevel(level)
-                        }
-                        
-                        self.presenter.didUpdateTotals(points: 0, score: 0, goalProgressValue: 0, goalUnit: self.game.currentLevel?.goalUnit)
-                    }
-                }
+                self.configurePresenter(game, fromState: false)
             }
         }
-        
-        
     }
     
     func didLoadLevel() {
@@ -135,9 +104,9 @@ extension GameInteractor: GameInteractorApi {
                 // reset goal progress count
                 self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: 0, goalUnit: level.goalUnit)
                 
-                self.presenter.didFetchNextLevel(level)
+                self.presenter.didFetchNextLevel(level, fromState: false)
             } else {
-                presenter.didEndGame()
+                presenter.didWinGame()
             }
         } else {
             self.addNewShape()
@@ -148,6 +117,20 @@ extension GameInteractor: GameInteractorApi {
         guard let game = self.game else { return }
         self.gameService.addScore(for: game.title, score: game.score) { isHighScore, error in
             completion?(isHighScore ?? false)
+        }
+    }
+    
+    func saveState() {
+        guard let game = self.game else { return }
+        gameService.saveGameState(state: GameState(game: game)) { error in
+            //
+        }
+    }
+    
+    func clearState() {
+        guard let game = self.game else { return }
+        gameService.clearGameState(for: game.title) { result in
+            //
         }
     }
 }

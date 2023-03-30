@@ -45,7 +45,13 @@ class BlockGrid {
     var rows: Int = 15
     
     /// A reference to the matrix of blocks in the game. A nil means there is no block at the given position. Blocks are referenced such that blocks[r][c] is the block at row, r, and column, c, using a zero based indexing.
+    ///
+    /// Includes blocks of all types, including the active Shape's blocks. To exclude the active Shape, use ``blocksExcludingShape``
     var blocks: [[Block?]]!
+    
+    var blocksExcludingShape: [[Block?]]! {
+        return blocks.map { $0.map( { $0.map { $0?.type == .player ? nil : $0 } }) }
+    }
     
     var shape: Shape?
     
@@ -139,7 +145,6 @@ class BlockGrid {
         self.rows = rows
         self.columns = columns
         self.blocks = blocks
-        
     }
     
     

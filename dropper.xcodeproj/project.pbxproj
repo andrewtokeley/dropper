@@ -48,6 +48,17 @@
 		D83DE36D29CF906A005F83A0 /* LevelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36C29CF906A005F83A0 /* LevelTests.swift */; };
 		D83DE36F29CFE671005F83A0 /* GridOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE36E29CFE671005F83A0 /* GridOffset.swift */; };
 		D83DE37129D0176D005F83A0 /* ShapeRotationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE37029D0176D005F83A0 /* ShapeRotationResult.swift */; };
+		D83DE37329D25CB9005F83A0 /* GameTile.xib in Resources */ = {isa = PBXBuildFile; fileRef = D83DE37229D25CB9005F83A0 /* GameTile.xib */; };
+		D83DE37529D283A6005F83A0 /* GameTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE37429D283A6005F83A0 /* GameTile.swift */; };
+		D83DE37729D2B50D005F83A0 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE37629D2B50C005F83A0 /* UIViewExtension.swift */; };
+		D83DE39029D3FEF4005F83A0 /* ModalDialog.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D83DE38929D3FEF4005F83A0 /* ModalDialog.storyboard */; };
+		D83DE39129D3FEF4005F83A0 /* ModalDialogDisplayData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE38A29D3FEF4005F83A0 /* ModalDialogDisplayData.swift */; };
+		D83DE39229D3FEF4005F83A0 /* ModalDialogPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE38B29D3FEF4005F83A0 /* ModalDialogPresenter.swift */; };
+		D83DE39329D3FEF4005F83A0 /* ModalDialogRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE38C29D3FEF4005F83A0 /* ModalDialogRouter.swift */; };
+		D83DE39429D3FEF4005F83A0 /* ModalDialogModuleApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE38D29D3FEF4005F83A0 /* ModalDialogModuleApi.swift */; };
+		D83DE39529D3FEF4005F83A0 /* ModalDialogInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE38E29D3FEF4005F83A0 /* ModalDialogInteractor.swift */; };
+		D83DE39629D3FEF4005F83A0 /* ModalDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE38F29D3FEF4005F83A0 /* ModalDialogView.swift */; };
+		D83DE39A29D439EE005F83A0 /* ModalDialogSetupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE39929D439EE005F83A0 /* ModalDialogSetupData.swift */; };
 		D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D729BAC16C001120C7 /* UIImageExtension.swift */; };
 		D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62D929BB1FFC001120C7 /* Cloud.swift */; };
 		D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */; };
@@ -165,6 +176,17 @@
 		D83DE36C29CF906A005F83A0 /* LevelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelTests.swift; sourceTree = "<group>"; };
 		D83DE36E29CFE671005F83A0 /* GridOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridOffset.swift; sourceTree = "<group>"; };
 		D83DE37029D0176D005F83A0 /* ShapeRotationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeRotationResult.swift; sourceTree = "<group>"; };
+		D83DE37229D25CB9005F83A0 /* GameTile.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GameTile.xib; sourceTree = "<group>"; };
+		D83DE37429D283A6005F83A0 /* GameTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTile.swift; sourceTree = "<group>"; };
+		D83DE37629D2B50C005F83A0 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
+		D83DE38929D3FEF4005F83A0 /* ModalDialog.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ModalDialog.storyboard; sourceTree = "<group>"; };
+		D83DE38A29D3FEF4005F83A0 /* ModalDialogDisplayData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDialogDisplayData.swift; sourceTree = "<group>"; };
+		D83DE38B29D3FEF4005F83A0 /* ModalDialogPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDialogPresenter.swift; sourceTree = "<group>"; };
+		D83DE38C29D3FEF4005F83A0 /* ModalDialogRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDialogRouter.swift; sourceTree = "<group>"; };
+		D83DE38D29D3FEF4005F83A0 /* ModalDialogModuleApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDialogModuleApi.swift; sourceTree = "<group>"; };
+		D83DE38E29D3FEF4005F83A0 /* ModalDialogInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDialogInteractor.swift; sourceTree = "<group>"; };
+		D83DE38F29D3FEF4005F83A0 /* ModalDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDialogView.swift; sourceTree = "<group>"; };
+		D83DE39929D439EE005F83A0 /* ModalDialogSetupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDialogSetupData.swift; sourceTree = "<group>"; };
 		D83F62D729BAC16C001120C7 /* UIImageExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtension.swift; sourceTree = "<group>"; };
 		D83F62D929BB1FFC001120C7 /* Cloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cloud.swift; sourceTree = "<group>"; };
 		D83F62DD29BC4AEE001120C7 /* MKOutlinedLabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKOutlinedLabelNode.swift; sourceTree = "<group>"; };
@@ -287,6 +309,7 @@
 			isa = PBXGroup;
 			children = (
 				D8FDAE2F29A48DC9007AA40B /* AppModules.swift */,
+				D83DE37A29D3FE9A005F83A0 /* ModalDialog */,
 				D83DE34929C97FFD005F83A0 /* Popup */,
 				D83DE33229C85C77005F83A0 /* Settings */,
 				D8FDAE2E29A48D91007AA40B /* Game */,
@@ -326,6 +349,21 @@
 			path = Popup;
 			sourceTree = "<group>";
 		};
+		D83DE37A29D3FE9A005F83A0 /* ModalDialog */ = {
+			isa = PBXGroup;
+			children = (
+				D83DE38929D3FEF4005F83A0 /* ModalDialog.storyboard */,
+				D83DE38A29D3FEF4005F83A0 /* ModalDialogDisplayData.swift */,
+				D83DE38B29D3FEF4005F83A0 /* ModalDialogPresenter.swift */,
+				D83DE38C29D3FEF4005F83A0 /* ModalDialogRouter.swift */,
+				D83DE38D29D3FEF4005F83A0 /* ModalDialogModuleApi.swift */,
+				D83DE38E29D3FEF4005F83A0 /* ModalDialogInteractor.swift */,
+				D83DE38F29D3FEF4005F83A0 /* ModalDialogView.swift */,
+				D83DE39929D439EE005F83A0 /* ModalDialogSetupData.swift */,
+			);
+			path = ModalDialog;
+			sourceTree = "<group>";
+		};
 		D83F62E929BDC243001120C7 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -346,6 +384,8 @@
 				D83F62FB29C032BA001120C7 /* HomeModuleApi.swift */,
 				D83F62FC29C032BA001120C7 /* HomeInteractor.swift */,
 				D83F62FD29C032BA001120C7 /* HomeView.swift */,
+				D83DE37229D25CB9005F83A0 /* GameTile.xib */,
+				D83DE37429D283A6005F83A0 /* GameTile.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -399,6 +439,7 @@
 				D88D552D29A16D7B003A0478 /* LaunchScreen.storyboard */,
 				D869175429A7F259008C60F0 /* UIColorExtension.swift */,
 				D83F62D729BAC16C001120C7 /* UIImageExtension.swift */,
+				D83DE37629D2B50C005F83A0 /* UIViewExtension.swift */,
 			);
 			path = dropper;
 			sourceTree = "<group>";
@@ -583,6 +624,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D83F62E229BD19B4001120C7 /* GameScene.sks in Resources */,
+				D83DE37329D25CB9005F83A0 /* GameTile.xib in Resources */,
+				D83DE39029D3FEF4005F83A0 /* ModalDialog.storyboard in Resources */,
 				D88D552C29A16D7B003A0478 /* Assets.xcassets in Resources */,
 				D834302129A48B5900D9C052 /* Podfile in Resources */,
 				D88D552F29A16D7B003A0478 /* LaunchScreen.storyboard in Resources */,
@@ -687,12 +730,14 @@
 				D83DE34029C8D2B1005F83A0 /* Settings.swift in Sources */,
 				D83DE35B29C98616005F83A0 /* UserDefaultsExtension.swift in Sources */,
 				D83F630629C0E9B2001120C7 /* SKNodeExtension.swift in Sources */,
+				D83DE37529D283A6005F83A0 /* GameTile.swift in Sources */,
 				D8036E4129A218090081CF41 /* Block.swift in Sources */,
 				D83DE36B29CE5A27005F83A0 /* GameTitle.swift in Sources */,
 				D83F62E629BDA3D3001120C7 /* Achievement.swift in Sources */,
 				D83F62E829BDBF35001120C7 /* Level.swift in Sources */,
 				D83DE36929CC43AF005F83A0 /* GameSetupData.swift in Sources */,
 				D88D552529A16D79003A0478 /* GameScene.swift in Sources */,
+				D83DE39229D3FEF4005F83A0 /* ModalDialogPresenter.swift in Sources */,
 				D83DE35D29C99CA1005F83A0 /* PopupDelegate.swift in Sources */,
 				D83F62F729BFB5BD001120C7 /* ProgressNode.swift in Sources */,
 				D869175529A7F259008C60F0 /* UIColorExtension.swift in Sources */,
@@ -701,10 +746,12 @@
 				D869177129B6B612008C60F0 /* DropIntoEmptyRowsEffect.swift in Sources */,
 				D83DE34829C933CE005F83A0 /* ServiceFactory.swift in Sources */,
 				D83DE36F29CFE671005F83A0 /* GridOffset.swift in Sources */,
+				D83DE39329D3FEF4005F83A0 /* ModalDialogRouter.swift in Sources */,
 				D83F62F329BEBB82001120C7 /* EffectsRunner.swift in Sources */,
 				D83DE34229C8E3E2005F83A0 /* SettingsDelegate.swift in Sources */,
 				D83DE35629C98084005F83A0 /* PopupRouter.swift in Sources */,
 				D83F62EF29BE4C39001120C7 /* Game.swift in Sources */,
+				D83DE39429D3FEF4005F83A0 /* ModalDialogModuleApi.swift in Sources */,
 				D83DE33E29C85C8C005F83A0 /* SettingsView.swift in Sources */,
 				D83DE33B29C85C8C005F83A0 /* SettingsRouter.swift in Sources */,
 				D8FDAE2829A48D88007AA40B /* GameView.swift in Sources */,
@@ -714,7 +761,9 @@
 				D83DE35829C98084005F83A0 /* PopupInteractor.swift in Sources */,
 				D83F62EB29BDC24F001120C7 /* LevelService.swift in Sources */,
 				D8036E3B29A18F830081CF41 /* Ground.swift in Sources */,
+				D83DE39129D3FEF4005F83A0 /* ModalDialogDisplayData.swift in Sources */,
 				D8FDAE2929A48D88007AA40B /* GamePresenter.swift in Sources */,
+				D83DE39A29D439EE005F83A0 /* ModalDialogSetupData.swift in Sources */,
 				D869176F29B6B416008C60F0 /* RemoveRowsEffect.swift in Sources */,
 				D83DE33A29C85C8C005F83A0 /* SettingsPresenter.swift in Sources */,
 				D83F630329C032BA001120C7 /* HomeView.swift in Sources */,
@@ -739,13 +788,16 @@
 				D83DE35429C98084005F83A0 /* PopupDisplayData.swift in Sources */,
 				D83DE35529C98084005F83A0 /* PopupPresenter.swift in Sources */,
 				D83DE33C29C85C8C005F83A0 /* SettingsModuleApi.swift in Sources */,
+				D83DE39629D3FEF4005F83A0 /* ModalDialogView.swift in Sources */,
 				D869176829B2BFA2008C60F0 /* GridRange.swift in Sources */,
 				D83DE34429C8E44D005F83A0 /* SettingsSetupData.swift in Sources */,
 				D83F62DE29BC4AEE001120C7 /* MKOutlinedLabelNode.swift in Sources */,
 				D83F62FF29C032BA001120C7 /* HomePresenter.swift in Sources */,
+				D83DE37729D2B50D005F83A0 /* UIViewExtension.swift in Sources */,
 				D83F62DA29BB1FFC001120C7 /* Cloud.swift in Sources */,
 				D83F62E429BDA2C6001120C7 /* EffectResult.swift in Sources */,
 				D83F630229C032BA001120C7 /* HomeInteractor.swift in Sources */,
+				D83DE39529D3FEF4005F83A0 /* ModalDialogInteractor.swift in Sources */,
 				D8036E4529A21AFA0081CF41 /* GridReference.swift in Sources */,
 				D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */,
 			);
@@ -933,8 +985,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -962,8 +1013,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -13,5 +13,16 @@ struct GameState: Codable {
     var rows: Int = 0
     var columns: Int = 0
     var level: Int = 1
-    var genre: GameType = .tetrisClassic
+    var levelAchievements = Achievements()
+    var title: GameTitle = TetrisClassicTitle()
+    
+    init(game: Game) {
+        self.blocks = game.grid.blocksExcludingShape
+        self.rows = game.rows
+        self.score = game.score
+        self.columns = game.columns
+        self.level = game.currentLevel?.number ?? 1
+        self.title = game.title
+        self.levelAchievements = game.levelAchievements
+    }
 }

@@ -9,4 +9,5 @@ import Foundation
 
 struct GameSetupData {
     var title: GameTitle
+    var state: GameState?
 }

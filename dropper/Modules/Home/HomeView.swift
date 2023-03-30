@@ -13,118 +13,121 @@ import Viperit
 final class HomeView: UserInterface {
     
     var titles = [GameTitle]()
+    var states = [GameState?]()
     
     override func viewDidLoad() {
-        self.view.backgroundColor = .gameBackground
-        
+        self.view.backgroundColor = .white
+
         self.navigationController?.navigationBar.backgroundColor = .gameBackground
         self.navigationController?.navigationBar.tintColor = .white
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         
-        self.view.addSubview(titleLabel)
-        //self.view.addSubview(collectionView)
-        self.view.addSubview(stackView)
+        //self.view.addSubview(titleLabel)
+        self.view.addSubview(headerImage)
+        self.view.addSubview(collectionView)
         
         setConstraints()
         
         super.viewDidLoad()
     }
     
-    func playView(_ title: GameTitle) -> UIButton {
-        
-        let action = UIAction { action in
-            self.presenter.didSelectPlay(gameTitle: title)
-        }
-        let view = UIButton(primaryAction: action)
-        
-        //view.backgroundColor = .gameBackground
-        view.backgroundColor = .white
-        view.setTitleColor(.gameBackground, for: .normal)
-        view.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        view.setTitle(title.title, for: .normal)
-        view.layer.cornerRadius = 25
-
+    lazy var headerImage: UIImageView = {
+        let view = UIImageView(image: UIImage(named: "tiles"))
+        view.contentMode = .scaleAspectFit
         return view
-    }
+    }()
     
     lazy var titleLabel: UILabel = {
         let view = UILabel()
         view.text = "TETRIS"
         view.font = UIFont.boldSystemFont(ofSize: 80)
-        view.textColor = .white
+        view.textColor = .black
         view.textAlignment = .center
         
         return view
     }()
     
-    lazy var stackView: UIStackView = {
-        let view = UIStackView()
-        view.axis = .vertical
-        view.spacing = 40
-        view.alignment = .center
+    lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        
+        let view = UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewFlowLayout())
+        view.delegate = self
+        view.dataSource = self
+        
+        view.register(UINib(nibName: "GameTile", bundle: .main), forCellWithReuseIdentifier: "cell")
         return view
     }()
     
     private func setConstraints() {
         
-        titleLabel.autoSetDimension(.height, toSize: 150)
-        titleLabel.autoPinEdge(toSuperviewMargin: .top)
-        titleLabel.autoPinEdge(toSuperviewMargin: .left)
-        titleLabel.autoPinEdge(toSuperviewMargin: .right)
+        headerImage.autoPinEdge(toSuperviewEdge: .top, withInset: 20)
+        headerImage.autoAlignAxis(toSuperviewAxis: .vertical)
+        headerImage.autoPinEdge(toSuperviewMargin: .top, withInset: 30)
         
-        stackView.autoPinEdge(.top, to: .bottom, of: titleLabel, withOffset: 0)
-        stackView.autoPinEdge(toSuperviewEdge: .left)
-        stackView.autoPinEdge(toSuperviewEdge: .right)
-        stackView.autoPinEdge(toSuperviewEdge: .bottom)
-        stackView.autoSetDimension(.height, toSize: 300)
+        
+        
+//        titleLabel.autoSetDimension(.height, toSize: 150)
+//        titleLabel.autoPinEdge(toSuperviewMargin: .top)
+//        titleLabel.autoPinEdge(toSuperviewMargin: .left)
+//        titleLabel.autoPinEdge(toSuperviewMargin: .right)
+        
+        collectionView.autoPinEdge(.top, to: .bottom, of: headerImage, withOffset: 40)
+        collectionView.autoPinEdge(toSuperviewEdge: .left, withInset: 20)
+        collectionView.autoPinEdge(toSuperviewEdge: .right, withInset: 20)
+        collectionView.autoPinEdge(toSuperviewEdge: .bottom)
         
     }
     
-    @objc func settingsTapped(_ sender: UIBarButtonItem) {
+}
+
+extension HomeView: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
+        let size = collectionView.frame.size.width *  0.85
+        return CGSize(width: size , height: 240)
+    }
+}
+
+extension HomeView: UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return self.titles.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! GameTile
+        
+        cell.delegate = self
+        let title = titles[indexPath.row]
+        let state = states[indexPath.row]
+        
+        cell.configureView(title: title, state: state)
+        return cell
+    }
+    
+    
+}
+
+extension HomeView: GameTileDelegate {
+    func didSelectContinueGame(state: GameState) {
+        presenter.didSelectContinueGame(state: state)
+    }
+    
+    func didSelectNewGame(title: GameTitle) {
+        presenter.didSelectPlay(gameTitle: title)
     }
 }
 
 //MARK: - HomeView API
 extension HomeView: HomeViewApi {
-    func displayGameTitles(titles: [GameTitle]) {
-        
-        // remove all arranged views
-        for view in stackView.arrangedSubviews {
-            view.removeFromSuperview()
-            stackView.removeArrangedSubview(view)
-        }
-        
+    func displayGameTitles(titles: [GameTitle], states: [GameState?]) {
         self.titles = titles
-        
-        for title in titles {
-            let view = UIView()
-            
-            let button = self.playView(title)
-            view.addSubview(button)
-            
-            button.autoSetDimension(.height, toSize: 50)
-            button.autoPinEdge(.left, to: .left, of: view)
-            button.autoPinEdge(.right, to: .right, of: view)
-            
-            if title.highScore > 0 {
-                let label = UILabel()
-                label.textColor = .white
-                label.font = UIFont.systemFont(ofSize: 18)
-                label.textAlignment = .center
-                label.text = "Highscore \(title.highScore)"
-                view.addSubview(label)
-                label.autoPinEdge(.top, to: .bottom, of: button, withOffset: 10)
-                label.autoPinEdge(.left, to: .left, of: view, withOffset: 30)
-                label.autoPinEdge(.right, to: .right, of: view, withOffset: -30)
-            }
-            
-            stackView.addArrangedSubview(view)
-            view.autoPinEdge(.left, to: .left, of: stackView, withOffset: 30)
-            view.autoPinEdge(.right, to: .right, of: stackView, withOffset: -30)
-            view.autoSetDimension(.height, toSize: 100)
-        }
-        
+        self.states = states
+        self.collectionView.reloadData()
     }
 }
 

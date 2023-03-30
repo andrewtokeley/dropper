@@ -11,6 +11,7 @@ import Viperit
 
 // MARK: - HomePresenter Class
 final class HomePresenter: Presenter {
+    var states = [GameState?]()
     
     override func setupView(data: Any) {
         //
@@ -24,13 +25,27 @@ final class HomePresenter: Presenter {
 // MARK: - HomePresenter API
 extension HomePresenter: HomePresenterApi {
     
-    func didSelectPlay(gameTitle: GameTitle) {
-        router.showGame(gameTitle)
+    func didSelectContinueGame(state: GameState) {
+        router.showGame(from: state)
     }
     
-    func didGetGameTitles(titles: [GameTitle]) {
-        view.displayGameTitles(titles: titles)
+    func didGetGameTitles(titles: [GameTitle], states: [GameState?]) {
+        self.states = states
+        view.displayGameTitles(titles: titles, states: states)
     }
+    
+    func didSelectPlay(gameTitle: GameTitle) {
+        if let _ = self.states.first(where: {$0?.title.id == gameTitle.id }) {
+            var data = ModalDialogSetupData(heading: "Are you sure?", message: "Starting a new game will remove your saved game.", primaryButtonText: "Start New Game", secondaryButtonText: "Cancel", callback: { (type) in
+                if type == .primary {
+                    self.router.showGame(gameTitle)
+                }
+            } )
+            router.showModalDialog(data)
+        } else {
+            router.showGame(gameTitle)
+        }
+    }    
 }
 
 // MARK: - Home Viper Components

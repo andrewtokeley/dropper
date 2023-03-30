@@ -18,9 +18,24 @@ final class HomeInteractor: Interactor {
 extension HomeInteractor: HomeInteractorApi {
     
     func getGameTitles() {
+        var statesResult = [GameState?]()
+        var titlesResult = [GameTitle]()
+        
+        let dispatch = DispatchGroup()
         gameService.getGameTitles { titles in
-            self.presenter.didGetGameTitles(titles: titles)
+            titlesResult.append(contentsOf: titles)
+            for title in titles {
+                dispatch.enter()
+                // get state for each title
+                self.gameService.getGameState(for: title) { state in
+                    statesResult.append(state)
+                    dispatch.leave()
+                }
+            }
         }
+        dispatch.notify(queue: DispatchQueue.main, execute: {
+            self.presenter.didGetGameTitles(titles: titlesResult, states: statesResult)
+        })
     }
     
 }

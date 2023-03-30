@@ -28,21 +28,28 @@ final class GamePresenter: Presenter {
     private var isDropping: Bool = false
     
     private var setup: GameSetupData?
+    
     /**
      This is the entry point for the Module and kicks of the Interactor's first call to create a new Game instance for the given genre.
      */
     override func setupView(data: Any) {
         self.setup = data as? GameSetupData
     }
+    
     override func viewIsAboutToAppear() {
         if let setup = self.setup {
-            interactor.createNewGame(setup.title)
+            if let state = self.setup?.state {
+                interactor.restoreFromState(state)
+            } else {
+                interactor.createNewGame(setup.title)
+            }
         }
     }
 
     private func gameOver() {
         view.stopGameLoop()
         
+        self.interactor.clearState()
         self.interactor.saveScores { (highscore) in
             
             let title = highscore ? "Highscore!" : "Oh No!"
@@ -63,17 +70,16 @@ extension GamePresenter: GamePresenterApi {
     // MARK: - From Interactor
     
     func didRestoreState(_ state: GameState, settings: Settings) {
-        didCreateNewGame(rows: state.rows, columns: state.columns, settings: settings)
+        //didCreateNewGame(rows: state.rows, columns: state.columns, settings: settings)
     }
     
-    func didCreateNewGame(rows: Int, columns: Int, settings: Settings) {
+    func didCreateNewGame(game: Game, settings: Settings) {
         
-        // create the grid to manage the UI
-        self.grid = try! BlockGrid(rows: rows, columns: columns)
+        self.grid = game.grid
         self.grid.delegate = self
         
         // create the initial ui interface
-        view.initialiseGame(rows: rows, columns: columns, showGrid: settings.showGrid)
+        view.initialiseGame(rows: game.rows, columns: game.columns, showGrid: settings.showGrid)
         
         // add the blocks
         let all = grid.getAll()
@@ -82,7 +88,7 @@ extension GamePresenter: GamePresenterApi {
         view.showGhost(settings.showGhost)
     }
     
-    func didFetchNextLevel(_ level: Level) {
+    func didFetchNextLevel(_ level: Level, fromState: Bool = false) {
         
         // set the level specific attributes
         self.gameLoopInterval = level.moveDuration
@@ -92,15 +98,23 @@ extension GamePresenter: GamePresenterApi {
         self.view.displayLevel(level.number)
         
         // Remove all the blocks and the player
-        let blocks = self.grid.getAll().map { $0.block! }
-        self.grid.removeBlocks(self.grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
-        self.grid.replacePlayerWithBlocksOfType(.block)
         
         let title = level.number == 1 ? "Get Ready!" : "Nice!"
         let message = level.goalDescription
         
-        self.view.removeBlocks(blocks) {
-            self.router.showPopup(title: title, message: message, buttonText: "Start", secondaryButtonText: nil) { _ in
+        if !fromState {
+            let blocks = self.grid.getAll().map { $0.block! }
+            self.grid.removeBlocks(self.grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
+            self.grid.replacePlayerWithBlocksOfType(.block)
+            
+            self.view.removeBlocks(blocks) {
+                self.router.showPopup(title: title, message: message, buttonText: "Start", secondaryButtonText: nil) { _ in
+                    self.view.startGameLoop(self.gameLoopInterval)
+                    self.interactor.didLoadLevel()
+                }
+            }
+        } else {
+            self.router.showPopup(title: "Continue", message: message, buttonText: "Continue", secondaryButtonText: nil) { _ in
                 self.view.startGameLoop(self.gameLoopInterval)
                 self.interactor.didLoadLevel()
             }
@@ -134,24 +148,19 @@ extension GamePresenter: GamePresenterApi {
         }
     }
     
-    func didEndGame() {
-        // game completed! no more levels
+    func didWinGame() {
+        interactor.clearState()
+        router.showPopup(title: "You Won!", message: "Nice one :-)", buttonText: "Thanks", secondaryButtonText: nil) { buttonText in
+            self.router.navigateHome()
+        }
     }
     
     // MARK: - From View
     
     func willCloseView(completion: @escaping (Bool)->Void) {
         view.stopGameLoop()
-        router.showPopup(title: "Are You Sure?", message: "Are you sure you want to bail now?" , buttonText: "Keep Going!", secondaryButtonText: "Leave") { buttonText in
-            if buttonText == "Leave" {
-                // let the close happen
-                completion(true)
-            } else {
-                // Keep going, cancel the close
-                completion(false)
-                self.view.startGameLoop(self.gameLoopInterval)
-            }
-        }
+        interactor.saveState()
+        router.navigateHome()
     }
     
     func didSelectSettings() {
@@ -162,11 +171,13 @@ extension GamePresenter: GamePresenterApi {
     }
     
     func didSelectPause() {
+        view.setPauseState(true)
         gamePaused = true
         view.stopGameLoop()
     }
     
     func didSelectUnPause() {
+        view.setPauseState(false)
         gamePaused = false
         view.startGameLoop(self.gameLoopInterval)
     }
@@ -275,8 +286,8 @@ extension GamePresenter: BlockGridDelegate {
     func blockGrid(_ blockGrid: BlockGrid, shapeDropedTo reference: GridReference) {
         view.stopGameLoop()
         view.moveShape(reference, speed: 0.1, withShake: true) {
-            blockGrid.replacePlayerWithBlocksOfType(.block)
-            self.view.convertShapeToBlocks(.block)
+//            blockGrid.replacePlayerWithBlocksOfType(.block)
+//            self.view.convertShapeToBlocks(.block)
             self.applyEffects()
         }
     }
@@ -342,6 +353,7 @@ extension GamePresenter: EffectsRunnerDelegate {
         interactor.recordAchievements(achievements, with: self.isDropping)
         self.isDropping = false
         
+        interactor.saveState()
         interactor.readyForNewShape()
     }
 }

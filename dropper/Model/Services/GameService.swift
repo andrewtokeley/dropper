@@ -15,8 +15,9 @@ protocol GameServiceContract {
      Creats a new game instance for the given game type
      */
     func createGame(for title: GameTitle, completion: ((Game?) -> Void)?)
+    func createGame(from state: GameState, completion: ((Game?) -> Void)?)
     
-    func saveGameState(for title: GameTitle, state: GameState, completion: ((Error?)->Void)?)
+    func saveGameState(state: GameState, completion: ((Error?)->Void)?)
     func getGameState(for title: GameTitle, completion: ((GameState?)->Void)?)
     func clearGameState(for title: GameTitle, completion: ((Bool)->Void)?)
     
@@ -47,6 +48,28 @@ extension GameService: GameServiceContract {
     
     // MARK: - Game
     
+    func createGame(from state: GameState, completion: ((Game?) -> Void)?) {
+        self.createGame(for: state.title) { game in
+            if let game = game {
+                game.columns = state.columns
+                game.rows = state.rows
+                game.setLevel(state.level)
+                game.score = state.score
+                game.levelAchievements = state.levelAchievements
+                game.grid = try! BlockGrid(rows: game.rows, columns: game.columns, blocks: state.blocks)
+                completion?(game)
+            }
+        }
+    }
+    
+    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) {
+        if title.id == TetrisClassicTitle().id {
+            completion?(TetrisClassic())
+        } else if title.id == ColourMatcherTitle().id {
+            completion?(ColourMatcherGame())
+        }
+    }
+    
     func getGameTitles(completion: (([GameTitle])->Void)?) {
         let dispatch = DispatchGroup()
         
@@ -63,19 +86,11 @@ extension GameService: GameServiceContract {
         })
     }
     
-    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) {
-        if let _ = title as? TetrisClassicTitle {
-            completion?(TetrisClassic())
-        } else if let _ = title as? ColourMatcherTitle {
-            completion?(ColourMatcherGame())
-        }
-    }
-    
     // MARK: - State
     
-    func saveGameState(for title: GameTitle, state: GameState, completion: ((Error?)->Void)?) {
+    func saveGameState(state: GameState, completion: ((Error?)->Void)?) {
         do {
-            try userDefaults.setObject(state, forKey: keyFor(title, key: .STATE))
+            try userDefaults.setObject(state, forKey: keyFor(state.title, key: .STATE))
             completion?(nil)
         } catch let error {
             completion?(error)

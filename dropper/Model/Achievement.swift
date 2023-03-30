@@ -21,9 +21,9 @@ enum Achievement: Int {
     case colourMatch
 }
 
-class Achievements {
+class Achievements: Codable {
     
-    private var state: [Achievement: Int] = [:]
+    private var state: [Int: Int] = [:]
     
     static var zero: Achievements {
         let zero = Achievements()
@@ -32,14 +32,14 @@ class Achievements {
     }
     
     public func clear() {
-        state[.oneRow] = 0
-        state[.twoRows] = 0
-        state[.threeRows] = 0
-        state[.fourRows] = 0
-        state[.explodedBlock] = 0
-        state[.match10] = 0
-        state[.match20] = 0
-        state[.colourMatch] = 0
+        state[Achievement.oneRow.rawValue] = 0
+        state[Achievement.twoRows.rawValue] = 0
+        state[Achievement.threeRows.rawValue] = 0
+        state[Achievement.fourRows.rawValue] = 0
+        state[Achievement.explodedBlock.rawValue] = 0
+        state[Achievement.match10.rawValue] = 0
+        state[Achievement.match20.rawValue] = 0
+        state[Achievement.colourMatch.rawValue] = 0
     }
     
     init() {
@@ -47,7 +47,7 @@ class Achievements {
     }
     
     public func set(_ achievement: Achievement, _ value: Int) {
-        state[achievement] = abs(value)
+        state[achievement.rawValue] = abs(value)
     }
     
     public func addTo(_ achievement: Achievement, _ value: Int) {
@@ -55,7 +55,7 @@ class Achievements {
     }
     
     public func get(_ achievement: Achievement) -> Int {
-        return state[achievement]!
+        return state[achievement.rawValue]!
     }
     
     public func sum(_ achievements: [Achievement]) -> Int {

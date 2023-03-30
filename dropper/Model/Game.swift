@@ -14,6 +14,8 @@ enum GameType: Int, Codable {
 
 class Game {
     
+    var grid: BlockGrid!
+    
     var title: GameTitle
     
     /**
@@ -59,14 +61,17 @@ class Game {
     
     init(_ title: GameTitle) {
         self.title = title
+        self.rows = title.gridRows
+        self.columns = title.gridColumns
+        self.grid = try! BlockGrid(rows: self.rows, columns: self.columns)
     }
     
     /**
-     Set the level to be played by it's zero based index.
+     Set the level to be played, where 1 is the first level.
      */
-    func setLevel(_ levelIndex: Int) {
-        guard levelIndex >= 0 && levelIndex < levels.count else { return }
-        self.currentLevelIndex = levelIndex
+    func setLevel(_ level: Int) {
+        guard level > 0 && level <= levels.count else { return }
+        self.currentLevelIndex = level - 1
     }
     
     /**

@@ -414,6 +414,10 @@ class GameScene: SKScene {
         nextShape.setShape(shape, blockSize: 15)
     }
     
+    public func setPauseState(_ paused: Bool) {
+        pauseButton.alpha = paused ? 0 : 1
+        playButton.alpha = paused ? 1 : 0
+    }
     // MARK: - Shape Methods
     
     public func addShape(_ shape: Shape, to: GridReference) {
@@ -630,14 +634,12 @@ class GameScene: SKScene {
 
 extension GameScene: ButtonNodeDelegate {
     func buttonClicked(sender: ButtonNode) {
-        //presenter.didSelectPauseToggle()
+        
         if let tag = sender.tag {
             if tag == "pause" {
-                pauseButton.alpha = 0
-                playButton.alpha = 1
+                setPauseState(true)
             } else if tag == "play" {
-                pauseButton.alpha = 1
-                playButton.alpha = 0
+                setPauseState(false)
             }
             gameSceneDelegate?.gameScene(self, didClickButton: tag)
         }

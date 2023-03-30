@@ -88,7 +88,7 @@ protocol GameViewApi: UserInterfaceProtocol {
     func updateLevelProgress(_ progressValue: Int, goalUnit: String?)
     func showGrid(_ show: Bool)
     func showGhost(_ show: Bool)
-
+    func setPauseState(_ pause: Bool)
 }
 
 //MARK: - GamePresenter API
@@ -142,12 +142,12 @@ protocol GamePresenterApi: PresenterProtocol {
     /**
      Called by Interactor when a ``Game`` instance has been created the Presenter can now communicate with the View to put stuff on the screen ready to play.
      */
-    func didCreateNewGame(rows: Int, columns: Int, settings: Settings)
+    func didCreateNewGame(game: Game, settings: Settings)
     
     /**
      Called by the Interactor whenever a new level is ready to be played. The Presenter will reset the UI, update the level description and initiate a new player by calling back to the Interactor via the ``didLoadLevel`` method.
      */
-    func didFetchNextLevel(_ level: Level)
+    func didFetchNextLevel(_ level: Level, fromState: Bool)
     
     /**
      Called by Interactor to let the presenter know to add a new shape and display the next shape
@@ -160,15 +160,17 @@ protocol GamePresenterApi: PresenterProtocol {
     func didUpdateTotals(points: Int?, score: Int?, goalProgressValue: Int?, goalUnit: String?)
         
     /**
-     Called by the Interactor when the game is over.
+     Called by the Interactor when all the levels have been completed
      */
-    func didEndGame()
+    func didWinGame()
 }
 
 //MARK: - GameInteractor API
 protocol GameInteractorApi: InteractorProtocol {
     
     //MARK: - Presenter -> Interactor
+    
+    func restoreFromState(_ state: GameState)
     
     /**
      The first call made by the Presenter when the module loads and we know what game genre we're playing.
@@ -202,4 +204,7 @@ protocol GameInteractorApi: InteractorProtocol {
      Saves the score at the end of the game and returns whether it was a highscore
      */
     func saveScores(completion: ((Bool)->Void)?)
+    
+    func saveState()
+    func clearState()
 }

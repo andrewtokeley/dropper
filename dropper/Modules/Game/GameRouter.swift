@@ -31,6 +31,7 @@ extension GameRouter: GameRouterApi {
     }
     
     func showPopup(title: String, message: String, buttonText: String, secondaryButtonText: String? = nil, callback: ((String)->Void)? = nil) {
+        
         let module = AppModules.popup.build()
         var data = PopupSetupData()
         data.heading = title
@@ -38,6 +39,7 @@ extension GameRouter: GameRouterApi {
         data.buttonText = buttonText
         data.secondaryButtonText = secondaryButtonText
         data.callback = callback
+        
         module.router.present(from: viewController, embedInNavController: false, presentationStyle: .custom, transitionStyle: .crossDissolve, setupData: data, completion: nil)
 
     }

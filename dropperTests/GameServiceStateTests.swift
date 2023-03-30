@@ -48,20 +48,26 @@ final class GameServiceStateTests: XCTestCase {
 
     func testSaveThenGet() throws {
         let expect = expectation(description: "testSaveThenGet")
-        let rows = 10
-        let columns = 5
-        let state = GameState(blocks: Array(repeating: Array(repeating: Block(.colour1, .block), count: columns), count: rows), score: 123, rows: 4, level: 1)
-        gameService.saveGameState(for: TITLE_TETRIS, state: state) { error in
-            XCTAssertNil(error)
-            self.gameService.getGameState(for: self.TITLE_TETRIS) { state in
-                XCTAssertEqual(state?.score, 123)
-                XCTAssertEqual(state?.rows, 4)
-                XCTAssertEqual(state?.level, 1)
-                XCTAssertEqual(state?.blocks.count, rows)
-                XCTAssertEqual(state?.blocks[0].count, columns)
-                expect.fulfill()
+        
+        gameService.createGame(for: TetrisClassicTitle()) { result in
+            if let game = result {
+                game.score = 123
+                let state = GameState(game: game)
+                self.gameService.saveGameState(state: state) { error in
+                    XCTAssertNil(error)
+                    self.gameService.getGameState(for: self.TITLE_TETRIS) { state in
+                        XCTAssertEqual(state?.score, 123)
+                        XCTAssertEqual(state?.rows, game.rows)
+                        XCTAssertEqual(state?.columns, game.columns)
+                        XCTAssertEqual(state?.level, 1)
+                        XCTAssertEqual(state?.blocks.count, game.rows)
+                        XCTAssertEqual(state?.blocks[0].count, game.columns)
+                        expect.fulfill()
+                    }
+                }
             }
         }
+        
         waitForExpectations(timeout: 100) { (error) in
             if let e = error {
                 XCTFail(e.localizedDescription)

@@ -160,6 +160,8 @@ final class GameView: UserInterface {
         guard let blockSize = gameScene?.blockSize else { return }
         let panVelocity = sender.velocity(in: self.view)
         let panPoint = sender.location(in: self.view)
+        
+        let sensitivity: CGFloat = 0.8
         let swipeVelocityThreshold:CGFloat = 300
         
         if sender.state == .began {
@@ -168,7 +170,7 @@ final class GameView: UserInterface {
             
             if abs(panPoint.y - lastPanPoint.y) > blockSize && panVelocity.y > swipeVelocityThreshold {
                 presenter.didSelectDrop()
-            } else if abs(panPoint.x - lastPanPoint.x) > 0.5  * blockSize {
+            } else if abs(panPoint.x - lastPanPoint.x) > sensitivity  * blockSize {
                 if panPoint.x > lastPanPoint.x {
                     presenter.didSelectMove(.right)
                 } else {
@@ -289,6 +291,10 @@ extension GameView: GameViewApi {
     
     func updateScore(_ score: Int) {
         gameScene?.updateScore(score)
+    }
+    
+    func setPauseState(_ pause: Bool) {
+        gameScene?.setPauseState(pause)
     }
     
     //MARK: - Init Game

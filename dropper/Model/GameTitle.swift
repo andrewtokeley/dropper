@@ -14,6 +14,8 @@ class GameTitle: Codable {
     var id: String = ""
     var title: String = ""
     var highScore: Int = 0
+    var gridRows: Int = 21
+    var gridColumns: Int = 10
 }
 
 extension GameTitle: Hashable {
@@ -32,7 +34,7 @@ class TetrisClassicTitle: GameTitle {
     override init() {
         super.init()
         id = "TTC"
-        title = "Classic"
+        title = "Classic Tetris"
     }
     
     required init(from decoder: Decoder) throws {

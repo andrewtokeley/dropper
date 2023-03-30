@@ -13,7 +13,12 @@ enum AppModules: String, ViperitModule {
     case home
     case settings
     case popup
+    case modalDialog
     var viewType: ViperitViewType {
-        return .code
+        if self == .modalDialog {
+            return .storyboard
+        } else {
+            return .code
+        }
     }
 }
