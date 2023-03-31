@@ -9,57 +9,132 @@
 import UIKit
 import Viperit
 
-enum ModalDialogButtonType {
-    case primary
-    case secondary
-}
-
 //MARK: ModalDialogView Class
-final class ModalDialogView: UserInterface {
+
+final class ModalDialogView: UIViewController {
     
-    @IBOutlet weak var primaryButton: UIButton!
-    @IBOutlet weak var secondaryButton: UIButton!
+    // MARK: - Private Properties
     
+    private let buttonHeight:CGFloat = 50
+    private var presentFrom: UIViewController?
+    public var actions = [ModalDialogAction]()
+    private var heading: String = ""
+    private var body: String = ""
+
+    // MARK: - Outlets
+    @IBOutlet weak var backgroundMask: UIView!
+    @IBOutlet weak var actionsStackView: UIStackView!
     @IBOutlet weak var bodyLabel: UILabel!
     @IBOutlet weak var headingLabel: UILabel!
     @IBOutlet weak var dialogView: UIView!
+    @IBOutlet weak var stackViewHeight: NSLayoutConstraint!
     
-    // MARK: - Handlers
-    @IBAction func handleSecondaryButtonClick(_ sender: UIButton) {
-        presenter.didSelectButton(.secondary)
+    // MARK: - UIViewController
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.modalPresentationStyle = .overCurrentContext
+        //
     }
     
-    @IBAction func handlePrimaryButtonClick(_ sender: UIButton) {
-        presenter.didSelectButton(.primary)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        self.view.alpha = 0
+    override func viewDidLoad() {
         dialogView.layer.cornerRadius = 25
+        
+        self.headingLabel.text = self.heading
+        self.bodyLabel.text = self.body
+        
+        for action in actions {
+            addAction(action)
+        }
+        
+        registerTapEvent()
     }
-}
+    
+    
+    // MARK: - Controls
+    
+    private func getButton(_ action: ModalDialogAction) -> UIButton? {
+        
+        let button = UIButton()
 
-//MARK: - ModalDialogView API
-extension ModalDialogView: ModalDialogViewApi {
-    func display(_ heading: String, message: String, primaryButtonText: String, secondaryButtonText: String?) {
-        headingLabel.text = heading
-        bodyLabel.text = message
-        primaryButton.titleLabel?.text = primaryButtonText
-        if let secondaryButtonText = secondaryButtonText {
-            secondaryButton.titleLabel?.text = secondaryButtonText
-            secondaryButton.alpha = 1
-        } else {
-            secondaryButton.alpha = 0
+        // Constraints
+        button.autoSetDimension(.height, toSize: self.buttonHeight)
+
+        // Rounded corners
+        button.setTitle(action.title, for: .normal)
+        button.layer.cornerRadius = 0.5 * self.buttonHeight
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        
+        // Drop Shadow
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0.0, height: 6.0)
+        button.layer.shadowRadius = 6
+        button.layer.shadowOpacity = 0.1
+        // Font
+        switch action.style {
+        case .default:
+            button.backgroundColor = .systemBlue
+            button.setTitleColor(.white, for: .normal)
+            break
+        case .cancel:
+            button.backgroundColor = .white
+            button.setTitleColor(.systemBlue, for: .normal)
+            break
+        case .destructive:
+            button.backgroundColor = .systemRed
+            button.setTitleColor(.white, for: .normal)
+            break
+        }
+        
+        // Action
+        let uiAction = UIAction { _ in
+            self.presentingViewController?.dismiss(animated: true)
+            action.handler?(action)
+        }
+        button.addAction(uiAction , for: .touchUpInside)
+        
+        return button
+    }
+    
+    // MARK: - Public Methods
+    
+    public func show(from viewController: UIViewController, title: String, message: String, actions: [ModalDialogAction]) {
+         
+        self.heading = title
+        self.body = message
+        self.actions = actions
+        
+        viewController.present(self, animated: true)
+    }
+    
+    // MARK: - Private Methods
+
+    private func addAction(_ action: ModalDialogAction) {
+        if let button = getButton(action) {
+            
+            self.actionsStackView.addArrangedSubview(button)
+            
+            // for each action button we add the stackview needs to grow
+            let stackHeight:CGFloat = CGFloat(self.actions.count) * (self.buttonHeight + 10)
+            print(stackHeight)
+            self.stackViewHeight.constant = stackHeight
         }
     }
-}
-
-// MARK: - ModalDialogView Viper Components API
-private extension ModalDialogView {
-    var presenter: ModalDialogPresenterApi {
-        return _presenter as! ModalDialogPresenterApi
+    
+    private func registerTapEvent() {
+        let tap = UITapGestureRecognizer()
+        tap.addTarget(self, action: #selector(handleTap))
+        self.backgroundMask.addGestureRecognizer(tap)
     }
-    var displayData: ModalDialogDisplayData {
-        return _displayData as! ModalDialogDisplayData
+    
+    @objc func handleTap(sender: UITapGestureRecognizer) {
+        if sender.state == .ended {
+            // find a cancel action
+            if let cancel = self.actions.first(where: { $0.style == .cancel }) {
+                self.presentingViewController?.dismiss(animated: true)
+                cancel.handler?(cancel)
+            }
+            
+        }
     }
 }

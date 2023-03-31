@@ -29,20 +29,6 @@ extension GameRouter: GameRouterApi {
     func closeSettings() {
         
     }
-    
-    func showPopup(title: String, message: String, buttonText: String, secondaryButtonText: String? = nil, callback: ((String)->Void)? = nil) {
-        
-        let module = AppModules.popup.build()
-        var data = PopupSetupData()
-        data.heading = title
-        data.message = message
-        data.buttonText = buttonText
-        data.secondaryButtonText = secondaryButtonText
-        data.callback = callback
-        
-        module.router.present(from: viewController, embedInNavController: false, presentationStyle: .custom, transitionStyle: .crossDissolve, setupData: data, completion: nil)
-
-    }
 }
 
 // MARK: - Game Viper Components

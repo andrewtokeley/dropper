@@ -19,6 +19,7 @@ enum Achievement: Int {
     case match10
     case match20
     case colourMatch
+    case colourMatchGroup
 }
 
 class Achievements: Codable {
@@ -40,6 +41,7 @@ class Achievements: Codable {
         state[Achievement.match10.rawValue] = 0
         state[Achievement.match20.rawValue] = 0
         state[Achievement.colourMatch.rawValue] = 0
+        state[Achievement.colourMatchGroup.rawValue] = 0
     }
     
     init() {
@@ -55,7 +57,10 @@ class Achievements: Codable {
     }
     
     public func get(_ achievement: Achievement) -> Int {
-        return state[achievement.rawValue]!
+        if let state = state[achievement.rawValue] {
+            return state
+        }
+        return 0
     }
     
     public func sum(_ achievements: [Achievement]) -> Int {
@@ -78,5 +83,6 @@ class Achievements: Codable {
         addTo(.match10, achievements.get(.match10))
         addTo(.match20, achievements.get(.match20))
         addTo(.colourMatch, achievements.get(.colourMatch))
+        addTo(.colourMatchGroup, achievements.get(.colourMatchGroup))
     }
 }

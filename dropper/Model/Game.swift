@@ -143,7 +143,7 @@ class ColourMatcherGame: Game {
                 RemoveMatchedBlocksEffect(minimumMatchCount: 15)
                 ]
             level.goalProgressValue = {(a: Achievements) -> Int in
-                return a.get(.match10)
+                return a.get(.colourMatchGroup)
             }
             level.number = i + 1
             result.append(level)

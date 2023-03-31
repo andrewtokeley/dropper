@@ -12,7 +12,6 @@ import Viperit
 protocol GameRouterApi: RouterProtocol {
     func showSettings(_ title: GameTitle)
     func navigateHome()
-    func showPopup(title: String, message: String, buttonText: String, secondaryButtonText: String?, callback: ((String)->Void)?)
 }
 
 //MARK: - GameView API
@@ -89,6 +88,8 @@ protocol GameViewApi: UserInterfaceProtocol {
     func showGrid(_ show: Bool)
     func showGhost(_ show: Bool)
     func setPauseState(_ pause: Bool)
+    
+    func displayModalDialog(title: String, message: String, actions: [ModalDialogAction]) 
 }
 
 //MARK: - GamePresenter API

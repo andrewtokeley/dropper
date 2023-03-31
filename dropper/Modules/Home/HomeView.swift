@@ -60,9 +60,9 @@ final class HomeView: UserInterface {
     
     private func setConstraints() {
         
-        headerImage.autoPinEdge(toSuperviewEdge: .top, withInset: 20)
+        headerImage.autoPinEdge(toSuperviewEdge: .top, withInset: 30)
         headerImage.autoAlignAxis(toSuperviewAxis: .vertical)
-        headerImage.autoPinEdge(toSuperviewMargin: .top, withInset: 30)
+        headerImage.autoPinEdge(toSuperviewEdge: .left, withInset: 30)
         
         
         
@@ -128,6 +128,22 @@ extension HomeView: HomeViewApi {
         self.titles = titles
         self.states = states
         self.collectionView.reloadData()
+    }
+    
+    func displayConfirmation(title: String, confirmationButtonText: String, confirmationText: String, completion: ((Bool)->Void)?) {
+        
+        let modal = ModalDialogView.fromStoryboard("ModalDialog", identifier: "ModalDialogView", bundle: nil)
+        
+        var actions = [ModalDialogAction]()
+        actions.append(ModalDialogAction(title: confirmationButtonText, style: .default, handler: { action in
+            completion?(true)
+        }))
+        actions.append(ModalDialogAction(title: "Cancel", style: .cancel, handler: { action in
+            completion?(false)
+        }))
+        
+        modal.show(from: self, title: title, message: confirmationText, actions: actions)
+        
     }
 }
 

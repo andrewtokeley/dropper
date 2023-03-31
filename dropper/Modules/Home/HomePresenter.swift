@@ -36,14 +36,16 @@ extension HomePresenter: HomePresenterApi {
     
     func didSelectPlay(gameTitle: GameTitle) {
         if let _ = self.states.first(where: {$0?.title.id == gameTitle.id }) {
-            var data = ModalDialogSetupData(heading: "Are you sure?", message: "Starting a new game will remove your saved game.", primaryButtonText: "Start New Game", secondaryButtonText: "Cancel", callback: { (type) in
-                if type == .primary {
+            
+            view.displayConfirmation(title: "Are you sure?", confirmationButtonText: "Yes", confirmationText: "If you continue you'll lose your saved game.") { result in
+                if (result) {
                     self.router.showGame(gameTitle)
+                } else {
+                    // do nothing
                 }
-            } )
-            router.showModalDialog(data)
+            }
         } else {
-            router.showGame(gameTitle)
+            self.router.showGame(gameTitle)
         }
     }    
 }

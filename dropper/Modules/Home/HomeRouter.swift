@@ -16,11 +16,11 @@ final class HomeRouter: Router {
 // MARK: - HomeRouter API
 extension HomeRouter: HomeRouterApi {
     
-    func showModalDialog(_ setup: ModalDialogSetupData) {
-        let module = AppModules.modalDialog.build()
-        module.router.present(from: self.viewController, embedInNavController: false, presentationStyle: .custom, transitionStyle: .crossDissolve, setupData: setup, completion: nil)
-        
-    }
+//    func showModalDialog(_ setup: ModalDialogSetupData) {
+//        let module = AppModules.modalDialog.build()
+//        module.router.present(from: self.viewController, embedInNavController: false, presentationStyle: .custom, transitionStyle: .crossDissolve, setupData: setup, completion: nil)
+//        
+//    }
     
     func showGame(from state: GameState) {
         let module = AppModules.game.build()

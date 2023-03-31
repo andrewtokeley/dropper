@@ -743,7 +743,6 @@ class BlockGrid {
         let transformResult = rotatedPlayerGridReference
         
         if transformResult.canRotate {
-            let player = playerBlocks.map { $0.gridReference }
             
             // if there's a kick to do before rotating...
             if let kick = transformResult.wallKick {

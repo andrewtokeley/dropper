@@ -10,7 +10,7 @@ import Viperit
 
 //MARK: - HomeRouter API
 protocol HomeRouterApi: RouterProtocol {
-    func showModalDialog(_ setup: ModalDialogSetupData)
+    //func showModalDialog(_ setup: ModalDialogSetupData)
     func showGame(_ gameType: GameTitle)
     func showGame(from state: GameState)
 }
@@ -18,6 +18,7 @@ protocol HomeRouterApi: RouterProtocol {
 //MARK: - HomeView API
 protocol HomeViewApi: UserInterfaceProtocol {
     func displayGameTitles(titles: [GameTitle], states: [GameState?])
+    func displayConfirmation(title: String, confirmationButtonText: String, confirmationText: String, completion: ((Bool)->Void)?)
 }
 
 //MARK: - HomePresenter API

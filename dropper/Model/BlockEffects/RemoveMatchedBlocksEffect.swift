@@ -47,6 +47,9 @@ class RemoveMatchedBlocksEffect: GridEffect {
         // You get an achievement for every block that was matched and removed across all groups
         effectResults.achievments.addTo(.colourMatch, removeBlocks.count)
         
+        // You also get an achievement for every group of blocks
+        effectResults.achievments.addTo(.colourMatchGroup, groups.count)
+        
         return effectResults
     }
     

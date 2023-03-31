@@ -418,6 +418,7 @@ class GameScene: SKScene {
         pauseButton.alpha = paused ? 0 : 1
         playButton.alpha = paused ? 1 : 0
     }
+    
     // MARK: - Shape Methods
     
     public func addShape(_ shape: Shape, to: GridReference) {

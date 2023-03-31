@@ -54,10 +54,14 @@ final class GamePresenter: Presenter {
             
             let title = highscore ? "Highscore!" : "Oh No!"
             let message = highscore ? "The blocks beat you, but that's a great score!" : "The blocks beat you this time!"
-            let closeButtonText = "Close"
-            self.router.showPopup(title: title, message: message, buttonText: closeButtonText, secondaryButtonText: nil) { buttonText in
-                    self.router.navigateHome()
+            let action = ModalDialogAction(title: "Close", style: .default) { _ in
+                self.router.navigateHome()
             }
+            self.view.displayModalDialog(title: title, message: message, actions: [action])
+            
+//            self.router.showPopup(title: title, message: message, primaryButtonText: closeButtonText, secondaryButtonText: nil) { buttonText in
+//                    self.router.navigateHome()
+//            }
         }
     }
     
@@ -90,6 +94,9 @@ extension GamePresenter: GamePresenterApi {
     
     func didFetchNextLevel(_ level: Level, fromState: Bool = false) {
         
+        // pause the game play until we're ready.
+        self.view.stopGameLoop()
+        
         // set the level specific attributes
         self.gameLoopInterval = level.moveDuration
         self.gridEffects = level.effects
@@ -99,8 +106,15 @@ extension GamePresenter: GamePresenterApi {
         
         // Remove all the blocks and the player
         
-        let title = level.number == 1 ? "Get Ready!" : "Nice!"
+        let title = level.number == 1 ? "Get Ready!" : "Next Level!"
+        let primaryButton = level.number == 1 ? "Start!" : "Let's Go!"
         let message = level.goalDescription
+        let startGameAction = ModalDialogAction(title: primaryButton, style: .default, handler: { _ in
+            self.interactor.didLoadLevel()
+        })
+        let goHomeAction =  ModalDialogAction(title: "Cancel", style: .cancel, handler: { _ in
+            self.router.navigateHome()
+        })
         
         if !fromState {
             let blocks = self.grid.getAll().map { $0.block! }
@@ -108,16 +122,12 @@ extension GamePresenter: GamePresenterApi {
             self.grid.replacePlayerWithBlocksOfType(.block)
             
             self.view.removeBlocks(blocks) {
-                self.router.showPopup(title: title, message: message, buttonText: "Start", secondaryButtonText: nil) { _ in
-                    self.view.startGameLoop(self.gameLoopInterval)
-                    self.interactor.didLoadLevel()
-                }
+                self.view.displayModalDialog(title: title, message: message, actions: [startGameAction])
             }
         } else {
-            self.router.showPopup(title: "Continue", message: message, buttonText: "Continue", secondaryButtonText: nil) { _ in
-                self.view.startGameLoop(self.gameLoopInterval)
-                self.interactor.didLoadLevel()
-            }
+            // The user is continuing a game from state.
+            startGameAction.title = "OK"
+            self.view.displayModalDialog(title: "Continue", message: "Right, let's keep going!", actions: [startGameAction, goHomeAction])
         }
     }
     
@@ -150,9 +160,10 @@ extension GamePresenter: GamePresenterApi {
     
     func didWinGame() {
         interactor.clearState()
-        router.showPopup(title: "You Won!", message: "Nice one :-)", buttonText: "Thanks", secondaryButtonText: nil) { buttonText in
+        let action = ModalDialogAction(title: "Close", style: .cancel) { _ in
             self.router.navigateHome()
         }
+        view.displayModalDialog(title: "You Won!", message: "Nice one :-)", actions: [action])
     }
     
     // MARK: - From View
@@ -350,6 +361,7 @@ extension GamePresenter: BlockGridDelegate {
 extension GamePresenter: EffectsRunnerDelegate {
     
     func didFinishEffectsRun(_ runner: EffectsRunner, achievements: Achievements) {
+        
         interactor.recordAchievements(achievements, with: self.isDropping)
         self.isDropping = false
         

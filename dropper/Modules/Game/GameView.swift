@@ -297,6 +297,11 @@ extension GameView: GameViewApi {
         gameScene?.setPauseState(pause)
     }
     
+    func displayModalDialog(title: String, message: String, actions: [ModalDialogAction]) {
+        let modal = ModalDialogView.fromStoryboard("ModalDialog", identifier: "ModalDialogView", bundle: nil)
+        modal.show(from: self, title: title, message: message, actions: actions)
+    }
+    
     //MARK: - Init Game
     
     func initialiseGame(rows: Int, columns: Int, showGrid: Bool = false) {

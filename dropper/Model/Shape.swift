@@ -128,7 +128,7 @@ class Shape {
      ````
      */
     static func I(_ colour: BlockColour) -> Shape {
-        var s = Shape(references: [
+        let s = Shape(references: [
             GridReference(0,-1),
             GridReference(0,0),
             GridReference(0,1),
@@ -153,7 +153,7 @@ class Shape {
      ````
      */
     static func O(_ colour: BlockColour) -> Shape {
-        var s = Shape(references: [
+        let s = Shape(references: [
             GridReference(1,0),
             GridReference(1,1),
             GridReference(0,0),
