@@ -25,6 +25,11 @@ protocol GameViewApi: UserInterfaceProtocol {
     func initialiseGame(rows: Int, columns: Int, showGrid: Bool)
     
     /**
+     The title to display in the navbar
+     */
+    func displayTitle(_ title: String)
+    
+    /**
      Adds a new shape to the grid, where the shape's origin will be located at the specified reference.
      */
     func addShape(_ shape: Shape, to: GridReference)

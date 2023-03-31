@@ -80,6 +80,7 @@ final class GameView: UserInterface {
         registerSwipes()
         view.addSubview(gameSKView)
         setConstraints()
+        self.displayTitle("Tetris")
     }
     
     @objc func handleSettings(_ sender: UIBarButtonItem) {
@@ -278,6 +279,15 @@ extension GameView: GameViewApi {
     
     func updateLevelProgress(_ progressValue: Int, goalUnit: String? = nil) {
         gameScene?.updateLevelProgress(progressValue, goalUnit: goalUnit)
+    }
+    
+    func displayTitle(_ title: String) {
+        //self.navigationItem.attr
+        self.title = title
+        self.navigationController?.navigationBar.titleTextAttributes = [
+            NSAttributedString.Key.foregroundColor: UIColor.white,
+            NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 24),
+        ]
     }
     
     func displayLevel(_ levelNumber: Int) {

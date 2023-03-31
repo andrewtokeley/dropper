@@ -85,6 +85,8 @@ extension GamePresenter: GamePresenterApi {
         // create the initial ui interface
         view.initialiseGame(rows: game.rows, columns: game.columns, showGrid: settings.showGrid)
         
+        view.displayTitle(game.title.title)
+        
         // add the blocks
         let all = grid.getAll()
         view.addBlocks(all.map { $0.block! }, references: all.map { $0.gridReference }, completion: nil)
