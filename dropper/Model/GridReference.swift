@@ -13,20 +13,20 @@ enum GridDirection: Int {
     case top
     case bottom
     
-    var gridDelta: GridDelta {
+    var offset: GridOffset {
         switch self {
-        case .top: return GridDelta(rowDelta: 1, columnDelta: 0)
-        case .bottom: return GridDelta(rowDelta: -1, columnDelta: 0)
-        case .left: return GridDelta(rowDelta: 0, columnDelta: -1)
-        case .right: return GridDelta(rowDelta: 0, columnDelta: 1)
+        case .top: return GridOffset(1,0)
+        case .bottom: return GridOffset(-1,0)
+        case .left: return GridOffset(0,-1)
+        case .right: return GridOffset(0,1)
         }
     }
 }
 
-struct GridDelta {
-    var rowDelta: Int
-    var columnDelta: Int
-}
+//struct GridDelta {
+//    var rowDelta: Int
+//    var columnDelta: Int
+//}
 
 /**
  Represents a location within the game's grid. Grid's are referenced using a zero based index, where row 0 is the bottom row and column 0 is the left most column.
@@ -39,6 +39,13 @@ class GridReference {
     /// Column reference where 1 is the leftmost column
     var column: Int
     
+    /**
+     Rreturn a new (0,0) GridReference instance.
+     */
+    static var zero: GridReference {
+        return GridReference(0, 0)
+    }
+    
     init(_ row: Int, _ column: Int) {
         self.row = row
         self.column = column
@@ -49,15 +56,19 @@ class GridReference {
      */
     func adjacent(_ direction: GridDirection) -> GridReference {
         return GridReference(
-            row + direction.gridDelta.rowDelta,
-            column + direction.gridDelta.columnDelta
+            row + direction.offset.rowOffset,
+            column + direction.offset.columnOffset
         )
     }
     
     /**
      Returns a new GridReference equal to the current instance offset by the given row, column offsets
      */
-    func offSet(_ rowOffset: Int, _ columnOffset: Int) -> GridReference {
+    func offSet(_ offset: GridOffset) -> GridReference {
+        return offSet(offset.rowOffset, offset.columnOffset)
+    }
+    
+    func offSet(_ rowOffset: Int, _ columnOffset: Int ) -> GridReference {
         return GridReference(row + rowOffset, column + columnOffset)
     }
     

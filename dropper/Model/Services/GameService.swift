@@ -56,7 +56,7 @@ extension GameService: GameServiceContract {
                 game.setLevel(state.level)
                 game.score = state.score
                 game.levelAchievements = state.levelAchievements
-                game.grid = try! BlockGrid(rows: game.rows, columns: game.columns, blocks: state.blocks)
+                game.grid = try! BlockGrid(state.blocks)
                 completion?(game)
             }
         }

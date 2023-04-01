@@ -24,9 +24,8 @@ struct Level {
      Returns the time a block takes to move on row
      */
     var moveDuration: TimeInterval {
-        // slowest 0.3, fastest 0.05
-        let speeds = [0.5, 0.4, 0.3, 0.2, 0.1, 0.08, 0.06]
-        if self.number < 5 {
+        let speeds = [0.5, 0.4, 0.3, 0.2, 0.15]
+        if self.number <= 5 {
             return speeds[self.number-1]
         } else {
             // return fastest

@@ -20,17 +20,29 @@ enum CollisionTypes: UInt32 {
 }
 
 struct LayoutDimensions {
+    var sceneSize = CGSize.zero
+    
     var gridLeft: CGFloat = 0
     var gridRight: CGFloat = 0
-    var gridTop: CGFloat = 0
-    var gridBottom: CGFloat = 0
     
-    var labelsRow: CGFloat = 100
-    var valuesRow: CGFloat = 125
+    var gridTopOffset: CGFloat = 0
+    var gridBottomOffset: CGFloat = 0
+    var gridBorderWidth: CGFloat = 20
+    
+    var gridCentre: CGPoint {
+        return CGPoint(x: gridSize.width/2 + gridLeft - gridBorderWidth/2, y: gridSize.height/2 + gridBottomOffset - gridBorderWidth/2)
+    }
+    
+    var gridSize: CGSize {
+        return CGSize(width: gridRight - gridLeft + gridBorderWidth, height: sceneSize.height - (gridTopOffset+gridBottomOffset-gridBorderWidth))
+    }
+    
+    var labelsRowTopOffset: CGFloat = 100
+    var valuesRowTopOffset: CGFloat = 125
     
     var blockSize: CGFloat = 30
     
-    var bottomButtonsRow:CGFloat = 40
+    var buttonsRowBottomOffset:CGFloat = 40
     
     var spacer: CGFloat = 30
 }
@@ -193,52 +205,32 @@ class GameScene: SKScene {
         super.init(coder: aDecoder)
     }
     
-//    var panColumn: Int = 0
-//    public func gridReferenceFromPoint(_ point: CGPoint) -> GridReference? {
-//
-//        // normalise the point to be relative to the grid, normalPoint(0,0) will be at the bottom left of the grid
-//        let normalPoint = CGPoint(x: point.x - layout.gridLeft, y: point.y - layout.gridBottom)
-//        let column = Int(normalPoint.y/layout.blockSize)
-//        if column != panColumn {
-//            self.panColumn = column
-//            return self.panColumn
-//        }
-//        return nil
-//    }
-    
-//    private func registerGestures() {
-//        let left = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-//        self.view?.addGestureRecognizer(left)
-//    }
-//
-//    @objc private func handlePan(_ sender: UIPanGestureRecognizer) {
-//        print(sender.location(in: self.view))
-//    }
-    
     public func isInGrid(_ point: CGPoint) -> Bool {
         print(point)
-        let hOK = point.x > layout.gridLeft && point.x < (self.size.width - layout.gridRight)
-        let vOK = point.y > layout.gridBottom && point.y < (self.size.height - layout.gridTop)
+        let hOK = point.x > layout.gridLeft && point.x < layout.gridRight
+        let vOK = point.y > layout.gridBottomOffset && point.y < (self.size.height - layout.gridTopOffset)
         return vOK && hOK
     }
     
     private func getLayout(from size: CGSize) -> LayoutDimensions {
         
         var layout = LayoutDimensions()
-        layout.gridBottom = 100
-        layout.labelsRow = 100
-        layout.valuesRow = 125
-        layout.gridTop = layout.valuesRow + 50
+        layout.sceneSize = self.size
+        
+        layout.gridBottomOffset = 100
+        layout.labelsRowTopOffset = 100
+        layout.valuesRowTopOffset = 125
+        layout.gridTopOffset = layout.valuesRowTopOffset + 50
 
         
         // Define a block size to gaurantee it will fit in the space.
-        layout.blockSize = min(size.width/CGFloat(columns + 2), (size.height-(layout.gridTop+layout.gridBottom))/CGFloat(rows))
+        layout.blockSize = min(size.width/CGFloat(columns + 2), (size.height-(layout.gridTopOffset+layout.gridBottomOffset))/CGFloat(rows))
         
         // Give to the left and right of the grid an equal amount of space
         layout.gridLeft = (size.width - CGFloat(columns) * layout.blockSize)/2
-        layout.gridRight = layout.gridLeft
+        layout.gridRight = size.width - layout.gridLeft
         
-        layout.bottomButtonsRow = 40
+        layout.buttonsRowBottomOffset = 40
         
         return layout
     }
@@ -283,15 +275,16 @@ class GameScene: SKScene {
      */
     private func repositionNodes() {
         
-        nextHeadingLabel.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: layout.labelsRow)
-        nextShape.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: layout.valuesRow)
-        goalBlock.autoPositionWithinParent(.leftTop, xOffSet: 0.35*size.width, yOffSet: layout.labelsRow)
-        scoreHeadingLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: layout.labelsRow)
-        scoreLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: layout.valuesRow)
-        levelBlock.autoPositionWithinParent(.rightTop, xOffSet: 0.40*size.width, yOffSet: layout.labelsRow)
+        nextHeadingLabel.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: layout.labelsRowTopOffset)
         
-        pauseButton.autoPositionWithinParent(.centreBottom, yOffSet: layout.bottomButtonsRow)
-        playButton.autoPositionWithinParent(.centreBottom, yOffSet: layout.bottomButtonsRow)
+        nextShape.autoPositionWithinParent(.leftTop, xOffSet: layout.spacer, yOffSet: layout.valuesRowTopOffset)
+        goalBlock.autoPositionWithinParent(.leftTop, xOffSet: 0.35*size.width, yOffSet: layout.labelsRowTopOffset)
+        scoreHeadingLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: layout.labelsRowTopOffset)
+        scoreLabel.autoPositionWithinParent(.rightTop, xOffSet: layout.spacer, yOffSet: layout.valuesRowTopOffset)
+        levelBlock.autoPositionWithinParent(.rightTop, xOffSet: 0.40*size.width, yOffSet: layout.labelsRowTopOffset)
+        
+        pauseButton.autoPositionWithinParent(.centreBottom, yOffSet: layout.buttonsRowBottomOffset)
+        playButton.autoPositionWithinParent(.centreBottom, yOffSet: layout.buttonsRowBottomOffset)
     }
     /**
      Gets the screen point at the centre of a GridReference
@@ -303,7 +296,7 @@ class GameScene: SKScene {
         if centre {
             position.x += layout.blockSize/2.0
         }
-        position.y = CGFloat(reference.row) * layout.blockSize + layout.gridBottom
+        position.y = CGFloat(reference.row) * layout.blockSize + layout.gridBottomOffset
         if centre {
             position.y += layout.blockSize/2.0
         }
@@ -329,6 +322,17 @@ class GameScene: SKScene {
     }
     
     public func showGrid(_ show: Bool) {
+        // always show a border around the grid
+        if let border = self.childNode(withName: "border") {
+            border.removeFromParent()
+        }
+        let border = SKShapeNode(rectOf: layout.gridSize)
+        border.name = "border"
+        border.lineWidth = layout.gridBorderWidth/4
+        border.strokeColor = .white
+        border.position = layout.gridCentre
+        self.addChild(border)
+        
         if !show {
             let lines = self.children.filter({$0.name?.starts(with: "_line") ?? false })
             for line in lines {
@@ -384,17 +388,7 @@ class GameScene: SKScene {
         
         pointLabel.run(move)
         pointLabel.run(fade)
-//
-//        pointLabel.run(SKAction.moveBy(x: 40, y: 40, duration: 1.0))
-//        pointLabel.run(scale)
-//        let sequence = SKAction.sequence([
-//            move,
-//            SKAction.fadeIn(withDuration: 0.2),
-//            SKAction.wait(forDuration: 0.5),
-//            SKAction.scale(by: -2, duration: 3),
-//            SKAction.fadeOut(withDuration: 0.2),
-//        ])
-//        pointLabel.run(sequence)
+
     }
     
     // MARK: - User Interface
@@ -451,10 +445,13 @@ class GameScene: SKScene {
     
     public func moveShape(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)? = nil) {
         if let playerNode = shapeNode {
+            let x = CGFloat(direction.gridDirection.offset.columnOffset)*blockSize
+            let y = CGFloat(direction.gridDirection.offset.rowOffset)*blockSize
             playerNode.run(SKAction.moveBy(
-                x: CGFloat(direction.gridDirection.gridDelta.columnDelta)*blockSize,
-                y: CGFloat(direction.gridDirection.gridDelta.rowDelta)*blockSize,
+                x: x,
+                y: y,
                 duration: speed)) {
+                    print("Moved shape to (\(playerNode.position.x),\(playerNode.position.y))")
                     completion?()
                 }
         } else {
@@ -482,20 +479,6 @@ class GameScene: SKScene {
             shapeNode?.removeFromParent()
         }
     }
-    
-//    func removePlayerBlock(_ block: Block, completion: (()->Void)? = nil) {
-//        if let playerNode = playerNode {
-//            playerNode.removeBlock(block) { (remainingBlocks) in
-//                if remainingBlocks == 0 {
-//                    self.removeShape()
-//                }
-//                completion?()
-//                return
-//            }
-//        } else {
-//            completion?()
-//        }
-//    }
     
     /**
      Removes the player and replaces it with blocks of the given type

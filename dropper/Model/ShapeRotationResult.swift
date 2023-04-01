@@ -17,7 +17,7 @@ struct ShapeRotationResult {
     var transformedReferences: [GridReference]?
     
     /**
-     If not nil, is the move the player blocks must make before rotating
+     If not nil, represents the move the player blocks must make before rotating
      */
     var wallKick: GridOffset?
 }

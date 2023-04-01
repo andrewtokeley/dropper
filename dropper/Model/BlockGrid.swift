@@ -9,12 +9,16 @@ import Foundation
 import UIKit
 
 enum BlockGridError: Error {
+    /// Thrown by BlockGrid initialisers if supplied inconsistent state.
     case InvalidInitialBlocks
-    case ReferenceOutOfBounds
-    case PlayerAlreadyExists
-    case InvalidPlayerSize
+    
+    /// Thrown if attempt to add a new shape fails
+    case CantAddShape
 }
 
+/**
+ Describes the direction a block can move
+ */
 enum BlockMoveDirection: Int {
     case left = 0
     case right
@@ -36,64 +40,123 @@ class BlockGrid {
     
     // MARK: - Properties
     
+    /**
+     Delegates methods are called to advise of changes to grid state.
+     */
     var delegate: BlockGridDelegate?
     
     /// The number of columns in the game
-    var columns: Int = 15
+    var columns: Int
     
     /// The number of rows in the game
-    var rows: Int = 15
+    var rows: Int
     
-    /// A reference to the matrix of blocks in the game. A nil means there is no block at the given position. Blocks are referenced such that blocks[r][c] is the block at row, r, and column, c, using a zero based indexing.
-    ///
-    /// Includes blocks of all types, including the active Shape's blocks. To exclude the active Shape, use ``blocksExcludingShape``
+    /**
+     A reference to the matrix of blocks in the grid.
+     
+     A nil means there is no block at the given position. Blocks are referenced such that blocks[r][c] is the block at row, r, and column, c, using a zero based indexing.
+     
+     Includes blocks of all types, including the active Shape's blocks. To exclude the active Shape, use ``blocksExcludingShape``
+     */
     var blocks: [[Block?]]!
     
+    /**
+     A reference to the matrix of blocks in the grid, but excluding blocks of type .shape.
+     */
     var blocksExcludingShape: [[Block?]]! {
-        return blocks.map { $0.map( { $0.map { $0?.type == .player ? nil : $0 } }) }
+        return blocks.map { $0.map( { $0.map { $0?.type == .shape ? nil : $0 } }) }
     }
     
+    /**
+     A reference to the original shape added to the grid.
+     */
     var shape: Shape?
     
     /**
-     Returns an array of BlockResults for each of the player blocks
+     A ``BlockResult`` array  for each of the shape's blocks
      */
-    var  playerBlocks: [BlockResult] {
-        var result = [BlockResult]()
-        for r in 0..<rows {
-            for c in 0..<columns {
-                let reference = GridReference(r,c)
-                let block = blocks[reference.row][reference.column]
-                if block?.type == .player {
-                    result.append(BlockResult(block: block, isInsideGrid: true, gridReference: reference))
-                }
-            }
-        }
-        return result
+    var  shapeBlocks: [BlockResult] {
+        guard let shape = self.shape else { return [BlockResult]() }
+        return shape.blocks
+        
+//        return shape.references.map { BlockResult(
+//            block: Block($0),
+//            isInsideGrid: true,
+//            gridReference: reference)
+//        }
+//        var result = [BlockResult]()
+//        for r in 0..<rows {
+//            for c in 0..<columns {
+//                let reference = GridReference(r,c)
+//                let block = blocks[reference.row][reference.column]
+//                if block?.type == .shape {
+//                    result.append(BlockResult(block: block, isInsideGrid: true, gridReference: reference))
+//                }
+//            }
+//        }
+//        return result
     }
     
-    /// Stores the grid reference of the player's orgin block
-    var playerOrigin: GridReference?
+    /**
+     Stores the grid reference of the active shapes orgin block
+     */
+    //var shapeOrigin: GridReference?
     
     /**
-     Returns whether the grid has any player blocks
+     Returns whether the grid contains an active shape.
      */
-    var hasPlayer: Bool {
-        playerBlocks.count > 0
+    var hasShape: Bool {
+        self.shape != nil
     }
     
     // MARK: - Initialisers
     
-    /// initializer to create a blank grid
+    /**
+     Initialises a blank grid
+     */
     convenience init(rows: Int, columns: Int) throws {
-        try self.init(rows: rows, columns: columns, blocks: Array(repeating: Array(repeating: nil, count: columns), count: rows) )
+        try self.init(Array(repeating: Array(repeating: nil, count: columns), count: rows) )
     }
     
+    /**
+     Initialises a grid with blocks represented by the string elements of the 2D array.
+     
+     - Parameter blocks: a 2D array of block strings, where blocks[0][0] represents the block in the bottom row and leftmost column.
+  
+     This initialiser is intended to be used as a convenience for testing.
+     
+     Valid strings to represent blocks include,
+     - X1: standard block set to ``BlockColour/colour1``
+     - X2: standard block set to ``BlockColour/colour2``
+     - ...X4: : standard block set to ``BlockColour/colour4``
+     - S1: shape block set to ``BlockColour/colour1``
+     - ...S4: shape block set to ``BlockColour/colour4``
+     - A small 's' represents the origin of the shape
+     
+     Note, some older tests may be using XB, XR, XO, XY and PB, PR, PO, PY but these should be avoided.
+     
+     For example;
+     ````
+     let grid = try! BlockGrid([
+     ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+     ["  ", "S1", "s1", "S1", "S1", "  ", "  "],
+     ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+     ["  ", "  ", "  ", "X2", "  ", "  ", "  "],
+     ["  ", "  ", "X1", "  ", "  ", "  ", "  "],
+     ["  ", "X1", "X1", "  ", "  ", "  ", "  "],
+     ["  ", "X1", "  ", "  ", "  ", "  ", "  "],
+     ])
+     ````
+     
+     */
     convenience init(_ blocks: [[String]]) throws {
         let rows = blocks.count
         let columns = blocks[0].count
         
         var result = [[Block?]]()
+        var shapeReferences = [GridReference]()
+        var shapeColours = [BlockColour]()
+        var shapeOrigin = GridReference.zero
         
         for r in 0..<rows {
             if columns != blocks[rows-r-1].count {
@@ -101,76 +164,108 @@ class BlockGrid {
             }
             result.append(Array(repeating: nil, count: columns))
             for c in 0..<columns {
+                
                 let char = blocks[rows-r-1][c]
+                if char.starts(with: "s") {
+                    shapeOrigin = GridReference(r,c)
+                }
                 switch char {
-                case "PB":
-                    result[r][c] = Block(.colour4, .player)
-                case "PY":
-                    result[r][c] = Block(.colour2, .player)
-                case "PR":
-                    result[r][c] = Block(.colour3, .player)
-                case "PO":
-                    result[r][c] = Block(.colour1, .player)
-                case "XB":
-                    result[r][c] = Block(.colour4, .block)
-                case "XY":
-                    result[r][c] = Block(.colour2, .block)
-                case "XR":
-                    result[r][c] = Block(.colour3, .block)
-                case "XO":
+                case "PO", "S1", "s1":
+                    shapeReferences.append(GridReference(r,c))
+                    shapeColours.append(BlockColour.colour1)
+                case "PY", "S2", "s2":
+                    shapeReferences.append(GridReference(r,c))
+                    shapeColours.append(BlockColour.colour2)
+                case "PR", "S3", "s3":
+                    shapeReferences.append(GridReference(r,c))
+                    shapeColours.append(BlockColour.colour3)
+                case "PB","S4","s4":
+                    shapeReferences.append(GridReference(r,c))
+                    shapeColours.append(BlockColour.colour4)
+                case "XO", "X1":
                     result[r][c] = Block(.colour1, .block)
-                case "XX":
+                case "XY", "X2":
+                    result[r][c] = Block(.colour2, .block)
+                case "XR", "X3":
+                    result[r][c] = Block(.colour3, .block)
+                case "XB", "X4":
+                    result[r][c] = Block(.colour4, .block)
+                case "XX", "WW":
                     result[r][c] = Block(.colour6, .wall)
                 default:
                     result[r][c] = nil
                 }
             }
         }
-        try self.init(rows: rows, columns: columns, blocks: result)
-    }
-    /**
-     Initialise new BlockGrid
-     
-     - Parameters:
-        - rows: number of rows in the grid
-        - columns: number of columns in the grid
-        - blocks: matrix of blocks, where blocks[0,0] is the block at row 0, column 0.
-     */
-    init(rows: Int, columns: Int, blocks: [[Block?]]) throws {
-        guard rows > 0 && columns > 0 else { throw BlockGridError.InvalidInitialBlocks }
-        guard blocks.count == rows else { throw BlockGridError.InvalidInitialBlocks }
-        guard blocks[0].count == columns else { throw BlockGridError.InvalidInitialBlocks }
-        guard blocks.first(where: { $0.count != blocks[0].count }) == nil else { throw BlockGridError.InvalidInitialBlocks }
-        
-        self.rows = rows
-        self.columns = columns
-        self.blocks = blocks
+        var shape: Shape?
+        if shapeReferences.count > 0 {
+            if shapeOrigin == GridReference.zero {
+                throw BlockGridError.InvalidInitialBlocks
+            } else {
+                // normalise so that origin is at (0,0)
+                let references = shapeReferences.map { $0 - shapeOrigin }
+                shape = try? Shape(references: references, colours: shapeColours)
+                
+                // move into place
+                shape?.move(shapeOrigin)
+            }
+        }
+        try self.init(result, shape: shape)
     }
     
+    /**
+     Initialise new BlockGrid from a matrix of Block instances.
+     
+     - Parameters:
+        - blocks: ``Block``matrix, where blocks[0,0] is the block at row 0, column 0, and a nil means there's no block.
+        - shape: adds a shape to the grid
+     - Throws:
+     Throws a ``BlockGridError/InvalidInitialBlocks`` is the matrix elements don't all have the same number of elements.
+     */
+    init(_ blocks: [[Block?]], shape: Shape? = nil) throws {
+        guard blocks.count > 0 && blocks[0].count > 0 else { throw BlockGridError.InvalidInitialBlocks }
+        guard blocks.first(where: { $0.count != blocks[0].count }) == nil else { throw BlockGridError.InvalidInitialBlocks }
+        
+        self.rows = blocks.count
+        self.columns = blocks[0].count
+        self.blocks = blocks
+        if let shape = shape {
+            do {
+                let _ = try self.addShape(shape)
+            }
+            catch {
+                throw BlockGridError.CantAddShape
+            }
+        }
+    }
     
     // MARK: - Position Functions
     
     /**
-     Returns the reference locations where the player would drop to
+     Returns the location the active shape can drop to
      */
-    var playerDropReferences: [GridReference]? {
-        
-        if let playerOrigin = playerOrigin, let playerCanDropTo = playerCanDropTo {
-            let rowOffset = playerCanDropTo.row - playerOrigin.row
-            let columnOffset = playerCanDropTo.column - playerOrigin.column
-            return playerBlocks.map { $0.gridReference.offSet(rowOffset, columnOffset)}
-        }
-        return nil
-    }
+//    var shapeDropReferences: [GridReference]? {
+//        guard let shape = self.shape else { return nil }
+//
+//        if let shapeCanDropTo = shapeCanDropTo {
+//            let rowOffset = shapeCanDropTo.row - shape.origin.row
+//            let columnOffset = shapeCanDropTo.column - shape.origin.column
+//            return shapeBlocks.map { $0.gridReference.offSet(rowOffset, columnOffset)}
+//        }
+//        return nil
+//    }
     
-    var playerCanDropTo: GridReference? {
-        guard let playerOrigin = playerOrigin else {
+    /**
+     Returns to where the active shape can drop
+     */
+    var shapeCanDropTo: GridReference? {
+        guard let origin = self.shape?.origin else {
             return nil
         }
         var dropTo: GridReference?
-        for row in 0..<playerOrigin.row {
-            let tryDropTo = playerOrigin.offSet(-(row + 1), 0)
-            if canMovePlayer(tryDropTo) {
+        for row in 0..<origin.row {
+            let tryDropTo = origin.offSet(-(row + 1), 0)
+            if canMoveShape(tryDropTo) {
                 dropTo = tryDropTo
             } else {
                 // the first time we can't move down means the previous move was the furthest we can go
@@ -231,10 +326,12 @@ class BlockGrid {
         return result
     }
     
-    /// Returns each block in a column
-    /// - Parameter column: zero based column reference
-    /// - Returns: array of ``BlockResult`` instances where the first row is the first element (index 0)
-    func getColumn(_ column: Int) -> [BlockResult] {
+    /**
+     Returns each block in a column
+    - Parameter column: zero based column reference
+    - Returns: array of ``BlockResult`` instances where the first row is the first element (index 0)
+     */
+    func getColumn(_ column: Int, includeShape: Bool = false) -> [BlockResult] {
         var result = [BlockResult]()
         for row in 0..<rows {
             result.append(get(GridReference(row, column)))
@@ -256,16 +353,19 @@ class BlockGrid {
     /**
      Returns all non empty block results, optionally excluding the player blocks
      
-     - Parameter excludePlayer: whether to exclude player blocks from the search. The default is true.
+     - Parameter excludeShape: whether to exclude the active shape's blocks from the search. The default is true.
      */
-    func getAll(excludePlayer: Bool = true) -> [BlockResult] {
+    func getAll(includeShape: Bool = false) -> [BlockResult] {
         var result = [BlockResult]()
         for r in 0..<rows {
             for c in 0..<columns {
                 let blockResult = get(GridReference(r,c))
-                if let block = blockResult.block {
-                    if block.type != .player || !excludePlayer {
-                        result.append(blockResult)
+                if let _ = blockResult.block {
+                    result.append(blockResult)
+                }
+                if includeShape {
+                    if let shapeBlock = shape?.blocks.first(where: { $0.gridReference == GridReference(r,c) }) {
+                        result.append(shapeBlock)
                     }
                 }
             }
@@ -320,7 +420,15 @@ class BlockGrid {
         return result
     }
     
-    func transform(_ references: [GridReference], transformedInDirection direction: BlockMoveDirection) -> [GridReference] {
+    /**
+     Transforms the references in the given direction and returns the result.
+     
+     - Parameters:
+     - references: references to transform
+     - direction: a ``BlockMoveDirection`` to transform towards
+     - Returns: new GridReference array
+     */
+    private func transform(_ references: [GridReference], transformedInDirection direction: BlockMoveDirection) -> [GridReference] {
         var result = [GridReference]()
         for reference in references {
             result.append(reference.adjacent(direction.gridDirection))
@@ -328,25 +436,49 @@ class BlockGrid {
         return result
     }
     
-    func transform(_ references: [GridReference], rotated90AboutOrigin origin: GridReference) -> [GridReference] {
+    /**
+     Returns true if there are no blocks at the given references and all the references lie inside the grid.
+     
+     This is used to see whether the active shape can move/rotate into the references.
+     */
+    private func isClear(_ references: [GridReference]) -> Bool {
         
-        // remove origin from each block, to get the origin at 0,0
-        var transformedReferences = references.map {
-            GridReference($0.row - origin.row, $0.column - origin.column)
+        // see if we an prove this wrong
+        for reference in references {
+            let blockResult = get(reference)
+            
+            if !blockResult.isInsideGrid || blockResult.block != nil {
+                return false
+            }
         }
-        
-        // transform around 0,0
-        transformedReferences = transformedReferences.map {
-            GridReference(-$0.column, $0.row)
-        }
-        
-        // add the origin back
-        transformedReferences = transformedReferences.map {
-            GridReference($0.row + origin.row, $0.column + origin.column)
-        }
-        
-        return transformedReferences
+        // if we get this far it's clear
+        return true
     }
+    
+    /// Transforms the references by 90 degrees about an origin.
+    /// - Parameters:
+    ///   - references: references to transform
+    ///   - origin: origin of transformation
+    /// - Returns: resulting GridReference array.
+//    private func transform(_ references: [GridReference], rotated90AboutOrigin origin: GridReference) -> [GridReference] {
+//
+//        // remove origin from each block, to get the origin at 0,0
+//        var transformedReferences = references.map {
+//            GridReference($0.row - origin.row, $0.column - origin.column)
+//        }
+//
+//        // transform around 0,0
+//        transformedReferences = transformedReferences.map {
+//            GridReference(-$0.column, $0.row)
+//        }
+//
+//        // add the origin back
+//        transformedReferences = transformedReferences.map {
+//            GridReference($0.row + origin.row, $0.column + origin.column)
+//        }
+//
+//        return transformedReferences
+//    }
     
     // MARK: - Block Movement
     
@@ -528,13 +660,17 @@ class BlockGrid {
     /**
      Remove a block from the grid
      */
-    func removeBlock(_ from: GridReference) {
-        
-    }
+//    func removeBlock(_ from: GridReference) {
+//
+//    }
     
-    /// Removes any blocks at the given reference locations
-    /// - Parameter references: array of GridReference instances
-    func removeBlocks(_ references: [GridReference], suppressDelegateCall: Bool = false) {
+    /**
+     Removes blocks at the given reference locations
+     
+     - Parameter references: the references to
+     - Parameter suppressDelegateCall: if set to `false` (the default) calling this method will result in a call to ``BlockGridDelegate/blockGrid(_:blocksRemoved:)``.
+     */
+    public func removeBlocks(_ references: [GridReference], suppressDelegateCall: Bool = false) {
         var removedBlocks = [Block]()
         for reference in references {
             if let block = blocks[reference.row][reference.column] {
@@ -548,135 +684,132 @@ class BlockGrid {
     }
     
     
-    // MARK: - Player Movement
-    func addShape(_ shape: Shape, reference: GridReference) throws -> Bool {
-        guard !hasPlayer else { return false }
+    // MARK: - Shape Movement
+    /**
+     Adds a shape to the top centre of the grid, ignoring its current location.
+     */
+    public func addShapeTopCentre(_ shape: Shape) -> Bool {
         
-        // keep a reference to the shape
-        self.shape = shape
-        
-        // create an array of BlockResults
-        var playerBlocks = [BlockResult]()
-        
-        for i in 0..<shape.references.count {
-            let blockReference = reference.offSet(shape.references[i].row, shape.references[i].column)
-            if !isInGrid(blockReference) {
-                return false
-            }
-            let block = Block(shape.colours[i], .player)
-            playerBlocks.append(BlockResult(block: block, isInsideGrid: true, gridReference: blockReference))
+        // normalise the shape to put it's origin at (0,0)
+        if let maxRow = shape.references.map({ $0.row }).max() {
+            let row = rows - (maxRow - shape.origin.row) - 1
+            let column = Int(columns/2)
+            shape.move(GridReference(row,column))
+            return addShape(shape)
         }
+        return false
+    }
+    
+    /**
+     Adds a new ``Shape`` to the grid at the given grid location
+     
+     - Parameters:
+        - shape: a ``Shape`` instance representing the shape to add
+     
+     - Returns: A flag that returns whether the shape was successfully added or not
+     */
+    public func addShape(_ shape: Shape) -> Bool {
+        guard self.shape == nil else { return false }
         
-        let result = addBlocks(blocks: playerBlocks.map { $0.block! }, references: playerBlocks.map { $0.gridReference })
-        
-        if result {
-            playerOrigin = reference
-            delegate?.blockGrid(self, shapeAdded: shape, to: reference)
+        if isClear(shape.references) {
+            self.shape = shape
+            delegate?.blockGrid(self, shapeAdded: shape, to: shape.origin)
             return true
-        }
-        
-        // something went wrong
-        return false
-    }
-    
-    /// Add a player or the given shape definition to the top middle of the grid. Calls the ``blockGrid(grid:, playerAdded:)`` delegate method, if successfully added.
-    ///
-    /// - Parameter shape: shape definition
-    /// - Returns: boolean indicating whether the player could be added or not
-    func addShape(_ shape: Shape) throws -> Bool {
-        
-        // default position is top middle
-        if let topRelativeRow = shape.references.map({ $0.row }).max() {
-            
-            // position as high up the grid as possible, in the middle
-            let origin = GridReference((rows - 1) - topRelativeRow, Int(columns/2))
-            return try self.addShape(shape, reference: origin)
-        }
-
-        return false
-    }
-    
-    /**
-     Moves a play as far down as it will go. Will call ``blockGrid(self, shapeDropedTo: self.playerOrigin!)`` delegate method when dropped.
-     */
-    func dropPlayer() {
-        guard hasPlayer else { return }
-        guard let playerDropReferences = playerDropReferences else { return }
-        
-        let playerReferences = playerBlocks.map { $0.gridReference }
-        let _ = moveBlocks(from: playerReferences , to: playerDropReferences, suppressDelegateCall: true)
-        
-        // update the player origin
-        if let playerOrigin = playerOrigin {
-            let delta = playerDropReferences[0] - playerReferences[0]
-            self.playerOrigin = playerOrigin + delta
-            delegate?.blockGrid(self, shapeDropedTo: self.playerOrigin!)
-        }
-    }
-    
-    /**
-     Returns whether the play can move
-     */
-    public func canMovePlayer(_ direction: BlockMoveDirection) -> Bool {
-        return canMove(references: playerBlocks.map { $0.gridReference }, direction: direction)
-    }
-    
-    /**
-     Retursn whether the player can move to the specified reference location
-     */
-    public func canMovePlayer(_ reference: GridReference) -> Bool {
-        guard let playerOrigin = playerOrigin else {
+        } else {
             return false
         }
-
-        // calculate the player references for the given location
-        
-        let rowOffset = reference.row - playerOrigin.row
-        let columnOffset = reference.column - playerOrigin.column
-        let references  = playerBlocks.map { $0.gridReference.offSet(rowOffset, columnOffset)}
-        
-        return canMove(references: playerBlocks.map { $0.gridReference }, to: references)
     }
     
-//    func movePlayer(to: reference) -> Bool {
-//        guard hasPlayer else { return false }
-//        guard canMovePlayer(reference) else { return false }
+//    /** Adds a new shape to the top middle of the grid. Will result in a call to ``BlockGridDelegate/blockGrid(_:shapeAdded:to:)`` if successfully added.
+//    
+//        - Parameter shape: shape definition
+//        - Returns: boolean indicating whether the player could be added or not
+//     */
+//    public func addShape(_ shape: Shape) throws -> Bool {
 //        
-//        let references = playerBlocks.map { $0.gridReference }
-//        
-//        // Don't allow moveBlocks to call the moveBlocks delegate method because we want to call  playerDropped instead, as it's likely to be handled differently by clients
-//        let result = moveBlocks(from: references, direction: dir, suppressDelegateCall: true)
-//        
-//        if result {
-//            // redefine where the origin is
-//            playerOrigin = playerOrigin?.adjacent(direction.gridDirection)
+//        // default position is top middle
+//        if let topRelativeRow = shape.references.map({ $0.row }).max() {
 //            
-//            delegate?.blockGrid(self, playerMovedInDirection: direction)
+//            // position as high up the grid as possible, in the middle
+//            let origin = GridReference((rows - 1) - topRelativeRow, Int(columns/2))
+//            return try self.addShape(shape, reference: origin)
 //        }
-//        return result
+//
+//        return false
 //    }
+//    
+    /**
+     Moves the active shape as far down as it will go. This method will only call ``BlockGridDelegate/blockGrid(_:shapeDropedTo:)`` when dropped, no other delegate methods will be called.
+     */
+    public func dropShape() {
+        guard let shape = self.shape else { return }
+        guard let shapeCanDropTo = shapeCanDropTo else { return }
+        
+        //let shapeReferences = shapeBlocks.map { $0.gridReference }
+        shape.move(shapeCanDropTo)
+//        let _ = moveBlocks(from: shape.references , to: shapeDropReferences, suppressDelegateCall: true)
+        
+        delegate?.blockGrid(self, shapeDropedTo: shape.origin)
+//        // update the player origin
+//        if let playerOrigin = shapeOrigin {
+//            let delta = shapeDropReferences[0] - shapeReferences[0]
+//            self.shapeOrigin = playerOrigin + delta
+//            delegate?.blockGrid(self, shapeDropedTo: self.shapeOrigin!)
+//        }
+    }
     
-    func movePlayer(_ direction: BlockMoveDirection) -> Bool {
-        guard hasPlayer else { return false }
-        guard canMovePlayer(direction) else { return false }
+    /**
+     Returns whether the active shape can move in the given direction
+     */
+    public func canMoveShape(_ direction: BlockMoveDirection) -> Bool {
+        guard let shape = self.shape else { return false }
         
-        let references = playerBlocks.map { $0.gridReference }
+        let destination = shape.origin.adjacent(direction.gridDirection)
+        return canMoveShape(destination)
+    }
+    
+    /**
+     Returns whether the active shape can move to the specified reference location
+     */
+    public func canMoveShape(_ reference: GridReference) -> Bool {
+        guard let shape = self.shape else { return false }
+
+        // calculate the player references for the given location
+        return isClear(shape.getReferences(afterMoveTo: reference))
+//
+//        let rowOffset = reference.row - shape.origin.row
+//        let columnOffset = reference.column - shape.origin.column
+//        let references = shape.references.map { $0.offSet(rowOffset, columnOffset)}
+////        let references  = shapeBlocks.map { $0.gridReference.offSet(rowOffset, columnOffset)}
+//
+//        return canMove(references: shape.references, to: references)
+    }
+    
+    /**
+     Moves the active shape in the given direction.
+     
+     Will call ``BlockGridDelegate/blockGrid(_:shapeMovedInDirection:)`` once complete.
+     */
+    public func moveShape(_ direction: BlockMoveDirection) -> Bool {
+        guard let shape = self.shape else { return false }
+        guard canMoveShape(direction) else { return false }
         
-        // Don't allow moveBlocks to call the moveBlocks delegate method because we want to call  playerDropped instead, as it's likely to be handled differently by clients
-        let result = moveBlocks(from: references, direction: direction, suppressDelegateCall: true)
+        //let references = shapeBlocks.map { $0.gridReference }
+        
+        // Don't allow moveBlocks to call the moveBlocks delegate method because we want to call  shapeMovedInDirection instead, as it's likely to be handled differently by clients
+        let result = moveBlocks(from: shape.references, direction: direction, suppressDelegateCall: true)
         
         if result {
+            shape.move(direction)
             // redefine where the origin is
-            playerOrigin = playerOrigin?.adjacent(direction.gridDirection)
+            //shapeOrigin = shapeOrigin?.adjacent(direction.gridDirection)
             delegate?.blockGrid(self, shapeMovedInDirection: direction)
         }
         return result
-        
-        
     }
     
     /**
-     Returns the new grid references after rotating them around an origin 90 degrees clockwise
+     Returns the new grid references after rotating them around an origin 90 degrees clockwise.
      */
     private func getRotatedGridReferences(references: [GridReference], origin: GridReference ) -> [GridReference] {
         
@@ -702,30 +835,31 @@ class BlockGrid {
     /**
      Returns the transformed grid references for the player, or nil if the player can't be rotated
      */
-    var rotatedPlayerGridReference: ShapeRotationResult {
+    private var rotatedShapeGridReference: ShapeRotationResult {
         
         var result = ShapeRotationResult(canRotate: false)
         
-        let playerReferences = playerBlocks.map { $0.gridReference }
+        let playerReferences = shapeBlocks.map { $0.gridReference }
         
-        if let shape = self.shape, let playerOrigin = self.playerOrigin {
+        if let shape = self.shape {
             if let wallKicks = shape.wallKicks[shape.orientation] {
                 
                 // iterate the wallKicks offsets
                 for kick in wallKicks {
                     
-                    // Offset the player and its origin by the kick and see if that can be rotated.
-                    let playerReferencesKick = playerReferences.map { $0.offSet(kick.rowOffset, kick.columnOffset)}
-                    let playerOriginKick = playerOrigin.offSet(kick.rowOffset, kick.columnOffset)
+                    let transformedReferences = shape.getRotationWithKick(kick)
+//                    // Offset the player and its origin by the kick and see if that can be rotated.
+//                    let playerReferencesKick = playerReferences.map { $0.offSet(kick.rowOffset, kick.columnOffset)}
+//                    let playerOriginKick = playerOrigin.offSet(kick.rowOffset, kick.columnOffset)
                     
-                    let transformedReferences = getRotatedGridReferences(references: playerReferencesKick, origin: playerOriginKick)
-                    
+//                    let transformedReferences = getRotatedGridReferences(references: playerReferencesKick, origin: playerOriginKick)
+//
                     // Make sure none of the transformed references are outside of the grid or land on another block
-                    if canMove(references: playerReferences, to: transformedReferences) {
+                    if canMove(references: shape.references, to: transformedReferences) {
                         
                         // this kick worked!
                         result.canRotate = true
-                        result.transformedReferences = transformedReferences
+                        //result.transformedReferences = transformedReferences
                         result.wallKick = kick
                         return result
                     }
@@ -737,57 +871,80 @@ class BlockGrid {
     }
   
     /**
-     Rotates the player and calls the delegate method ``blockGrid(_: shapeRotatedBy: withKick)``
+     Rotates the active shape clockwise 90 degrees.
+     
+     Will call ``BlockGridDelegate/blockGrid(_:shapeRotatedBy:withKick:)`` delegate method.
+     
+     See ``Shape/wallKicks`` for an explanation of wall kicks.
      */
-    func rotateShape() -> Bool {
-        let transformResult = rotatedPlayerGridReference
+    public func rotateShape() -> Bool {
+        guard let shape = self.shape else { return false }
         
-        if transformResult.canRotate {
-            
-            // if there's a kick to do before rotating...
-            if let kick = transformResult.wallKick {
-                let player = playerBlocks.map { $0.gridReference }
-                if let transformedReferences = transformResult.transformedReferences {
-                    if moveBlocks(from: player, to: transformedReferences, suppressDelegateCall: true) {
-                        self.shape?.rotate()
-                        self.playerOrigin = self.playerOrigin?.offSet(kick.rowOffset, kick.columnOffset)
-                        delegate?.blockGrid(self, shapeRotatedBy: 90.0, withKick: self.playerOrigin!)
-                    }
+        // iterate through the kicks to find the first one that allows a rotation
+        if let kicks = shape.wallKicks[shape.orientation] {
+            for kick in kicks {
+                let destination = shape.getRotationWithKick(kick)
+                if isClear(destination) {
+                    shape.rotate(with: kick)
+                    delegate?.blockGrid(self, shapeRotatedBy: 90.0, withKickMove: shape.origin)
+                    return true
                 }
             }
         }
-        return transformResult.canRotate
+        return false
     }
     
     /**
-     Converts the player into standard blocks.
+     Converts the active shape into standard blocks.
      
-     Even though this method is simply going to change the type of each player block from .player to .type, it will call the delegate methods blockAdded and playerRemoved as the view clients treats players and blocks differently.
+     Even though this method is simply going to change the type of each player block from .player to .type, it will call the delegate methods ``BlockGridDelegate/blockGrid(_:blockAdded:reference:)``  and ``BlockGridDelegate/shapeRemoved()`` to allow the delegate clients to simulate the change as required.
      */
-    func replacePlayerWithBlocksOfType(_ type: BlockType) {
+    public func replaceShapeWithBlocksOfType(_ type: BlockType) {
+        guard let shape = self.shape else { return }
         
-        // tell the delegate to remove the player
-        let blocks = playerBlocks
-        for playerBlock in blocks {
-            let reference = playerBlock.gridReference
-            playerBlock.block?.type = type
-            delegate?.blockGrid(self, blockAdded: playerBlock.block!, reference: reference)
+        for result in shape.blocks {
+            var block = result.block
+            block?.type = .block
+            addBlock(block: block!, reference: result.gridReference)
         }
+        
+        // remove the shape from the grid
+        self.shape = nil
         delegate?.shapeRemoved()
+        
+//
+//        let blocks = shapeBlocks
+//        for playerBlock in blocks {
+//            let reference = playerBlock.gridReference
+//            playerBlock.block?.type = type
+//            delegate?.blockGrid(self, blockAdded: playerBlock.block!, reference: reference)
+//        }
+        
+        
     }
     
 }
 //MARK: - CustomStringConvertible
 extension BlockGrid: CustomStringConvertible {
+    
     var description: String {
         var result = (Array(0..<columns).map { String($0) }).joined(separator: "|")
         result = " " + result
         for r in 0..<rows {
-            let row = blocks[r].map{ (block) -> String in
-                if let block = block {
-                    return block.type == .player ? "P" : "X"
+            var row = [String]()
+            for c in 0..<columns {
+                let reference = GridReference(r,c)
+                let block = get(reference)
+                if block.block != nil {
+                    row.append("X")
+                } else if shape?.references.contains(reference) ?? false {
+                    if shape?.origin == reference {
+                        row.append("s")
+                    } else {
+                        row.append("S")
+                    }
                 } else {
-                    return " "
+                    row.append(" ")
                 }
             }
             result = String(r) + row.joined(separator: "|") + "\n" + result

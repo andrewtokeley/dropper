@@ -8,7 +8,7 @@
 import Foundation
 
 /**
- A GridOffset represents hirizontal and vertical offset amounts
+ A GridOffset represents horizontal and vertical offset amounts
  */
 struct GridOffset {
     var rowOffset: Int
@@ -17,5 +17,9 @@ struct GridOffset {
     init(_ rowOffset: Int, _ columnOffset: Int) {
         self.rowOffset = rowOffset
         self.columnOffset = columnOffset
+    }
+    
+    static var zero: GridOffset {
+        return GridOffset(0,0)
     }
 }

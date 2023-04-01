@@ -10,17 +10,20 @@ import UIKit
 
 /// Enumerated value for each visual type of block
 enum BlockType: Int, Codable {
-    /// The block is part of the player's shape
-    case player = 0
-    /// The block is a standard block in the grid and will be affected by gravity
+    /// The block is part of the grid's active shape
+    case shape = 0
+    /// The block is a standard block in the grid
     case block
-    /// This is a wall block that can float in the grid and won't ever drop
+    /// This is a wall block. Not current used.
     case wall
     
+    /**
+     Debug description of the BlockType
+     */
     var description: String {
         switch self {
         case .block: return "Block"
-        case .player: return "Player"
+        case .shape: return "Player"
         case .wall: return "Wall"
         }
     }
@@ -62,8 +65,9 @@ enum BlockColour: Int, Codable {
 }
 
 /**
- Represents a single block in the game. Blocks can be marked as fixed or dynamic, if dynamic they will move within a BlockGrid if a
- move command is issued
+ Represents a single block in the game.
+ 
+ Blocks have a type that determines how they can interact with a game. If the type is .shape it is consider part of the active shape and will able to move, drop and rotate accordingly. Shapes of type .block can not be rotated or dropped. All shapes, regardless of type can be added, moved and removed.
  */
 class Block: Codable {
     
@@ -92,6 +96,7 @@ class Block: Codable {
         self.type = type
         self.isGhost = isGhost
     }
+    
 }
 
 extension Block: Equatable {

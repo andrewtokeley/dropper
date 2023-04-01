@@ -108,13 +108,11 @@ class ShapeNode: SKSpriteNode {
     }
     
     public func setShape(_ shape: Shape, blockSize: CGFloat) {
-        var blocks = [Block]()
-        for i in 0..<shape.colours.count {
-            let block = Block(shape.colours[i], .block)
-            blocks.append(block)
-        }
+        let blocks = shape.blocks.map { $0.block! }
         
-        setShape(blocks: blocks, references: shape.references, blockSize: blockSize)
+        // normalise the shape references about the origin
+        let references = shape.references.map { $0.offSet(GridOffset(-shape.origin.row, -shape.origin.column))}
+        setShape(blocks: blocks, references: references, blockSize: blockSize)
     }
     
     /**

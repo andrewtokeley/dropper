@@ -7,6 +7,9 @@
 
 import Foundation
 
+/**
+ Orientation of a shape, where ``up`` is the initial state of all ``Shape`` instances.
+ */
 enum ShapeOrientation: Int {
     case up = 0
     case right
@@ -14,13 +17,53 @@ enum ShapeOrientation: Int {
     case left
 }
 
+enum ShapeError: Error {
+    case ShapeMustContainOrigin
+}
+
+/**
+ The Shape class is used to describe a shape by the relative location of its blocks.
+ */
 class Shape {
     
+    // MARK: - Member Variables
+    
     /**
-     GridReferences for each block of the shape, where the block at (0,0) is the centre of rotation.
+     The location of the shape on a grid
      */
-    var references: [GridReference]
+    private(set) var references: [GridReference]
+    
+    /**
+     The origin block of the shape. The centre of this block will be used as the centre of origin when rotating the shape.
+     */
+    var origin: GridReference {
+        return references[originIndex]
+    }
+    
+    /**
+     When a new instance is created this index is set to the index of the (0,0) reference
+     */
+    private var originIndex: Int
+    
+    /**
+     The colours of each block, represented in the order the blocks are defined by ``references``
+     */
     var colours: [BlockColour]
+    
+    /**
+     BlocksResult array of the shape
+     */
+    var blocks: [BlockResult] {
+        return references.enumerated().map { (index, reference) in
+            BlockResult(
+                block: Block(self.colours[index], .shape, self.isGhost),
+                isInsideGrid: true,
+                gridReference: reference) }
+    }
+    
+    /**
+     Flag to determine whether the block should be rendered as a ghost. Some games allow a shape to be mirrored at the bottom of the grid where the shape would land should it be dropped.
+     */
     var isGhost: Bool = false
     
     /**
@@ -29,16 +72,46 @@ class Shape {
     var orientation = ShapeOrientation.up
     
     /**
-     Wall kicks represent the movement offsets a shape is allowed to make to achieve a given rotation.
+     Wall kicks represent the movement offsets a shape is allowed to make to achieve a given rotation. Shapes can have different wall kick definitions.
      
-     The key of the dictionary represents the *current* shape orientation and the offsets represent the kicks allowed to move clockwise to the next orientation
+     The key of the dictionary represents the *current* shape orientation and the offsets represent the kicks allowed to move clockwise to the next orientation.
      */
     var wallKicks = [ShapeOrientation: [GridOffset]]()
     
+    
+    // MARK: - Initialisers
+    
+    /**
+     Initialises a shape by defining the relative references of its blocks and each block's colour.
+     
+     - Important: A shape must define a block at location (0,0) and this will be considered the centre of rotation.
+     
+     - Throws: a ``ShapeError/ShapeMustContainOrigin`` error if no (0,0) reference is supplied.
+     */
+    init(references: [GridReference], colours: [BlockColour]) throws {
+        guard let originIndex = references.firstIndex(where: {$0.row == 0 && $0.column == 0}) else { throw ShapeError.ShapeMustContainOrigin }
+        
+        self.references = references
+        self.originIndex = originIndex
+        self.colours = colours
+        
+        // The shapes J, L, T, S, Z all use the same kicks. These kicks are overridden for I and O.
+        self.wallKicks[.up] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(1,-1), GridOffset(-2,0), GridOffset(-2,-1)]
+        self.wallKicks[.right] = [GridOffset(0,0), GridOffset(0,1), GridOffset(-1,1), GridOffset(2,0), GridOffset(2,1)]
+        self.wallKicks[.down] = [GridOffset(0,0), GridOffset(0,1), GridOffset(1,1), GridOffset(-2,0), GridOffset(-2,1)]
+        self.wallKicks[.left] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(-1,-1), GridOffset(2,0), GridOffset(2,-1)]
+    }
+    
+    //MARK: - Public Methods
+    
     /**
      Rotates the shape (just the orientation property for now)
+     
+     - Important: this does not actually change the references property but simply updates the orientation.
+     
+     - Attention: Should really change this. At the moment it's up to ``BlockGrid`` to do the rotation and then it calls this method. Should change so that this method does both.
      */
-    func rotate() {
+    func rotate(with kick: GridOffset = GridOffset.zero) {
         if orientation == .left {
             self.orientation = .up
         } else {
@@ -46,19 +119,93 @@ class Shape {
                 self.orientation = newOrientation
             }
         }
-    }
-    
-    init(references: [GridReference], colours: [BlockColour]) {
-        self.references = references
-        self.colours = colours
         
-        // The shapes J, L, T, S, Z all use the same kicks. These kicks are overridden I and O.
-        self.wallKicks[.up] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(1,-1), GridOffset(-2,0), GridOffset(-2,-1)]
-        self.wallKicks[.right] = [GridOffset(0,0), GridOffset(0,1), GridOffset(-1,1), GridOffset(2,0), GridOffset(2,1)]
-        self.wallKicks[.down] = [GridOffset(0,0), GridOffset(0,1), GridOffset(1,1), GridOffset(-2,0), GridOffset(-2,1)]
-        self.wallKicks[.left] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(-1,-1), GridOffset(2,0), GridOffset(2,-1)]
+        // rotate the references
+        self.references = getRotationWithKick(kick)
     }
     
+    /**
+     Moves the shape to the given local
+     */
+    func move(_ reference: GridReference) {
+        let difference = reference - origin
+        move(GridOffset(difference.row, difference.column))
+    }
+
+    /**
+     Moves the shape by the given kick offset
+     */
+    func move(_ offset: GridOffset) {
+        self.references = self.references.map { $0.offSet(offset) }
+    }
+    
+    /**
+     Moves the shape in the given direction
+     */
+    func move(_ direction: BlockMoveDirection) {
+        move(direction.gridDirection.offset)
+    }
+    
+    /**
+     Returns the references the shape would occupy if rotated using the given kick offset.
+     */
+    func getRotationWithKick(_ kickOffset: GridOffset) -> [GridReference] {
+        
+        let rotatedReferences = getRotatedGridReferences(
+            references: references.map { $0.offSet(kickOffset) },
+            origin: self.origin.offSet(kickOffset))
+        
+        return rotatedReferences
+    }
+
+    /**
+     Returns the references where the shape would move to given the destination.
+     */
+    func getReferences(afterMoveTo destination: GridReference) -> [GridReference] {
+        
+        var references = [GridReference]()
+        
+        // work out the offset to the new location
+        let difference = destination - origin
+        let offSet = GridOffset(difference.row, difference.column)
+        
+        for reference in self.references {
+            references.append(reference.offSet(offSet))
+        }
+        
+        return references
+    }
+    
+    // MARK: - Private Helpers
+    
+    /**
+     Returns the new grid references after rotating them around an origin 90 degrees clockwise.
+     */
+    private func getRotatedGridReferences(references: [GridReference], origin: GridReference ) -> [GridReference] {
+        
+        // remove origin from each block, to get the origin at 0,0
+        var transformedReferences = references.map {
+            GridReference($0.row - origin.row, $0.column - origin.column)
+        }
+        
+        // transform around 0,0
+        transformedReferences = transformedReferences.map {
+            GridReference(-$0.column, $0.row)
+        }
+        
+        // add the origin back
+        transformedReferences = transformedReferences.map {
+            GridReference($0.row + origin.row, $0.column + origin.column)
+        }
+        
+        return transformedReferences
+    }
+    
+    // MARK: - Static Shape Methods
+    
+    /**
+     Returns a random ``Shape`` instance.
+     */
     static func random(_ colour: BlockColour) -> Shape {
         let type = Int.random(in: 0..<6)
         switch type {
@@ -89,7 +236,7 @@ class Shape {
      ````
      */
     static func L(_ colour: BlockColour) -> Shape {
-        return Shape(
+        return try! Shape(
             references: [
             GridReference(0,1),
             GridReference(0,0),
@@ -109,7 +256,7 @@ class Shape {
      ````
      */
     static func J(_ colour: BlockColour) -> Shape {
-        return Shape(references: [
+        return try! Shape(references: [
             GridReference(0,1),
             GridReference(0,0),
             GridReference(0,-1),
@@ -128,7 +275,7 @@ class Shape {
      ````
      */
     static func I(_ colour: BlockColour) -> Shape {
-        let s = Shape(references: [
+        let s = try! Shape(references: [
             GridReference(0,-1),
             GridReference(0,0),
             GridReference(0,1),
@@ -153,7 +300,7 @@ class Shape {
      ````
      */
     static func O(_ colour: BlockColour) -> Shape {
-        let s = Shape(references: [
+        let s = try! Shape(references: [
             GridReference(1,0),
             GridReference(1,1),
             GridReference(0,0),
@@ -177,7 +324,7 @@ class Shape {
      ````
      */
     static func S(_ colour: BlockColour) -> Shape {
-        return Shape(references: [
+        return try! Shape(references: [
             GridReference(0,-1),
             GridReference(0,0),
             GridReference(1,0),
@@ -195,7 +342,7 @@ class Shape {
      ````
      */
     static func Z(_ colour: BlockColour) -> Shape {
-        return Shape(references: [
+        return try! Shape(references: [
             GridReference(1,-1),
             GridReference(1,0),
             GridReference(0,0),

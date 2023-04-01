@@ -35,7 +35,7 @@ protocol GameViewApi: UserInterfaceProtocol {
     func addShape(_ shape: Shape, to: GridReference)
     
     /**
-     Called by the Presenter to get the View to start the game loop. Once set the View will call the Presenter's ``didUpdateGameLoop`` method every ``loopTimeInterval`` seconds.
+     Called by the Presenter to get the View to start the game loop. Once set the View will call the Presenter's ``GamePresenterApi/didUpdateGameLoop()`` method every `loopTimeInterval` seconds.
      */
     func startGameLoop(_ loopTimeInterval: TimeInterval)
     
@@ -151,7 +151,7 @@ protocol GamePresenterApi: PresenterProtocol {
     func didCreateNewGame(game: Game, settings: Settings)
     
     /**
-     Called by the Interactor whenever a new level is ready to be played. The Presenter will reset the UI, update the level description and initiate a new player by calling back to the Interactor via the ``didLoadLevel`` method.
+     Called by the Interactor whenever a new level is ready to be played. The Presenter will reset the UI, update the level description and initiate a new player by calling back to the Interactor via the ``GameInteractorApi/didLoadLevel()`` method.
      */
     func didFetchNextLevel(_ level: Level, fromState: Bool)
     
@@ -182,17 +182,18 @@ protocol GameInteractorApi: InteractorProtocol {
      The first call made by the Presenter when the module loads and we know what game genre we're playing.
      
      Calls back to the following Presenter methods;
-     - ``didCreateNewGame(rows:columns:columnssettings)``
-     - ``didFetchNextLevel(level)``
-     -  ``didUpdateTotals(score:level:rows)``
+     - ``GamePresenterApi/didCreateNewGame(game:settings:)``
+     - ``GamePresenterApi/didFetchNextLevel(_:fromState:)``
+     - ``GamePresenterApi/didUpdateTotals(points:score:goalProgressValue:goalUnit:)``
      */
     func createNewGame(_ title : GameTitle)
     
     /**
-     Record when some achievements have been gained. Achievements are earned whenever effects are run and the shape has stopped dropping
+     Record when some achievements have been gained. Achievements are earned whenever effects are run and the shape has stopped dropping.
      
-     Calls back to the following Presenter method(s);
-     -  ``didUpdateTotals(score:level:rows)``
+     We pass in whether the achievements were recorded as a result of a hard drop because this can influence the number of points awarded in some games.
+     
+     The method will call ``GamePresenterApi/didUpdateTotals(points:score:goalProgressValue:goalUnit:)`` if there are any points awarded and what progress through the level to display.
      */
     func recordAchievements(_ achievements: Achievements, with hardDrop: Bool)
     
@@ -211,6 +212,13 @@ protocol GameInteractorApi: InteractorProtocol {
      */
     func saveScores(completion: ((Bool)->Void)?)
     
+    /**
+     Saves the current game state
+     */
     func saveState()
+    
+    /**
+     Removes the saved game state
+     */
     func clearState()
 }

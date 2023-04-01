@@ -121,7 +121,7 @@ extension GamePresenter: GamePresenterApi {
         if !fromState {
             let blocks = self.grid.getAll().map { $0.block! }
             self.grid.removeBlocks(self.grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
-            self.grid.replacePlayerWithBlocksOfType(.block)
+            self.grid.replaceShapeWithBlocksOfType(.block)
             
             self.view.removeBlocks(blocks) {
                 self.view.displayModalDialog(title: title, message: message, actions: [startGameAction])
@@ -146,16 +146,19 @@ extension GamePresenter: GamePresenterApi {
     }
     
     func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool = false) {
+        // some edge case where you're rotating when you land but we don't
+        self.isRotating = false
+        
+        // update the next shape
         view.displayNextShape(nextShape)
-        if let result = try? grid.addShape(shape) {
-            if result {
-                self.gamePaused = false 
-                view.startGameLoop(gameLoopInterval)
-            } else {
-                // can't add a new player because there's no room :-(
-                self.gameOver()
-            }
+        
+        //
+        if grid.addShapeTopCentre(shape) {
+            self.gamePaused = false
+            view.startGameLoop(gameLoopInterval)
         } else {
+            // can't add a new player because there's no room :-(
+            self.gameOver()
             view.stopGameLoop()
         }
     }
@@ -205,7 +208,7 @@ extension GamePresenter: GamePresenterApi {
     
     func didUpdateGameLoop() {
         guard !gamePaused else { return }
-        if grid.movePlayer(.down) {
+        if grid.moveShape(.down) {
             view.moveShape(.down, speed: 0.1, completion: nil)
         } else {
             // you've hit the ground or landed on another block
@@ -215,14 +218,14 @@ extension GamePresenter: GamePresenterApi {
     
     func didSelectMove(_ direction: BlockMoveDirection) {
         if !isDropping && !gamePaused {
-            let _ = grid.movePlayer(direction)
+            let _ = grid.moveShape(direction)
         }
     }
     
     func didSelectDrop() {
         if !isDropping && !gamePaused {
             self.isDropping = true
-            grid.dropPlayer()
+            grid.dropShape()
         }
     }
     
@@ -237,7 +240,7 @@ extension GamePresenter: GamePresenterApi {
     }
     
     private func applyEffects() {
-        self.grid.replacePlayerWithBlocksOfType(.block)
+        self.grid.replaceShapeWithBlocksOfType(.block)
         self.view.convertShapeToBlocks(.block)
         
         let runner = EffectsRunner(grid: grid, effects: self.gridEffects)
@@ -306,7 +309,7 @@ extension GamePresenter: BlockGridDelegate {
     }
     
     func blockGrid(_ blockGrid: BlockGrid, shapeMovedInDirection direction: BlockMoveDirection) {
-        if let ghostReference = grid.playerCanDropTo {
+        if let ghostReference = grid.shapeCanDropTo {
             view.showShapeGhost(at: ghostReference)
         }
         if direction == .left || direction == .right {
@@ -317,16 +320,16 @@ extension GamePresenter: BlockGridDelegate {
     
     func blockGrid(_ blockGrid: BlockGrid, shapeAdded: Shape, to: GridReference) {
         view.addShape(shapeAdded, to: to)
-        if let ghostReference = grid.playerCanDropTo {
+        if let ghostReference = grid.shapeCanDropTo {
             view.showShapeGhost(at: ghostReference)
         }
     }
     
-    func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat, withKick moveTo: GridReference) {
+    func blockGrid(_ blockGrid: BlockGrid, shapeRotatedBy degrees: CGFloat, withKickMove moveTo: GridReference) {
         view.moveShape(moveTo, speed: 0, withShake: false) {
-            self.isRotating = false
             self.view.rotateShape(degrees) {
-                if let ghostReference = self.grid.playerCanDropTo {
+                self.isRotating = false
+                if let ghostReference = self.grid.shapeCanDropTo {
                     self.view.showShapeGhost(at: ghostReference)
                 }
             }
@@ -351,19 +354,19 @@ extension GamePresenter: BlockGridDelegate {
         view.addBlock(block, reference: reference, completion: nil)
     }
     
-    func blockGrid(_ blockGrid: BlockGrid, blockRemoved block: Block) {
-        view.removeBlock(block) {
-            // drop any suspended blocks
-            //self.applyGravity()
-        }
-    }
+//    func blockGrid(_ blockGrid: BlockGrid, blockRemoved block: Block) {
+//        view.removeBlock(block) {
+//            // drop any suspended blocks
+//            //self.applyGravity()
+//        }
+//    }
     
 }
 
 extension GamePresenter: EffectsRunnerDelegate {
     
     func didFinishEffectsRun(_ runner: EffectsRunner, achievements: Achievements) {
-        
+        self.isRotating = false
         interactor.recordAchievements(achievements, with: self.isDropping)
         self.isDropping = false
         
