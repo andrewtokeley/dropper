@@ -157,6 +157,8 @@ final class GameView: UserInterface {
     }
 
     private var lastPanPoint = CGPoint(x:0, y:0)
+    private var isPanningLeftRight = false
+    
     @objc func pan(sender: UIPanGestureRecognizer) {
         guard let blockSize = gameScene?.blockSize else { return }
         let panVelocity = sender.velocity(in: self.view)
@@ -164,14 +166,18 @@ final class GameView: UserInterface {
         
         let sensitivity: CGFloat = 0.8
         let swipeVelocityThreshold:CGFloat = 300
-        
-        if sender.state == .began {
+        if sender.state == .ended {
+            self.isPanningLeftRight = false
+        } else if sender.state == .began {
             lastPanPoint = panPoint
         } else if sender.state == .changed {
             
             if abs(panPoint.y - lastPanPoint.y) > blockSize && panVelocity.y > swipeVelocityThreshold {
-                presenter.didSelectDrop()
+                if !isPanningLeftRight {
+                    presenter.didSelectDrop()
+                }
             } else if abs(panPoint.x - lastPanPoint.x) > sensitivity  * blockSize {
+                isPanningLeftRight = true
                 if panPoint.x > lastPanPoint.x {
                     presenter.didSelectMove(.right)
                 } else {

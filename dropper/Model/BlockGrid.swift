@@ -78,35 +78,6 @@ class BlockGrid {
     var  shapeBlocks: [BlockResult] {
         guard let shape = self.shape else { return [BlockResult]() }
         return shape.blocks
-        
-//        return shape.references.map { BlockResult(
-//            block: Block($0),
-//            isInsideGrid: true,
-//            gridReference: reference)
-//        }
-//        var result = [BlockResult]()
-//        for r in 0..<rows {
-//            for c in 0..<columns {
-//                let reference = GridReference(r,c)
-//                let block = blocks[reference.row][reference.column]
-//                if block?.type == .shape {
-//                    result.append(BlockResult(block: block, isInsideGrid: true, gridReference: reference))
-//                }
-//            }
-//        }
-//        return result
-    }
-    
-    /**
-     Stores the grid reference of the active shapes orgin block
-     */
-    //var shapeOrigin: GridReference?
-    
-    /**
-     Returns whether the grid contains an active shape.
-     */
-    var hasShape: Bool {
-        self.shape != nil
     }
     
     // MARK: - Initialisers
@@ -230,10 +201,8 @@ class BlockGrid {
         self.columns = blocks[0].count
         self.blocks = blocks
         if let shape = shape {
-            do {
-                let _ = try self.addShape(shape)
-            }
-            catch {
+            let result = self.addShape(shape)
+            if !result {
                 throw BlockGridError.CantAddShape
             }
         }
@@ -455,31 +424,6 @@ class BlockGrid {
         return true
     }
     
-    /// Transforms the references by 90 degrees about an origin.
-    /// - Parameters:
-    ///   - references: references to transform
-    ///   - origin: origin of transformation
-    /// - Returns: resulting GridReference array.
-//    private func transform(_ references: [GridReference], rotated90AboutOrigin origin: GridReference) -> [GridReference] {
-//
-//        // remove origin from each block, to get the origin at 0,0
-//        var transformedReferences = references.map {
-//            GridReference($0.row - origin.row, $0.column - origin.column)
-//        }
-//
-//        // transform around 0,0
-//        transformedReferences = transformedReferences.map {
-//            GridReference(-$0.column, $0.row)
-//        }
-//
-//        // add the origin back
-//        transformedReferences = transformedReferences.map {
-//            GridReference($0.row + origin.row, $0.column + origin.column)
-//        }
-//
-//        return transformedReferences
-//    }
-    
     // MARK: - Block Movement
     
     
@@ -658,13 +602,6 @@ class BlockGrid {
     }
     
     /**
-     Remove a block from the grid
-     */
-//    func removeBlock(_ from: GridReference) {
-//
-//    }
-    
-    /**
      Removes blocks at the given reference locations
      
      - Parameter references: the references to
@@ -720,24 +657,6 @@ class BlockGrid {
         }
     }
     
-//    /** Adds a new shape to the top middle of the grid. Will result in a call to ``BlockGridDelegate/blockGrid(_:shapeAdded:to:)`` if successfully added.
-//    
-//        - Parameter shape: shape definition
-//        - Returns: boolean indicating whether the player could be added or not
-//     */
-//    public func addShape(_ shape: Shape) throws -> Bool {
-//        
-//        // default position is top middle
-//        if let topRelativeRow = shape.references.map({ $0.row }).max() {
-//            
-//            // position as high up the grid as possible, in the middle
-//            let origin = GridReference((rows - 1) - topRelativeRow, Int(columns/2))
-//            return try self.addShape(shape, reference: origin)
-//        }
-//
-//        return false
-//    }
-//    
     /**
      Moves the active shape as far down as it will go. This method will only call ``BlockGridDelegate/blockGrid(_:shapeDropedTo:)`` when dropped, no other delegate methods will be called.
      */
@@ -745,17 +664,8 @@ class BlockGrid {
         guard let shape = self.shape else { return }
         guard let shapeCanDropTo = shapeCanDropTo else { return }
         
-        //let shapeReferences = shapeBlocks.map { $0.gridReference }
         shape.move(shapeCanDropTo)
-//        let _ = moveBlocks(from: shape.references , to: shapeDropReferences, suppressDelegateCall: true)
-        
         delegate?.blockGrid(self, shapeDropedTo: shape.origin)
-//        // update the player origin
-//        if let playerOrigin = shapeOrigin {
-//            let delta = shapeDropReferences[0] - shapeReferences[0]
-//            self.shapeOrigin = playerOrigin + delta
-//            delegate?.blockGrid(self, shapeDropedTo: self.shapeOrigin!)
-//        }
     }
     
     /**
@@ -776,13 +686,7 @@ class BlockGrid {
 
         // calculate the player references for the given location
         return isClear(shape.getReferences(afterMoveTo: reference))
-//
-//        let rowOffset = reference.row - shape.origin.row
-//        let columnOffset = reference.column - shape.origin.column
-//        let references = shape.references.map { $0.offSet(rowOffset, columnOffset)}
-////        let references  = shapeBlocks.map { $0.gridReference.offSet(rowOffset, columnOffset)}
-//
-//        return canMove(references: shape.references, to: references)
+
     }
     
     /**
@@ -802,7 +706,6 @@ class BlockGrid {
         if result {
             shape.move(direction)
             // redefine where the origin is
-            //shapeOrigin = shapeOrigin?.adjacent(direction.gridDirection)
             delegate?.blockGrid(self, shapeMovedInDirection: direction)
         }
         return result
@@ -833,42 +736,29 @@ class BlockGrid {
 
 
     /**
-     Returns the transformed grid references for the player, or nil if the player can't be rotated
+     Returns the transformed grid references for the shape, or nil if the player can't be rotated
      */
-    private var rotatedShapeGridReference: ShapeRotationResult {
-        
-        var result = ShapeRotationResult(canRotate: false)
-        
-        let playerReferences = shapeBlocks.map { $0.gridReference }
-        
-        if let shape = self.shape {
-            if let wallKicks = shape.wallKicks[shape.orientation] {
-                
-                // iterate the wallKicks offsets
-                for kick in wallKicks {
-                    
-                    let transformedReferences = shape.getRotationWithKick(kick)
-//                    // Offset the player and its origin by the kick and see if that can be rotated.
-//                    let playerReferencesKick = playerReferences.map { $0.offSet(kick.rowOffset, kick.columnOffset)}
-//                    let playerOriginKick = playerOrigin.offSet(kick.rowOffset, kick.columnOffset)
-                    
-//                    let transformedReferences = getRotatedGridReferences(references: playerReferencesKick, origin: playerOriginKick)
-//
-                    // Make sure none of the transformed references are outside of the grid or land on another block
-                    if canMove(references: shape.references, to: transformedReferences) {
-                        
-                        // this kick worked!
-                        result.canRotate = true
-                        //result.transformedReferences = transformedReferences
-                        result.wallKick = kick
-                        return result
-                    }
-                }
-            }
-        }
-        
-        return result
-    }
+//    private var rotatedShapeGridReference: ShapeRotationResult {
+//        guard let shape = self.shape else { return ShapeRotationResult(canRotate: false) }
+//        
+//        var result = ShapeRotationResult(canRotate: false)
+//        if let wallKicks = shape.wallKicks[shape.orientation] {
+//            
+//            // iterate the wallKicks offsets
+//            for kick in wallKicks {
+//                
+//                let transformedReferences = shape.getRotationWithKick(kick)
+//                if canMove(references: shape.references, to: transformedReferences) {
+//                    // this kick worked!
+//                    result.wallKick = kick
+//                    result.canRotate = true
+//                    result.transformedReferences = transformedReferences
+//                }
+//            }
+//        }
+//        
+//        return result
+//    }
   
     /**
      Rotates the active shape clockwise 90 degrees.
@@ -879,7 +769,8 @@ class BlockGrid {
      */
     public func rotateShape() -> Bool {
         guard let shape = self.shape else { return false }
-        
+        guard shape.canBeRotated else { return false }
+
         // iterate through the kicks to find the first one that allows a rotation
         if let kicks = shape.wallKicks[shape.orientation] {
             for kick in kicks {
@@ -903,7 +794,7 @@ class BlockGrid {
         guard let shape = self.shape else { return }
         
         for result in shape.blocks {
-            var block = result.block
+            let block = result.block
             block?.type = .block
             addBlock(block: block!, reference: result.gridReference)
         }
@@ -911,16 +802,6 @@ class BlockGrid {
         // remove the shape from the grid
         self.shape = nil
         delegate?.shapeRemoved()
-        
-//
-//        let blocks = shapeBlocks
-//        for playerBlock in blocks {
-//            let reference = playerBlock.gridReference
-//            playerBlock.block?.type = type
-//            delegate?.blockGrid(self, blockAdded: playerBlock.block!, reference: reference)
-//        }
-        
-        
     }
     
 }

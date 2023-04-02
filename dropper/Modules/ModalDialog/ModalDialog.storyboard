@@ -24,7 +24,7 @@
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="reM-qk-ZrI" userLabel="Dialog">
-                                <rect key="frame" x="46" y="295" width="301" height="262"/>
+                                <rect key="frame" x="46" y="293.66666666666669" width="301" height="265.00000000000006"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lD9-QZ-7SW">
                                         <rect key="frame" x="121.99999999999999" y="29.999999999999996" width="57.333333333333329" height="33.666666666666657"/>
@@ -33,15 +33,15 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="If you start a new game, the current game will be lost" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IWI-oR-9jh">
-                                        <rect key="frame" x="30" y="73.666666666666686" width="241" height="38.333333333333343"/>
+                                        <rect key="frame" x="30" y="73.666666666666629" width="241" height="38.333333333333343"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="5iH-3Y-RfX" userLabel="ActionsStackView">
-                                        <rect key="frame" x="20" y="132" width="261" height="110"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="5iH-3Y-RfX" userLabel="ActionsStackView">
+                                        <rect key="frame" x="20" y="132" width="261" height="113"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="110" id="K5h-fD-oPM"/>
+                                            <constraint firstAttribute="height" constant="113" id="K5h-fD-oPM"/>
                                         </constraints>
                                     </stackView>
                                 </subviews>

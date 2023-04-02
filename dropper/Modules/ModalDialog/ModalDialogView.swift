@@ -16,6 +16,8 @@ final class ModalDialogView: UIViewController {
     // MARK: - Private Properties
     
     private let buttonHeight:CGFloat = 50
+    private let buttonSpacing:CGFloat = 10
+    
     private var presentFrom: UIViewController?
     public var actions = [ModalDialogAction]()
     private var heading: String = ""
@@ -56,9 +58,6 @@ final class ModalDialogView: UIViewController {
     private func getButton(_ action: ModalDialogAction) -> UIButton? {
         
         let button = UIButton()
-
-        // Constraints
-        button.autoSetDimension(.height, toSize: self.buttonHeight)
 
         // Rounded corners
         button.setTitle(action.title, for: .normal)
@@ -115,8 +114,11 @@ final class ModalDialogView: UIViewController {
             self.actionsStackView.addArrangedSubview(button)
             
             // for each action button we add the stackview needs to grow
-            let stackHeight:CGFloat = CGFloat(self.actions.count) * (self.buttonHeight + 10)
-            print(stackHeight)
+            // button
+            // buttonSpacing
+            // button
+            let n = CGFloat(self.actions.count)
+            let stackHeight:CGFloat = n * self.buttonHeight + (n - 1) * self.buttonSpacing
             self.stackViewHeight.constant = stackHeight
         }
     }

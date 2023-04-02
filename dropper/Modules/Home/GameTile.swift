@@ -56,6 +56,8 @@ class GameTile: UICollectionViewCell {
             if let formattedNumber = numberFormatter.string(from: NSNumber(integerLiteral: title.highScore)) {
                 highscoreLabel.text = "\(formattedNumber)"
             }
+        } else {
+            highscoreLabel.text = "-"
         }
         if state != nil {
             primaryButton.setTitle("Continue Game", for: .normal)

@@ -451,7 +451,6 @@ class GameScene: SKScene {
                 x: x,
                 y: y,
                 duration: speed)) {
-                    print("Moved shape to (\(playerNode.position.x),\(playerNode.position.y))")
                     completion?()
                 }
         } else {

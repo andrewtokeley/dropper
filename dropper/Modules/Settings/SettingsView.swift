@@ -17,6 +17,8 @@ fileprivate enum SettingsSwitch: Int {
 //MARK: SettingsView Class
 final class SettingsView: UserInterface {
     
+    private var showClearHighScoresOption = false
+    
     lazy private var tableView: UITableView = {
         let tableView = UITableView(frame: self.view.frame, style: .grouped)
         tableView.delegate = self
@@ -54,6 +56,24 @@ final class SettingsView: UserInterface {
         return switchView
     }()
     
+    lazy var clearStateTableViewCell: UITableViewCell = {
+        let cell = UITableViewCell(style: UITableViewCell.CellStyle.value1, reuseIdentifier: nil)
+        let button = UIButton(primaryAction: UIAction { (action) in
+            self.presenter.didSelectClearHighScores()
+        })
+        button.setTitle("Clear high scores", for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.setTitleColor(.gray, for: .disabled)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        button.contentHorizontalAlignment = .left
+        button.tag = 123
+        cell.contentView.addSubview(button)
+        
+        button.autoPinEdgesToSuperviewEdges(with: UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 0))
+        button.autoSetDimension(.height, toSize: 50)
+        return cell
+    }()
+    
     override func loadView() {
         super.loadView()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(handleClose(_:)))
@@ -86,13 +106,19 @@ final class SettingsView: UserInterface {
 //MARK: - SettingsView API
 extension SettingsView: SettingsViewApi {
     
-    func displaySettings(_ settings: Settings) {
+    func removeClearHighScoresOption() {
+        self.showClearHighScoresOption = false
+        tableView.reloadData()
+    }
+    
+    func displaySettings(_ settings: Settings, showClearHighScores: Bool) {
         self.title = "Settings"
         self.view.backgroundColor = .white
 
         showGridSwitch.isOn = settings.showGrid
         showGhostSwitch.isOn = settings.showGhost
         
+        self.showClearHighScoresOption = showClearHighScores
         self.tableView.reloadData()
     }
     
@@ -107,25 +133,50 @@ extension SettingsView: UITableViewDelegate {
 
 extension SettingsView: UITableViewDataSource {
     
+    func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        if section == 0 {
+            return ""
+        }
+        return "This action will remove all high scores for this game."
+    }
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "Game Options"
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 2
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let row = indexPath.row
-        if row == 1 {
-            return showGridTableViewCell
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 0 {
+            return "Game Options"
         } else {
-            return showGhostTableViewCell
+            return "Scores"
         }
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return 2
+        } else {
+            return 1
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let section = indexPath.section
+        let row = indexPath.row
+        
+        if section == 0 {
+            if row == 0 {
+                return showGridTableViewCell
+            } else {
+                return showGhostTableViewCell
+            }
+        } else if section == 1 {
+            
+            if let button = clearStateTableViewCell.viewWithTag(123) as? UIButton {
+                button.isEnabled = self.showClearHighScoresOption
+            }
+            return clearStateTableViewCell
+        }
+        return UITableViewCell()
     }
     
 }

@@ -15,12 +15,15 @@ protocol SettingsRouterApi: RouterProtocol {
 //MARK: - SettingsView API
 protocol SettingsViewApi: UserInterfaceProtocol {
     func displayTitle(_ title: String)
-    func displaySettings(_ settings: Settings)
+    func displaySettings(_ settings: Settings, showClearHighScores: Bool)
+    func removeClearHighScoresOption()
 }
 
 //MARK: - SettingsPresenter API
 protocol SettingsPresenterApi: PresenterProtocol {
-    func didLoadSettings(_ settings: Settings)
+    func didLoadSettings(_ settings: Settings, showClearHighScores: Bool)
+    func didSelectClearHighScores()
+    func didClearHighScores()
     func didUpdateShowGrid(show: Bool)
     func didUpdateShowGhost(show: Bool)
     func didSaveSettings(_ settings: Settings)
@@ -31,4 +34,5 @@ protocol SettingsPresenterApi: PresenterProtocol {
 protocol SettingsInteractorApi: InteractorProtocol {
     func loadSettings(for title: GameTitle)
     func saveSettings(for title: GameTitle, settings: Settings)
+    func clearHighScores(for title: GameTitle)
 }

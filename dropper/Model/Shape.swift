@@ -41,6 +41,18 @@ class Shape {
     }
     
     /**
+     Unique name for a shape, for example, 'L', 'Z'...
+     */
+    var name: String
+    
+    /**
+     Returns whether a shape can be rotated or not.
+     */
+    var canBeRotated: Bool {
+        return name != "O"
+    }
+    
+    /**
      When a new instance is created this index is set to the index of the (0,0) reference
      */
     private var originIndex: Int
@@ -88,7 +100,7 @@ class Shape {
      
      - Throws: a ``ShapeError/ShapeMustContainOrigin`` error if no (0,0) reference is supplied.
      */
-    init(references: [GridReference], colours: [BlockColour]) throws {
+    init(references: [GridReference], colours: [BlockColour], name: String = "") throws {
         guard let originIndex = references.firstIndex(where: {$0.row == 0 && $0.column == 0}) else { throw ShapeError.ShapeMustContainOrigin }
         
         self.references = references
@@ -100,18 +112,17 @@ class Shape {
         self.wallKicks[.right] = [GridOffset(0,0), GridOffset(0,1), GridOffset(-1,1), GridOffset(2,0), GridOffset(2,1)]
         self.wallKicks[.down] = [GridOffset(0,0), GridOffset(0,1), GridOffset(1,1), GridOffset(-2,0), GridOffset(-2,1)]
         self.wallKicks[.left] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(-1,-1), GridOffset(2,0), GridOffset(2,-1)]
+        
+        self.name = name
     }
     
     //MARK: - Public Methods
     
     /**
-     Rotates the shape (just the orientation property for now)
-     
-     - Important: this does not actually change the references property but simply updates the orientation.
-     
-     - Attention: Should really change this. At the moment it's up to ``BlockGrid`` to do the rotation and then it calls this method. Should change so that this method does both.
+     Rotates the shape with an optional wallkick move.
      */
     func rotate(with kick: GridOffset = GridOffset.zero) {
+        
         if orientation == .left {
             self.orientation = .up
         } else {
@@ -146,18 +157,8 @@ class Shape {
         move(direction.gridDirection.offset)
     }
     
-    /**
-     Returns the references the shape would occupy if rotated using the given kick offset.
-     */
-    func getRotationWithKick(_ kickOffset: GridOffset) -> [GridReference] {
-        
-        let rotatedReferences = getRotatedGridReferences(
-            references: references.map { $0.offSet(kickOffset) },
-            origin: self.origin.offSet(kickOffset))
-        
-        return rotatedReferences
-    }
-
+    // MARK: - Public Methods
+    
     /**
      Returns the references where the shape would move to given the destination.
      */
@@ -176,6 +177,17 @@ class Shape {
         return references
     }
     
+    /**
+     Returns the references the shape would occupy if rotated using the given kick offset.
+     */
+    func getRotationWithKick(_ kickOffset: GridOffset) -> [GridReference] {
+        let rotatedReferences = getRotatedGridReferences(
+            references: references.map { $0.offSet(kickOffset) },
+            origin: self.origin.offSet(kickOffset))
+        
+        return rotatedReferences
+    }
+
     // MARK: - Private Helpers
     
     /**
@@ -243,7 +255,8 @@ class Shape {
             GridReference(0,-1),
             GridReference(1,1)
             ],
-            colours: Array(repeating: colour, count: 4))
+            colours: Array(repeating: colour, count: 4),
+            name: "L")
     }
     
     /**
@@ -256,12 +269,14 @@ class Shape {
      ````
      */
     static func J(_ colour: BlockColour) -> Shape {
-        return try! Shape(references: [
+        return try! Shape(
+            references: [
             GridReference(0,1),
             GridReference(0,0),
             GridReference(0,-1),
-            GridReference(1,-1)
-        ], colours: Array(repeating: colour, count: 4))
+            GridReference(1,-1)],
+            colours: Array(repeating: colour, count: 4),
+            name: "J")
     }
     
     /**
@@ -275,12 +290,14 @@ class Shape {
      ````
      */
     static func I(_ colour: BlockColour) -> Shape {
-        let s = try! Shape(references: [
+        let s = try! Shape(
+            references: [
             GridReference(0,-1),
             GridReference(0,0),
             GridReference(0,1),
-            GridReference(0,2)
-        ], colours: Array(repeating: colour, count: 4))
+            GridReference(0,2)],
+            colours: Array(repeating: colour, count: 4),
+            name: "I")
         
         s.wallKicks[.up] = [GridOffset(0,0), GridOffset(0,-2), GridOffset(0,1), GridOffset(-1,-2), GridOffset(2,1)]
         s.wallKicks[.right] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(0,2), GridOffset(1,2), GridOffset(-1,2)]
@@ -300,12 +317,14 @@ class Shape {
      ````
      */
     static func O(_ colour: BlockColour) -> Shape {
-        let s = try! Shape(references: [
+        let s = try! Shape(
+            references: [
             GridReference(1,0),
             GridReference(1,1),
             GridReference(0,0),
-            GridReference(0,1)
-        ], colours: Array(repeating: colour, count: 4))
+            GridReference(0,1)],
+            colours: Array(repeating: colour, count: 4),
+            name: "O")
         
         s.wallKicks[.up] = [GridOffset(0,0)]
         s.wallKicks[.right] = [GridOffset(0,0)]
@@ -324,12 +343,14 @@ class Shape {
      ````
      */
     static func S(_ colour: BlockColour) -> Shape {
-        return try! Shape(references: [
+        return try! Shape(
+            references: [
             GridReference(0,-1),
             GridReference(0,0),
             GridReference(1,0),
-            GridReference(1,1)
-        ], colours: Array(repeating: colour, count: 4))
+            GridReference(1,1)],
+            colours: Array(repeating: colour, count: 4),
+            name: "S")
     }
     
     /**
@@ -342,12 +363,14 @@ class Shape {
      ````
      */
     static func Z(_ colour: BlockColour) -> Shape {
-        return try! Shape(references: [
+        return try! Shape(
+            references: [
             GridReference(1,-1),
             GridReference(1,0),
             GridReference(0,0),
-            GridReference(0,1)
-        ], colours: Array(repeating: colour, count: 4))
+            GridReference(0,1)],
+            colours: Array(repeating: colour, count: 4),
+            name: "Z")
     }
 }
 

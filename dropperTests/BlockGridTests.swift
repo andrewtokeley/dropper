@@ -38,7 +38,7 @@ class BlockGridTests: XCTestCase {
                 ])
             XCTAssertEqual(grid.rows, 3)
             XCTAssertEqual(grid.columns, 7)
-            XCTAssertTrue(grid.hasShape)
+            XCTAssertNotNil(grid.shape)
             XCTAssertEqual(grid.shape?.origin, GridReference(2,3))
         } catch {
             XCTFail("Should have worked: " + error.localizedDescription)

@@ -33,9 +33,18 @@ final class SettingsPresenter: Presenter {
 // MARK: - SettingsPresenter API
 extension SettingsPresenter: SettingsPresenterApi {
     
-    func didLoadSettings(_ settings: Settings) {
+    func didClearHighScores() {
+        view.removeClearHighScoresOption()
+    }
+    
+    func didSelectClearHighScores() {
+        if let title = self.gameTitle {
+            interactor.clearHighScores(for: title)
+        }
+    }
+    func didLoadSettings(_ settings: Settings, showClearHighScores: Bool) {
         self.settings = settings
-        view.displaySettings(settings)
+        view.displaySettings(settings, showClearHighScores: showClearHighScores)
         if let title = self.gameTitle {
             view.displayTitle("\(title.title) Settings")
         }
