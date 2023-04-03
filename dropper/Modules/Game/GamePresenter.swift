@@ -114,9 +114,9 @@ extension GamePresenter: GamePresenterApi {
         let startGameAction = ModalDialogAction(title: primaryButton, style: .default, handler: { _ in
             self.interactor.didLoadLevel()
         })
-        let goHomeAction =  ModalDialogAction(title: "Cancel", style: .cancel, handler: { _ in
-            self.router.navigateHome()
-        })
+//        let goHomeAction =  ModalDialogAction(title: "Cancel", style: .cancel, handler: { _ in
+//            self.router.navigateHome()
+//        })
         
         if !fromState {
             let blocks = self.grid.getAll().map { $0.block! }
@@ -129,7 +129,7 @@ extension GamePresenter: GamePresenterApi {
         } else {
             // The user is continuing a game from state.
             startGameAction.title = "OK"
-            self.view.displayModalDialog(title: "Continue", message: "Right, let's keep going!", actions: [startGameAction, goHomeAction])
+            self.view.displayModalDialog(title: "Continue", message: "Right, let's keep going!", actions: [startGameAction])
         }
     }
     

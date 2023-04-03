@@ -164,8 +164,13 @@ final class GameView: UserInterface {
         let panVelocity = sender.velocity(in: self.view)
         let panPoint = sender.location(in: self.view)
         
-        let sensitivity: CGFloat = 0.8
-        let swipeVelocityThreshold:CGFloat = 300
+        // what proportion of a block width do you need to pan before it moves?
+        let sensitivity: CGFloat = 0.5
+        
+        // how fast you have to pan down before it's considered a drop swipe
+        // the higher the number the faster you need to swipe
+        let swipeVelocityThreshold:CGFloat = 100
+        
         if sender.state == .ended {
             self.isPanningLeftRight = false
         } else if sender.state == .began {
@@ -314,8 +319,10 @@ extension GameView: GameViewApi {
     }
     
     func displayModalDialog(title: String, message: String, actions: [ModalDialogAction]) {
+        
         let modal = ModalDialogView.fromStoryboard("ModalDialog", identifier: "ModalDialogView", bundle: nil)
         modal.show(from: self, title: title, message: message, actions: actions)
+        
     }
     
     //MARK: - Init Game

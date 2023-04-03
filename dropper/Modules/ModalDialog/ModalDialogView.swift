@@ -102,8 +102,7 @@ final class ModalDialogView: UIViewController {
         self.heading = title
         self.body = message
         self.actions = actions
-        
-        viewController.present(self, animated: true)
+        viewController.present(self, animated: false)
     }
     
     // MARK: - Private Methods

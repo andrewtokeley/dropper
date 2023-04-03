@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Loading View-->
+        <scene sceneID="htw-l1-ahc">
+            <objects>
+                <viewController storyboardIdentifier="LoadingView" id="xqD-av-Raz" customClass="LoadingView" customModule="dropper" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="EcR-ye-kTk"/>
+                        <viewControllerLayoutGuide type="bottom" id="vb6-4r-Epx"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="kgt-o0-aP8">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="tiles" translatesAutoresizingMaskIntoConstraints="NO" id="rbV-uq-pRz">
+                                <rect key="frame" x="120" y="250" width="153" height="227"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="loading..." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="opP-UB-oDp">
+                                <rect key="frame" x="161.66666666666666" y="487" width="69.666666666666657" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="rbV-uq-pRz" firstAttribute="leading" secondItem="kgt-o0-aP8" secondAttribute="leading" constant="120" id="2w7-wf-UpJ"/>
+                            <constraint firstItem="opP-UB-oDp" firstAttribute="centerX" secondItem="kgt-o0-aP8" secondAttribute="centerX" id="62f-vn-O1O"/>
+                            <constraint firstItem="opP-UB-oDp" firstAttribute="top" secondItem="rbV-uq-pRz" secondAttribute="bottom" constant="10" id="M60-k9-Hzk"/>
+                            <constraint firstItem="rbV-uq-pRz" firstAttribute="centerX" secondItem="kgt-o0-aP8" secondAttribute="centerX" id="SKS-kJ-oVR"/>
+                            <constraint firstItem="rbV-uq-pRz" firstAttribute="top" secondItem="kgt-o0-aP8" secondAttribute="top" constant="250" id="kwo-o0-f1h"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="image" destination="rbV-uq-pRz" id="kyx-2M-SJc"/>
+                        <outlet property="imageLeftConstraint" destination="2w7-wf-UpJ" id="ErC-fm-WYK"/>
+                        <outlet property="imageTopConstraint" destination="kwo-o0-f1h" id="RBe-Fd-KA0"/>
+                        <outlet property="loadingLabel" destination="opP-UB-oDp" id="7yr-AA-dSm"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="nXm-AG-NXG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="295" y="356"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="tiles" width="346" height="227"/>
+    </resources>
+</document>

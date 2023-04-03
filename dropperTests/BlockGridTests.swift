@@ -477,7 +477,7 @@ class BlockGridTests: XCTestCase {
         let grid = try! BlockGrid(
             rows: 7,
             columns: 7)
-        let shape = Shape.O(.colour4)
+        let shape = Shape.L(.colour4)
         shape.move(GridReference(5,3))
         if grid.addShape(shape) {
             XCTAssertTrue(grid.rotateShape())

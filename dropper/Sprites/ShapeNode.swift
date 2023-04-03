@@ -8,18 +8,37 @@
 import Foundation
 import SpriteKit
 
+/**
+ Errors raised during initialisation of a new Shape
+ */
 enum ShapeNodeError: Error {
     case InvalidInitialState
     case NoOrigin
 }
 
+/**
+ SpriteNode implementation of a shape and its blocks
+ */
 class ShapeNode: SKSpriteNode {
     
+    /**
+     The blocks that make up the shape. Each block can be a different colour.
+     */
     var blocks = [Block]()
+    
+    /**
+     The grid references of each block in the shape.
+     */
     var references = [GridReference]()
+    
+    /**
+     The size of each block. Blocks are always square.
+     */
     var blockSize: CGFloat = 0
     
-    /// Reference to the shape's block nodes
+    /**
+     Reference to the shape's block nodes
+     */
     var blockNodes = [BlockNode]()
     
     /**
@@ -62,26 +81,32 @@ class ShapeNode: SKSpriteNode {
         - references: location of each block
         - blockSize: size of a single (square) block
      */
-    init (blocks: [Block], references: [GridReference], blockSize: CGFloat) throws {
-        guard blocks.count != 0 else { throw ShapeNodeError.InvalidInitialState}
-        guard blocks.count == references.count else { throw ShapeNodeError.InvalidInitialState}
-
-        super.init(texture: nil, color: .clear, size: CGSize(width: blockSize*3.0, height: blockSize*3.0))
-        
-        setShape(blocks: blocks, references: references, blockSize: blockSize)
-    }
+//    init (blocks: [Block], references: [GridReference], blockSize: CGFloat) throws {
+//        guard blocks.count != 0 else { throw ShapeNodeError.InvalidInitialState}
+//        guard blocks.count == references.count else { throw ShapeNodeError.InvalidInitialState}
+//
+//        super.init(texture: nil, color: .clear, size: CGSize(width: blockSize*3.0, height: blockSize*3.0))
+//
+//        setShape(blocks: blocks, references: references, blockSize: blockSize)
+//    }
     
+    /**
+     Initialise a new shape based on the Shape definition and size.
+     */
     init (shape: Shape, blockSize: CGFloat) {
         super.init(texture: nil, color: .clear, size: CGSize(width: blockSize*3.0, height: blockSize*3.0))
         setShape(shape, blockSize: blockSize)
     }
 
-    override init(texture: SKTexture?, color: UIColor, size: CGSize) {
-        super.init(texture: nil, color: .clear, size: CGSize.zero)
-    }
-    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    /**
+     Need this for copy() to work for ghost
+     */
+    override init(texture: SKTexture?, color: UIColor, size: CGSize) {
+        super.init(texture: texture, color: color, size: size)
     }
     
     //MARK: - Set Shape

@@ -13,7 +13,11 @@ enum AppModules: String, ViperitModule {
     case home
     case settings
     case popup
+    case loading
     var viewType: ViperitViewType {
+        if self == .loading {
+            return .storyboard
+        }
         return .code
     }
 }
