@@ -15,6 +15,10 @@ final class HomeView: UserInterface {
     var titles = [GameTitle]()
     var states = [GameState?]()
     
+    private func showCollectionView() {
+        self.collectionView.alpha = 1
+    }
+    
     override func viewDidLoad() {
         self.view.backgroundColor = .white
 
@@ -55,6 +59,8 @@ final class HomeView: UserInterface {
         view.dataSource = self
         
         view.register(UINib(nibName: "GameTile", bundle: .main), forCellWithReuseIdentifier: "cell")
+        
+        view.alpha = 0
         return view
     }()
     
@@ -128,6 +134,16 @@ extension HomeView: HomeViewApi {
         self.titles = titles
         self.states = states
         self.collectionView.reloadData()
+        
+        if self.collectionView.alpha == 0 {
+            UIView.animate(
+                withDuration: 1.4,
+                delay:0,
+                options: .transitionCrossDissolve,
+                animations: {
+                    self.showCollectionView()
+                })
+        }
     }
     
     func displayConfirmation(title: String, confirmationButtonText: String, confirmationText: String, completion: ((Bool)->Void)?) {
