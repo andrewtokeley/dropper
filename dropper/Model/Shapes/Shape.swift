@@ -19,6 +19,7 @@ enum ShapeOrientation: Int {
 
 enum ShapeError: Error {
     case ShapeMustContainOrigin
+    case ShapeColoursMustMatchReferenceCount
 }
 
 /**
@@ -48,9 +49,7 @@ class Shape {
     /**
      Returns whether a shape can be rotated or not.
      */
-    var canBeRotated: Bool {
-        return name != "O"
-    }
+    var canBeRotated: Bool = true
     
     /**
      When a new instance is created this index is set to the index of the (0,0) reference
@@ -94,14 +93,56 @@ class Shape {
     // MARK: - Initialisers
     
     /**
-     Initialises a shape by defining the relative references of its blocks and each block's colour.
+     Initialises a Shape with the specified number of colours. Colours are chosen at random.
      
-     - Important: A shape must define a block at location (0,0) and this will be considered the centre of rotation.
+     - Parameters:
+        - references: block references
+        - numberOfColours:  the number of different colours to randomly apply to the shape
+        - name: optional name to identify the shape. Default is ""
      
-     - Throws: a ``ShapeError/ShapeMustContainOrigin`` error if no (0,0) reference is supplied.
+     If the number of randomColours is more than the number of blocks in the shape (n), only the first n will be used.
+     
+     - Important: One of the references must contain (0,0) which will be treated as the rotation origin of the shape. If no (0,0) reference is found a ``ShapeError/ShapeMustContainOrigin`` error is thrown.
+     */
+    convenience init(references: [GridReference], numberOfColours: Int, name: String = "") throws {
+        
+        let availableColours = BlockColour.random(numberOfColours)
+        var useColours = [BlockColour]()
+        for _ in 0..<references.count {
+            useColours.append(availableColours.randomElement()!)
+        }
+        
+        try self.init(references: references, colours: useColours, name: name)
+    }
+    
+    /**
+     Initialises a shape by defining the relative references of its blocks and the colour all blocks should have
+     
+     - Parameters:
+        - references: block references
+        - colour: the colour that all blocks will be
+        - name: optional name to identify the shape
+     
+     - Important: One of the references must contain (0,0) which will be treated as the rotation origin of the shape. If no (0,0) reference is found a ``ShapeError/ShapeMustContainOrigin`` error is thrown.
+     */
+    convenience init(references: [GridReference], colour: BlockColour, name: String = "") throws {
+        try self.init(references: references, colours: Array(repeating: colour, count: 4),
+                 name: name)
+    }
+    
+    /**
+     Initialises a shape by defining the relative references of its blocks and the relative colours of each block
+     
+     - Parameters:
+        - references: block references
+        - colours: colour of each block, represented in the same order as the references. The number of colours must equal the number of references.
+        - name: optional name to identify the shape
+     
+     - Important: One of the references must contain (0,0) which will be treated as the rotation origin of the shape. If no (0,0) reference is found a ``ShapeError/ShapeMustContainOrigin`` error is thrown.
      */
     init(references: [GridReference], colours: [BlockColour], name: String = "") throws {
         guard let originIndex = references.firstIndex(where: {$0.row == 0 && $0.column == 0}) else { throw ShapeError.ShapeMustContainOrigin }
+        guard references.count == colours.count else { throw ShapeError.ShapeColoursMustMatchReferenceCount }
         
         self.references = references
         self.originIndex = originIndex
@@ -215,26 +256,36 @@ class Shape {
     
     // MARK: - Static Shape Methods
     
+    static func random(_ numberOfColours: Int) -> Shape {
+        let s = ShapeReference.random
+        return try! Shape(references: s.references, numberOfColours:  numberOfColours, name: s.name)
+    }
+    
     /**
-     Returns a random ``Shape`` instance.
+     Returns a random ``Shape`` instance, with a single colour
      */
     static func random(_ colour: BlockColour) -> Shape {
-        let type = Int.random(in: 0..<6)
-        switch type {
-        case 0:
-            return L(colour)
-        case 1:
-            return I(colour)
-        case 2:
-            return J(colour)
-        case 3:
-            return S(colour)
-        case 4:
-            return Z(colour)
-        case 5:
-            return O(colour)
-        default:
-            return I(colour)
+        let s = ShapeReference.random
+        return try! Shape(references: s.references, colour: colour, name: s.name)
+    }
+    
+    /**
+     Returns a random shape but in the standard Tetris colours.
+     */
+    static func random() -> Shape {
+        let s = ShapeReference.random
+        return try! Shape(references: s.references, colour: defaultColourForShape(s), name: s.name)
+    }
+    
+    static func defaultColourForShape(_ shape: ShapeReference) -> BlockColour {
+        switch shape.name {
+        case "L": return .colour1
+        case "J": return .colour2
+        case "I": return .colour3
+        case "O": return .colour4
+        case "S": return .colour5
+        case "Z": return .colour6
+        default: return .colour1
         }
     }
     
@@ -248,15 +299,11 @@ class Shape {
      ````
      */
     static func L(_ colour: BlockColour) -> Shape {
+        let s = ShapeReference.L
         return try! Shape(
-            references: [
-            GridReference(0,1),
-            GridReference(0,0),
-            GridReference(0,-1),
-            GridReference(1,1)
-            ],
-            colours: Array(repeating: colour, count: 4),
-            name: "L")
+            references: s.references,
+            colour: colour,
+            name: s.name)
     }
     
     /**
@@ -269,14 +316,11 @@ class Shape {
      ````
      */
     static func J(_ colour: BlockColour) -> Shape {
+        let s = ShapeReference.J
         return try! Shape(
-            references: [
-            GridReference(0,1),
-            GridReference(0,0),
-            GridReference(0,-1),
-            GridReference(1,-1)],
-            colours: Array(repeating: colour, count: 4),
-            name: "J")
+            references: s.references,
+            colour: colour,
+            name: s.name)
     }
     
     /**
@@ -290,20 +334,17 @@ class Shape {
      ````
      */
     static func I(_ colour: BlockColour) -> Shape {
-        let s = try! Shape(
-            references: [
-            GridReference(0,-1),
-            GridReference(0,0),
-            GridReference(0,1),
-            GridReference(0,2)],
-            colours: Array(repeating: colour, count: 4),
-            name: "I")
+        let s = ShapeReference.I
+        let shape = try! Shape(
+            references: s.references,
+            colour: colour,
+            name: s.name)
         
-        s.wallKicks[.up] = [GridOffset(0,0), GridOffset(0,-2), GridOffset(0,1), GridOffset(-1,-2), GridOffset(2,1)]
-        s.wallKicks[.right] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(0,2), GridOffset(1,2), GridOffset(-1,2)]
-        s.wallKicks[.down] = [GridOffset(0,0), GridOffset(0,2), GridOffset(0,-1), GridOffset(1,2), GridOffset(-2,-1)]
-        s.wallKicks[.left] = [GridOffset(0,0), GridOffset(0,1), GridOffset(0,-2), GridOffset(-2,1), GridOffset(1,-2)]
-        return s
+        shape.wallKicks[.up] = [GridOffset(0,0), GridOffset(0,-2), GridOffset(0,1), GridOffset(-1,-2), GridOffset(2,1)]
+        shape.wallKicks[.right] = [GridOffset(0,0), GridOffset(0,-1), GridOffset(0,2), GridOffset(1,2), GridOffset(-1,2)]
+        shape.wallKicks[.down] = [GridOffset(0,0), GridOffset(0,2), GridOffset(0,-1), GridOffset(1,2), GridOffset(-2,-1)]
+        shape.wallKicks[.left] = [GridOffset(0,0), GridOffset(0,1), GridOffset(0,-2), GridOffset(-2,1), GridOffset(1,-2)]
+        return shape
     }
     
     /**
@@ -317,20 +358,19 @@ class Shape {
      ````
      */
     static func O(_ colour: BlockColour) -> Shape {
-        let s = try! Shape(
-            references: [
-            GridReference(1,0),
-            GridReference(1,1),
-            GridReference(0,0),
-            GridReference(0,1)],
-            colours: Array(repeating: colour, count: 4),
-            name: "O")
+        let s = ShapeReference.O
+        let shape = try! Shape(
+            references: s.references,
+            colour: colour,
+            name: s.name)
         
-        s.wallKicks[.up] = [GridOffset(0,0)]
-        s.wallKicks[.right] = [GridOffset(0,0)]
-        s.wallKicks[.down] = [GridOffset(0,0)]
-        s.wallKicks[.left] = [GridOffset(0,0)]
-        return s
+        // by default O's can't rotate
+        shape.canBeRotated = false
+        shape.wallKicks[.up] = [GridOffset(0,0)]
+        shape.wallKicks[.right] = [GridOffset(0,0)]
+        shape.wallKicks[.down] = [GridOffset(0,0)]
+        shape.wallKicks[.left] = [GridOffset(0,0)]
+        return shape
     }
     
     /**
@@ -343,14 +383,11 @@ class Shape {
      ````
      */
     static func S(_ colour: BlockColour) -> Shape {
+        let s = ShapeReference.S
         return try! Shape(
-            references: [
-            GridReference(0,-1),
-            GridReference(0,0),
-            GridReference(1,0),
-            GridReference(1,1)],
-            colours: Array(repeating: colour, count: 4),
-            name: "S")
+            references: s.references,
+            colour: colour,
+            name: s.name)
     }
     
     /**
@@ -363,14 +400,11 @@ class Shape {
      ````
      */
     static func Z(_ colour: BlockColour) -> Shape {
+        let s = ShapeReference.Z
         return try! Shape(
-            references: [
-            GridReference(1,-1),
-            GridReference(1,0),
-            GridReference(0,0),
-            GridReference(0,1)],
-            colours: Array(repeating: colour, count: 4),
-            name: "Z")
+            references: s.references,
+            colour: colour,
+            name: s.name)
     }
 }
 

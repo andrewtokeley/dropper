@@ -43,6 +43,20 @@ enum BlockColour: Int, Codable {
         return BlockColour(rawValue: Int.random(in: 0..<5)) ?? .colour4
     }
     
+    /**
+     Returns an array of unique random colours
+     */
+    static func random(_ count: Int) -> [BlockColour] {
+        var colours = [BlockColour]()
+        while colours.count < count {
+            let colour = BlockColour.random
+            if !colours.contains(colour) {
+                colours.append(colour)
+            }
+        }
+        return colours
+    }
+    
     static func randomSet(_ count: Int) -> [BlockColour] {
         var result = [BlockColour]()
         for _ in 0..<count {

@@ -29,13 +29,13 @@ struct LayoutDimensions {
     var gridBottomOffset: CGFloat = 0
     var gridBorderWidth: CGFloat = 20
     
-    var gridCentre: CGPoint {
-        return CGPoint(x: gridSize.width/2 + gridLeft - gridBorderWidth/2, y: gridSize.height/2 + gridBottomOffset - gridBorderWidth/2)
-    }
-    
-    var gridSize: CGSize {
-        return CGSize(width: gridRight - gridLeft + gridBorderWidth, height: sceneSize.height - (gridTopOffset+gridBottomOffset-gridBorderWidth))
-    }
+//    var gridCentre: CGPoint {
+//        return CGPoint(x: gridSize.width/2 + gridLeft - gridBorderWidth/2, y: gridSize.height/2 + gridBottomOffset - gridBorderWidth/2)
+//    }
+//
+//    var gridSize: CGSize {
+//        return CGSize(width: gridRight - gridLeft + gridBorderWidth, height: sceneSize.height - (gridTopOffset+gridBottomOffset-gridBorderWidth))
+//    }
     
     var labelsRowTopOffset: CGFloat = 100
     var valuesRowTopOffset: CGFloat = 125
@@ -287,7 +287,7 @@ class GameScene: SKScene {
         playButton.autoPositionWithinParent(.centreBottom, yOffSet: layout.buttonsRowBottomOffset)
     }
     /**
-     Gets the screen point at the centre of a GridReference
+     Gets the screen point at the centre of a GridReference. If centre is false the bottom left of a grid cell is returned.
      */
     private func getPosition(_ reference: GridReference, centre: Bool = true) -> CGPoint {
         
@@ -321,16 +321,25 @@ class GameScene: SKScene {
         self.ghostNode?.alpha = show ? 1 : 0
     }
     
+    private var gridSize: CGSize {
+        let bottomLeft = getPosition(GridReference(0,0), centre: false)
+        let topRight = getPosition(GridReference(rows,columns), centre: false)
+        return CGSize(width: topRight.x - bottomLeft.x + layout.gridBorderWidth, height: topRight.y - bottomLeft.y + layout.gridBorderWidth)
+    }
+    private var gridCentre: CGPoint {
+        return CGPoint(x: gridSize.width/2 + layout.gridLeft - layout.gridBorderWidth/2, y: gridSize.height/2 + layout.gridBottomOffset - layout.gridBorderWidth/2)
+    }
+    
     public func showGrid(_ show: Bool) {
         // always show a border around the grid
         if let border = self.childNode(withName: "border") {
             border.removeFromParent()
         }
-        let border = SKShapeNode(rectOf: layout.gridSize)
+        let border = SKShapeNode(rectOf: self.gridSize)
         border.name = "border"
         border.lineWidth = layout.gridBorderWidth/4
         border.strokeColor = .white
-        border.position = layout.gridCentre
+        border.position = self.gridCentre
         self.addChild(border)
         
         if !show {

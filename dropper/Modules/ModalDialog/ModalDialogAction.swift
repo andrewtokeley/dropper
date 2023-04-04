@@ -10,7 +10,7 @@ import Foundation
 class ModalDialogAction {
 
     enum Style: Int {
-        case `default` = 0
+        case standard = 0
         case cancel
         case destructive
     }
@@ -28,7 +28,7 @@ class ModalDialogAction {
     /**
      The style that applies to the action’s button.
      */
-    var style: ModalDialogAction.Style = .default
+    var style: ModalDialogAction.Style = .standard
     
     /**
      A Boolean value indicating whether the action is currently enabled.

@@ -60,7 +60,7 @@ final class ModalDialogView: UIViewController {
         let button = UIButton()
 
         // Rounded corners
-        button.setTitle(action.title, for: .normal)
+        button.setTitle(action.title, for: UIControl.State.normal)
         button.layer.cornerRadius = 0.5 * self.buttonHeight
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         
@@ -71,7 +71,7 @@ final class ModalDialogView: UIViewController {
         button.layer.shadowOpacity = 0.1
         // Font
         switch action.style {
-        case .default:
+        case .standard:
             button.backgroundColor = .systemBlue
             button.setTitleColor(.white, for: .normal)
             break

@@ -48,14 +48,23 @@ class Achievements: Codable {
         clear()
     }
     
+    /**
+     Sets the total for an achievement
+     */
     public func set(_ achievement: Achievement, _ value: Int) {
         state[achievement.rawValue] = abs(value)
     }
     
+    /**
+     Adds another achievement to the total of achievements of this type
+     */
     public func addTo(_ achievement: Achievement, _ value: Int) {
         set(achievement, get(achievement) + value)
     }
     
+    /**
+     Returns the number of achievements of the given type
+     */
     public func get(_ achievement: Achievement) -> Int {
         if let state = state[achievement.rawValue] {
             return state
@@ -63,6 +72,9 @@ class Achievements: Codable {
         return 0
     }
     
+    /**
+     Returns the sum across a set of achievements.
+     */
     public func sum(_ achievements: [Achievement]) -> Int {
         var sum = 0
         for a in achievements {

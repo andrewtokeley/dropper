@@ -65,9 +65,6 @@ final class GameView: UserInterface {
             NSAttributedString.Key.foregroundColor: UIColor.gameHighlight
         ]
         view.setTitleTextAttributes(attributes, for: .normal)
-        view.setTitleTextAttributes(pressedAttributes, for: .highlighted)
-        view.setTitleTextAttributes(pressedAttributes, for: .selected)
-        view.setTitleTextAttributes(pressedAttributes, for: .focused)
         return view
     }()
     

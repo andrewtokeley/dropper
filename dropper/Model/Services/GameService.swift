@@ -63,17 +63,47 @@ extension GameService: GameServiceContract {
     }
     
     func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) {
-        if title.id == TetrisClassicTitle().id {
-            completion?(TetrisClassic())
-        } else if title.id == ColourMatcherTitle().id {
-            completion?(ColourMatcherGame())
+        
+        if let rootGameName = title.rootGameName {
+            let gameClassName = "\(rootGameName)Game"
+            if let bundleName = Bundle.main.infoDictionary?["CFBundleName"] as? String {
+                let classInBundle = (bundleName + "." + gameClassName).replacingOccurrences(of: "[ -]", with: "_", options: .regularExpression)
+                
+                if let gameClass = NSClassFromString(classInBundle) as? Game.Type {
+                    completion?(gameClass.init())
+                }
+            }
+        } else {
+            // abort!
         }
+        
+        // get the root name of the game from the class name of the GameTitle
+        // get the root name of the game from the title
+//        let className = rawValue.uppercasedFirst + component.rawValue.uppercasedFirst
+//        let bundleName = safeString(bundle.infoDictionary?["CFBundleName"])
+//        let classInBundle = (bundleName + "." + className).replacingOccurrences(of: "[ -]", with: "_", options: .regularExpression)
+//
+//        if component == .view {
+//            let deviceType = deviceType ?? UIScreen.main.traitCollection.userInterfaceIdiom
+//            let isPad = deviceType == .pad
+//            if isPad, let tabletView = NSClassFromString(classInBundle + kTabletSuffix) {
+//                return tabletView
+//            }
+//        }
+        
+//        if title.id == TetrisClassicTitle().id {
+//            completion?(TetrisClassicGame())
+//        } else if title.id == ColourMatcherTitle().id {
+//            completion?(ColourMatcherGame())
+//        }
     }
     
     func getGameTitles(completion: (([GameTitle])->Void)?) {
         let dispatch = DispatchGroup()
         
-        let gameTitles = [TetrisClassicTitle(), ColourMatcherTitle()]
+        let gameTitles = [try! TetrisClassicTitle(),
+                          try! ColourMatcherTitle(),
+                          try! TestTitle()]
         for title in gameTitles {
             dispatch.enter()
             getScoreHistory(for: title) { scores in

@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct Level {
+class Level {
     
     /**
-     The number of a level, where 1 is the first level going as high as possible.
+     The number of a level, where 1 is the first level going as high as possible. Default is 1.
      */
     var number: Int = 1 {
         didSet {
@@ -21,7 +21,7 @@ struct Level {
     }
     
     /**
-     Returns the time a block takes to move on row
+     Returns the time a block takes to move on row. This can't be changed.
      */
     var moveDuration: TimeInterval {
         let speeds = [0.5, 0.4, 0.3, 0.2, 0.15]
@@ -33,30 +33,43 @@ struct Level {
         }
     }
     
-    // e.g. 100
+    /**
+     The goal value you need to achieve to complete the level. For example, this might be the number of rows to compete. The default is 10.
+     */
     var goalValue: Int = 10
     
-    /// Word describing the goal unit e.g. ROWS or MATCHES
+    /**
+     The word describing the goal unit e.g. ROWS or MATCHES. The default is ""
+     */
     var goalUnit = ""
     
-    // Sentence describing the goal
+    /**
+     Sentence describing the goal. The default is ""
+     */
     var goalDescription: String = ""
     
-    /// Instances of Levels must override this to calculate the progress made from Achievements
+    /**
+     Instances of Levels must override this to calculate the progress based on the Achievements have been made so far.
+     */
     var goalProgressValue: ((Achievements) -> Int) = { (a) in
         return 0
     }
     
-    /// The effects that will be applied after each shape lands. Default is only removing rows.
-    var effects = [RemoveRowsEffect(),
-                 DropIntoEmptyRowsEffect()]
+    /**
+     The effects that will be applied after each shape lands. Default is only removing rows
+     */
+    var effects: [GridEffect] = [RemoveRowsEffect()]
     
-    // e.g. 20 / 100 Points
+    /**
+     A description of the progess made, e.g. 2 /10 ROWS.
+     */
     func goalProgressDescription(_ achievements: Achievements) -> String {
         return "\(goalProgressValue(achievements)) \\ \(goalDescription)"
     }
     
-    /// Returns whether the goal for the level has been achieved
+    /**
+     Returns whether the goal for the level has been achieved
+     */
     func goalAchieved(_ achievements: Achievements) -> Bool {
         return goalProgressValue(achievements) >= goalValue
     }
@@ -98,19 +111,10 @@ struct Level {
      Returns a random shape
      */
     func nextShape() -> Shape {
-        // for now just returning classic tetris shapes/colours
-        let shapes = [
-            Shape.L(.colour1),
-            Shape.J(.colour2),
-            Shape.S(.colour3),
-            Shape.O(.colour4),
-            Shape.Z(.colour5),
-            Shape.I(.colour6)
-        ]
-        if let shape = shapes.randomElement() {
-            return shape
-        } else {
-            return shapes[0]
+        let shape = Shape.random()
+        if shape.name == "O" {
+            shape.canBeRotated = false
         }
+        return shape
     }
 }

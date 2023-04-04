@@ -54,14 +54,10 @@ final class GamePresenter: Presenter {
             
             let title = highscore ? "Highscore!" : "Oh No!"
             let message = highscore ? "The blocks beat you, but that's a great score!" : "The blocks beat you this time!"
-            let action = ModalDialogAction(title: "Close", style: .default) { _ in
+            let action = ModalDialogAction(title: "Close", style: .standard) { _ in
                 self.router.navigateHome()
             }
             self.view.displayModalDialog(title: title, message: message, actions: [action])
-            
-//            self.router.showPopup(title: title, message: message, primaryButtonText: closeButtonText, secondaryButtonText: nil) { buttonText in
-//                    self.router.navigateHome()
-//            }
         }
     }
     
@@ -111,7 +107,7 @@ extension GamePresenter: GamePresenterApi {
         let title = level.number == 1 ? "Get Ready!" : "Next Level!"
         let primaryButton = level.number == 1 ? "Start!" : "Let's Go!"
         let message = level.goalDescription
-        let startGameAction = ModalDialogAction(title: primaryButton, style: .default, handler: { _ in
+        let startGameAction = ModalDialogAction(title: primaryButton, style: .standard, handler: { _ in
             self.interactor.didLoadLevel()
         })
 //        let goHomeAction =  ModalDialogAction(title: "Cancel", style: .cancel, handler: { _ in
@@ -164,11 +160,16 @@ extension GamePresenter: GamePresenterApi {
     }
     
     func didWinGame() {
-        interactor.clearState()
-        let action = ModalDialogAction(title: "Close", style: .cancel) { _ in
-            self.router.navigateHome()
+        self.interactor.clearState()
+        self.interactor.saveScores { (highscore) in
+            
+            let title = "Completed!"
+            let message = highscore ? "You completed all the levels and got a new high score!" : "You completed all the levels - great effort!"
+            let action = ModalDialogAction(title: "Close", style: .standard) { _ in
+                self.router.navigateHome()
+            }
+            self.view.displayModalDialog(title: title, message: message, actions: [action])
         }
-        view.displayModalDialog(title: "You Won!", message: "Nice one :-)", actions: [action])
     }
     
     // MARK: - From View

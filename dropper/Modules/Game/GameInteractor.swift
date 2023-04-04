@@ -98,14 +98,16 @@ extension GameInteractor: GameInteractorApi {
         
         // see if level complete
         if level.goalAchieved(game.levelAchievements) {
-            game.moveToNextLevel()
-            if let level = game.currentLevel {
+            if game.moveToNextLevel() {
+                if let level = game.currentLevel {
                 
-                // reset goal progress count
-                self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: 0, goalUnit: level.goalUnit)
-                
-                self.presenter.didFetchNextLevel(level, fromState: false)
+                    // reset goal progress count
+                    self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: 0, goalUnit: level.goalUnit)
+                    
+                    self.presenter.didFetchNextLevel(level, fromState: false)
+                }
             } else {
+                // no morew levels!
                 presenter.didWinGame()
             }
         } else {

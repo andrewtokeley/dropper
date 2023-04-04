@@ -151,7 +151,7 @@ extension HomeView: HomeViewApi {
         let modal = ModalDialogView.fromStoryboard("ModalDialog", identifier: "ModalDialogView", bundle: nil)
         
         var actions = [ModalDialogAction]()
-        actions.append(ModalDialogAction(title: confirmationButtonText, style: .default, handler: { action in
+        actions.append(ModalDialogAction(title: confirmationButtonText, style: .standard, handler: { action in
             completion?(true)
         }))
         actions.append(ModalDialogAction(title: "Cancel", style: .cancel, handler: { action in

@@ -18,7 +18,7 @@ struct GameState: Codable {
     }
     var level: Int = 1
     var levelAchievements = Achievements()
-    var title: GameTitle = TetrisClassicTitle()
+    var title: GameTitle!
     
     init(game: Game) {
         self.blocks = game.grid.blocksExcludingShape
