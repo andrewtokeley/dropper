@@ -11,6 +11,33 @@ import Viperit
 import CoreImage
 
 // MARK: - GamePresenter Class
+
+/**
+ The Presenter coordinates the messages between the Interactor and the View. The basic game loop looks like;
+ 
+ - interactor.createNewGame
+    - presenter.didCreateNewGame
+        - view.initialiseGame
+        - view.displayTitle
+    - presenter.didFetchNextLevel
+        - view.stopGameLoop
+        - view.displayLevel
+        - view.updateLevelProgress
+        - interactor.didLoadLevel()
+            - presenter.addNewShape
+                - view.displayNextShape(nextShape)
+                - view.startGameLoop
+ - presenter.didUpdateGameLoop
+    - view.moveShape
+    - (when you can't move anymore) applyEffects
+        - view.convertShapeToBlocks
+ - didFinishEffectsRun (after all effects processed)
+    - interactor.recordAchievements
+    - interactor.saveState
+    - interactor.readyForNextShape
+        - presenter.addNewShape (if goal not yet achieved)
+        - presenter.didFetchNextLevel (if goal achieved, continue as above)
+*/
 final class GamePresenter: Presenter {
     
     private var isRotating = false
@@ -108,6 +135,9 @@ extension GamePresenter: GamePresenterApi {
         let primaryButton = level.number == 1 ? "Start!" : "Let's Go!"
         let message = level.goalDescription
         let startGameAction = ModalDialogAction(title: primaryButton, style: .standard, handler: { _ in
+            if (!fromState) {
+                self.view.updateLevelProgress(0, goalUnit: nil)
+            }
             self.interactor.didLoadLevel()
         })
 //        let goHomeAction =  ModalDialogAction(title: "Cancel", style: .cancel, handler: { _ in
@@ -209,10 +239,12 @@ extension GamePresenter: GamePresenterApi {
     
     func didUpdateGameLoop() {
         guard !gamePaused else { return }
+
         if grid.moveShape(.down) {
             view.moveShape(.down, speed: 0.1, completion: nil)
         } else {
             // you've hit the ground or landed on another block
+            view.stopGameLoop()
             applyEffects()
         }
     }
@@ -294,17 +326,14 @@ extension GamePresenter: BlockGridDelegate {
     }
     
     func blockGrid(_ blockGrid: BlockGrid, blocksRemoved blocks: [Block]) {
-        // remove the blocks from the view too
         view.removeBlocks(blocks) {
-            //self.view.updateScore(self.game.score)
+            // should we wait?
         }
     }
     
     func blockGrid(_ blockGrid: BlockGrid, shapeDropedTo reference: GridReference) {
         view.stopGameLoop()
         view.moveShape(reference, speed: 0.1, withShake: true) {
-//            blockGrid.replacePlayerWithBlocksOfType(.block)
-//            self.view.convertShapeToBlocks(.block)
             self.applyEffects()
         }
     }
@@ -354,13 +383,6 @@ extension GamePresenter: BlockGridDelegate {
     func blockGrid(_ blockGrid: BlockGrid, blockAdded block: Block, reference: GridReference) {
         view.addBlock(block, reference: reference, completion: nil)
     }
-    
-//    func blockGrid(_ blockGrid: BlockGrid, blockRemoved block: Block) {
-//        view.removeBlock(block) {
-//            // drop any suspended blocks
-//            //self.applyGravity()
-//        }
-//    }
     
 }
 

@@ -18,8 +18,7 @@ class LevelService: ServiceBase {
     
     fileprivate lazy var tetrisClassic: [Level] = {
         for i in 0..<10 {
-            var level = Level()
-            level.number = i + 1
+            var level = Level(i+1)
             levels.append(level)
         }
         return levels

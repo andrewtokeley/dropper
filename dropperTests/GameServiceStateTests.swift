@@ -10,8 +10,8 @@ import XCTest
 
 final class GameServiceStateTests: XCTestCase {
     let gameService = ServiceFactory.sharedInstance.gameService
-    let TITLE_TETRIS = TetrisClassicTitle()
-    let TITLE_COLOURS = ColourMatcherTitle()
+    let TITLE_TETRIS = try! TetrisClassicTitle()
+    let TITLE_COLOURS = try! ColourMatcherTitle()
     
     override func setUpWithError() throws {
         let expect = expectation(description: "setUpWithError")
@@ -49,7 +49,7 @@ final class GameServiceStateTests: XCTestCase {
     func testSaveThenGet() throws {
         let expect = expectation(description: "testSaveThenGet")
         
-        gameService.createGame(for: TetrisClassicTitle()) { result in
+        try! gameService.createGame(for: try! TetrisClassicTitle()) { result in
             if let game = result {
                 game.score = 123
                 let state = GameState(game: game)

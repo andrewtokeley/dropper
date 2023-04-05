@@ -14,8 +14,8 @@ protocol GameServiceContract {
     /**
      Creats a new game instance for the given game type
      */
-    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?)
-    func createGame(from state: GameState, completion: ((Game?) -> Void)?)
+    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) throws
+    func createGame(from state: GameState, completion: ((Game?) -> Void)?) throws
     
     func saveGameState(state: GameState, completion: ((Error?)->Void)?)
     func getGameState(for title: GameTitle, completion: ((GameState?)->Void)?)
@@ -48,8 +48,8 @@ extension GameService: GameServiceContract {
     
     // MARK: - Game
     
-    func createGame(from state: GameState, completion: ((Game?) -> Void)?) {
-        self.createGame(for: state.title) { game in
+    func createGame(from state: GameState, completion: ((Game?) -> Void)?) throws {
+        try self.createGame(for: state.title) { game in
             if let game = game {
                 game.columns = state.columns
                 game.rows = state.rows
@@ -62,7 +62,7 @@ extension GameService: GameServiceContract {
         }
     }
     
-    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) {
+    func createGame(for title: GameTitle, completion: ((Game?) -> Void)?) throws {
         
         if let rootGameName = title.rootGameName {
             let gameClassName = "\(rootGameName)Game"
@@ -71,46 +71,48 @@ extension GameService: GameServiceContract {
                 
                 if let gameClass = NSClassFromString(classInBundle) as? Game.Type {
                     completion?(gameClass.init())
+                } else {
+                    throw ServiceError.Failed
                 }
             }
         } else {
-            // abort!
+            throw ServiceError.Failed
         }
-        
-        // get the root name of the game from the class name of the GameTitle
-        // get the root name of the game from the title
-//        let className = rawValue.uppercasedFirst + component.rawValue.uppercasedFirst
-//        let bundleName = safeString(bundle.infoDictionary?["CFBundleName"])
-//        let classInBundle = (bundleName + "." + className).replacingOccurrences(of: "[ -]", with: "_", options: .regularExpression)
-//
-//        if component == .view {
-//            let deviceType = deviceType ?? UIScreen.main.traitCollection.userInterfaceIdiom
-//            let isPad = deviceType == .pad
-//            if isPad, let tabletView = NSClassFromString(classInBundle + kTabletSuffix) {
-//                return tabletView
-//            }
-//        }
-        
-//        if title.id == TetrisClassicTitle().id {
-//            completion?(TetrisClassicGame())
-//        } else if title.id == ColourMatcherTitle().id {
-//            completion?(ColourMatcherGame())
-//        }
     }
+    
+    // MARK: - Game Titles
     
     func getGameTitles(completion: (([GameTitle])->Void)?) {
         let dispatch = DispatchGroup()
         
         let gameTitles = [try! TetrisClassicTitle(),
                           try! ColourMatcherTitle(),
-                          try! TestTitle()]
+                          try! GravityMatcherTitle()]
+        var allSettings = [Settings?]()
         for title in gameTitles {
             dispatch.enter()
+            title.isLastPlayed = false
             getScoreHistory(for: title) { scores in
                 title.highScore = scores.max() ?? 0
                 dispatch.leave()
             }
+            getSettings(for: title) { settings in
+                allSettings.append(settings)
+            }
         }
+        
+        if let latestDate = allSettings.max( by: { a, b in
+            b?.lastPlayed ?? Date.distantPast > a?.lastPlayed ?? Date.distantPast
+        })??.lastPlayed {
+            // we have a game that's been played most recently
+            if let index = allSettings.firstIndex(where: { $0?.lastPlayed == latestDate }) {
+                gameTitles[index].isLastPlayed = true
+            }
+        } else {
+            // if no games have been played then select the first one
+            gameTitles[0].isLastPlayed = true
+        }
+        
         dispatch.notify(queue: DispatchQueue.main, execute: {
             completion?(gameTitles)
         })

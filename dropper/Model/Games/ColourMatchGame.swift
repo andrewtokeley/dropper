@@ -6,38 +6,17 @@
 //
 
 import Foundation
+import UIKit
+
+// MARK: - Game
 
 class ColourMatcherGame: Game {
-    
-    private func getLevels() -> [Level] {
-        var result = [Level]()
-        for i in 0..<10 {
-            var level = Level()
-            level.goalValue = 10
-            level.goalUnit = "MATCHES"
-            if i == 0 {
-                level.goalDescription = "Colour match 10 groups of 15 or more blocks"
-            } else {
-                level.goalDescription = "You crushed it, keep matching those blocks!"
-            }
-            level.effects = [
-                RemoveMatchedBlocksEffect(minimumMatchCount: 15)
-                ]
-            level.goalProgressValue = {(a: Achievements) -> Int in
-                return a.get(.colourMatchGroup)
-            }
-            level.number = i + 1
-            result.append(level)
-        }
-        return result
-    }
-    
     required init() {
-        super.init(try! ColourMatcherTitle())
-        self.levels = getLevels()
+        super.init(try! ColourMatcherTitle(), levelClass: ColourMatcherLevel.self)
     }
-    
 }
+
+// MARK: - Title
 
 class ColourMatcherTitle: GameTitle {
     override init() throws {
@@ -46,6 +25,7 @@ class ColourMatcherTitle: GameTitle {
         title = "Matcher"
         gridRows = 21
         gridColumns = 10
+        accentColorAsHex = UIColor.gameBlock3.asHex()
     }
     
     required init(from decoder: Decoder) throws {
@@ -53,3 +33,33 @@ class ColourMatcherTitle: GameTitle {
     }
 }
 
+// MARK: - Level
+
+class ColourMatcherLevel: Level {
+    
+    required init(_ levelNumber: Int) {
+        super.init(levelNumber)
+        
+        goalValue = 10
+        goalUnit = "MATCHES"
+        if levelNumber == 0 {
+            goalDescription = "Colour match 10 groups of 15 or more blocks"
+        } else {
+            goalDescription = "You crushed it, keep matching those blocks!"
+        }
+        effects = [
+            RemoveMatchedBlocksEffect(minimumMatchCount: 15)
+            ]
+        goalProgressValue = {(a: Achievements) -> Int in
+            return a.get(.colourMatchGroup)
+        }
+    }
+    
+    override func nextShape() -> Shape {
+        let shape = Shape.random()
+        if shape.name == "O" {
+            shape.canBeRotated = false
+        }
+        return shape
+    }
+}

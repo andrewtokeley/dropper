@@ -12,7 +12,7 @@ protocol GameTileDelegate {
     func didSelectContinueGame(state: GameState)
     func didSelectNewGame(title: GameTitle)
 }
-class GameTile: UICollectionViewCell {
+class GameTile: UIView {
     
     public var delegate: GameTileDelegate?
     private var state: GameState?

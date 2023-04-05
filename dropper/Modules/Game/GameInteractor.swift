@@ -20,7 +20,13 @@ final class GameInteractor: Interactor {
         self.game = game
         
         self.gameService.getSettings(for: game.title) { settings in
+            
             if let settings = settings {
+                    
+                // save the date this title was played
+                var updateSettings = settings
+                updateSettings.lastPlayed = Date.now
+                self.gameService.saveSettings(for: game.title, settings: updateSettings, completion: nil)
                 
                 self.presenter.didCreateNewGame(game: game, settings: settings)
                 
@@ -30,6 +36,7 @@ final class GameInteractor: Interactor {
                 
                 let currentProgressValue = game.currentLevel?.goalProgressValue(game.levelAchievements) ?? 0
                 self.presenter.didUpdateTotals(points: 0, score: game.score, goalProgressValue: currentProgressValue, goalUnit: self.game.currentLevel?.goalUnit)
+
             }
         }
     }
@@ -56,7 +63,7 @@ final class GameInteractor: Interactor {
 extension GameInteractor: GameInteractorApi {
     
     func restoreFromState(_ state: GameState) {
-        self.gameService.createGame(from: state) { game in
+        try? self.gameService.createGame(from: state) { game in
             if let game = game {
                 self.configurePresenter(game, fromState: true)
             }
@@ -64,7 +71,7 @@ extension GameInteractor: GameInteractorApi {
     }
     
     func createNewGame(_ title : GameTitle) {
-        self.gameService.createGame(for: title) { game in
+        try? self.gameService.createGame(for: title) { game in
             if let game = game {
                 self.configurePresenter(game, fromState: false)
             }
@@ -72,6 +79,7 @@ extension GameInteractor: GameInteractorApi {
     }
     
     func didLoadLevel() {
+        
         addNewShape()
     }
     
@@ -102,7 +110,7 @@ extension GameInteractor: GameInteractorApi {
                 if let level = game.currentLevel {
                 
                     // reset goal progress count
-                    self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: 0, goalUnit: level.goalUnit)
+                    self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: nil, goalUnit: level.goalUnit)
                     
                     self.presenter.didFetchNextLevel(level, fromState: false)
                 }

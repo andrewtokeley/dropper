@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 enum GameTitleError: Error {
     case InvalidGameTitleClass
@@ -20,6 +21,8 @@ class GameTitle: Codable {
     var gridRows: Int = 21
     var gridColumns: Int = 10
     var rootGameName: String?
+    var accentColorAsHex: String?
+    var isLastPlayed: Bool = false
     
     init() throws {
         

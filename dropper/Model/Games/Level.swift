@@ -7,15 +7,24 @@
 
 import Foundation
 
+/**
+ The Level class defines the rules of a level in a Game.
+
+ While ``Game`` implementations are responsible for creating instances of this type, they should not do so directly, but rather create instances of Level subclasses specific to their game. By convention these classes are named [GameName]Level, for example, ``TetrisClassicLevel``.
+ */
 class Level {
     
+    required init(_ levelNumber: Int) {
+        self.number = levelNumber
+    }
+    
     /**
-     The number of a level, where 1 is the first level going as high as possible. Default is 1.
+     The number of a level, where 1 is the first level.
      */
-    var number: Int = 1 {
+    var number: Int {
         didSet {
             if number <= 0 {
-                number = 0
+                number = 1
             }
         }
     }
@@ -28,7 +37,7 @@ class Level {
         if self.number <= 5 {
             return speeds[self.number-1]
         } else {
-            // return fastest
+            // keep returning fastest
             return speeds[speeds.count-1]
         }
     }

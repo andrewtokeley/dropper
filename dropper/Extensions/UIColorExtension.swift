@@ -9,46 +9,60 @@ import Foundation
 import UIKit
 
 extension UIColor {
-    
 
     convenience init(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat, _ alpha: CGFloat) {
         self.init(red: red/255, green: green/255, blue: blue/255, alpha: alpha)
     }
 
-    convenience init?(hex: String) {
-        let r, g, b, a: CGFloat
-
-        if hex.hasPrefix("#") {
-            let start = hex.index(hex.startIndex, offsetBy: 1)
-            let hexColor = String(hex[start...])
-
-            if hexColor.count == 8 {
-                let scanner = Scanner(string: hexColor)
-                var hexNumber: UInt64 = 0
-
-                if scanner.scanHexInt64(&hexNumber) {
-                    r = CGFloat((hexNumber & 0xff000000) >> 24) / 255
-                    g = CGFloat((hexNumber & 0x00ff0000) >> 16) / 255
-                    b = CGFloat((hexNumber & 0x0000ff00) >> 8) / 255
-                    a = CGFloat(hexNumber & 0x000000ff) / 255
-
-                    self.init(red: r, green: g, blue: b, alpha: a)
-                    return
-                }
-            }
-        }
-
-        return nil
-    }
+    // MARK: - Hex Conversion
     
+    func asHex() -> String {
+        let components = self.cgColor.components
+        let r: CGFloat = components?[0] ?? 0.0
+        let g: CGFloat = components?[1] ?? 0.0
+        let b: CGFloat = components?[2] ?? 0.0
+
+        let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+        return hexString
+     }
+
+    static func fromHex(hexString: String) -> UIColor {
+        var colorString = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
+        colorString = colorString.replacingOccurrences(of: "#", with: "").uppercased()
+
+        print(colorString)
+        let alpha: CGFloat = 1.0
+        let red: CGFloat = self.colorComponentFrom(colorString: colorString, start: 0, length: 2)
+        let green: CGFloat = self.colorComponentFrom(colorString: colorString, start: 2, length: 2)
+        let blue: CGFloat = self.colorComponentFrom(colorString: colorString, start: 4, length: 2)
+
+        let color = UIColor(red: red, green: green, blue: blue, alpha: alpha)
+        return color
+    }
+
+    static func colorComponentFrom(colorString: String, start: Int, length: Int) -> CGFloat {
+
+        let startIndex = colorString.index(colorString.startIndex, offsetBy: start)
+        let endIndex = colorString.index(startIndex, offsetBy: length)
+        let subString = colorString[startIndex..<endIndex]
+        let fullHexString = length == 2 ? subString : "\(subString)\(subString)"
+        var hexComponent: UInt64 = 0
+        
+        guard Scanner(string: String(fullHexString)).scanHexInt64(&hexComponent) else {
+            return 0
+        }
+        let hexFloat: CGFloat = CGFloat(hexComponent)
+        let floatValue: CGFloat = CGFloat(hexFloat / 255.0)
+        return floatValue
+    }
     // MARK: - App colours
 
     static var gameBackground: UIColor {
-        return UIColor(hex: "#0B5394FF")!
+        return UIColor.fromHex(hexString: "#0B5394FF")
     }
     
     static var gameLightGray: UIColor {
-        return UIColor(hex: "#F3F3F3FF")!
+        return UIColor.fromHex(hexString: "#F3F3F3FF")
     }
     
     static var gameHighlight: UIColor {
@@ -56,39 +70,27 @@ extension UIColor {
     }
     
     static var gameBlock1: UIColor {
-        //return UIColor(82, 140, 81, 100)
-        //return UIColor(hex: "#0339A6FF")!
-        return UIColor(hex: "#17DEEEFF")!
+        return UIColor.fromHex(hexString: "#17DEEEFF")
         
     }
     
     static var gameBlock2: UIColor {
-        //return UIColor(175, 190, 115, 100)
-        //return UIColor(hex: "#04ADBFFF")!
-        return UIColor(hex: "#FF7F50FF")!
+        return UIColor.fromHex(hexString: "#FF7F50FF")
     }
     
     static var gameBlock3: UIColor {
-        //return UIColor(245, 222, 131, 100)
-        //return UIColor(hex: "#F2B705FF")!
-        return UIColor(hex: "#FF4162FF")!
+        return UIColor.fromHex(hexString: "#FF4162FF")
     }
     
     static var gameBlock4: UIColor {
-        //return UIColor(242, 184, 75, 100)
-        //return UIColor(hex: "#F28705FF")!
-        return UIColor(hex: "#F2E50BFF")!
+        return UIColor.fromHex(hexString: "#F2E50BFF")
     }
     
     static var gameBlock5: UIColor {
-        //return UIColor(217, 94, 51, 100)
-        //return UIColor(hex: "#F2380FFF")!
-        return UIColor(hex: "#21B20CFF")!
+        return UIColor.fromHex(hexString: "#21B20CFF")
     }
     
     static var gameBlock6: UIColor {
-        //return UIColor(217, 94, 51, 100)
-        //return UIColor(hex: "#F2380FFF")!
         return UIColor.lightGray
     }
     

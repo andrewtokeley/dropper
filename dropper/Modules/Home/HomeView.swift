@@ -16,7 +16,7 @@ final class HomeView: UserInterface {
     var states = [GameState?]()
     
     private func showCollectionView() {
-        self.collectionView.alpha = 1
+        self.gamesCollectionView.alpha = 1
     }
     
     override func viewDidLoad() {
@@ -27,38 +27,30 @@ final class HomeView: UserInterface {
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         
         //self.view.addSubview(titleLabel)
-        self.view.addSubview(headerImage)
-        self.view.addSubview(collectionView)
+        self.view.addSubview(gamesCollectionView)
+        self.view.addSubview(selectedGameView)
         
         setConstraints()
         
         super.viewDidLoad()
     }
     
-    lazy var headerImage: UIImageView = {
-        let view = UIImageView(image: UIImage(named: "tiles"))
-        view.contentMode = .scaleAspectFit
+    lazy var selectedGameView: GameTile = {
+        let view: GameTile = UIView.fromNib()
+        view.delegate = self
         return view
     }()
     
-    lazy var titleLabel: UILabel = {
-        let view = UILabel()
-        view.text = "TETRIS"
-        view.font = UIFont.boldSystemFont(ofSize: 80)
-        view.textColor = .black
-        view.textAlignment = .center
-        
-        return view
-    }()
-    
-    lazy var collectionView: UICollectionView = {
+    lazy var gamesCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
         
-        let view = UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewFlowLayout())
+        let view = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
+        
         view.delegate = self
         view.dataSource = self
         
-        view.register(UINib(nibName: "GameTile", bundle: .main), forCellWithReuseIdentifier: "cell")
+        view.register(UINib(nibName: "SmallGameTile", bundle: .main), forCellWithReuseIdentifier: "cell")
         
         view.alpha = 0
         return view
@@ -66,21 +58,15 @@ final class HomeView: UserInterface {
     
     private func setConstraints() {
         
-        headerImage.autoPinEdge(toSuperviewEdge: .top, withInset: 30)
-        headerImage.autoAlignAxis(toSuperviewAxis: .vertical)
-        headerImage.autoPinEdge(toSuperviewEdge: .left, withInset: 30)
+        gamesCollectionView.autoPinEdge(toSuperviewEdge: .top, withInset: 60)
+        gamesCollectionView.autoPinEdge(toSuperviewEdge: .left, withInset: 30)
+        gamesCollectionView.autoPinEdge(toSuperviewEdge: .right, withInset: 20)
+        gamesCollectionView.autoSetDimension(.height, toSize: 120)
         
-        
-        
-//        titleLabel.autoSetDimension(.height, toSize: 150)
-//        titleLabel.autoPinEdge(toSuperviewMargin: .top)
-//        titleLabel.autoPinEdge(toSuperviewMargin: .left)
-//        titleLabel.autoPinEdge(toSuperviewMargin: .right)
-        
-        collectionView.autoPinEdge(.top, to: .bottom, of: headerImage, withOffset: 40)
-        collectionView.autoPinEdge(toSuperviewEdge: .left, withInset: 20)
-        collectionView.autoPinEdge(toSuperviewEdge: .right, withInset: 20)
-        collectionView.autoPinEdge(toSuperviewEdge: .bottom)
+        selectedGameView.autoPinEdge(.top, to: .bottom, of: gamesCollectionView, withOffset: 40)
+        selectedGameView.autoPinEdge(toSuperviewEdge: .left, withInset: 20)
+        selectedGameView.autoPinEdge(toSuperviewEdge: .right, withInset: 20)
+        selectedGameView.autoPinEdge(toSuperviewEdge: .bottom)
         
     }
     
@@ -89,13 +75,17 @@ final class HomeView: UserInterface {
 extension HomeView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        let size = collectionView.frame.size.width *  0.85
-        return CGSize(width: size , height: 240)
+        //let size = collectionView.frame.size.width *  0.85
+        return CGSize(width: 150 , height: 150)
     }
 }
 
 extension HomeView: UICollectionViewDataSource {
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let title = titles[indexPath.row]
+        let state = states[indexPath.row]
+        selectedGameView.configureView(title: title, state: state)
+    }
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -105,13 +95,18 @@ extension HomeView: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! GameTile
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! SmallGameTile
         
-        cell.delegate = self
+        //cell.delegate = self
         let title = titles[indexPath.row]
-        let state = states[indexPath.row]
+        cell.gameTitleLabel.text = title.title
+        if let accentColour = title.accentColorAsHex {
+            cell.background.backgroundColor = UIColor.fromHex(hexString: accentColour)
+        }
         
-        cell.configureView(title: title, state: state)
+//        let state = states[indexPath.row]
+//
+//        cell.configureView(title: title, state: state)
         return cell
     }
     
@@ -133,9 +128,13 @@ extension HomeView: HomeViewApi {
     func displayGameTitles(titles: [GameTitle], states: [GameState?]) {
         self.titles = titles
         self.states = states
-        self.collectionView.reloadData()
+        self.gamesCollectionView.reloadData()
         
-        if self.collectionView.alpha == 0 {
+        // see if one of the games is marked as isLastPlayed
+        let index = self.titles.firstIndex { $0.isLastPlayed } ?? 0
+        self.selectedGameView.configureView(title: self.titles[index], state: self.states[index])
+        
+        if self.gamesCollectionView.alpha == 0 {
             UIView.animate(
                 withDuration: 1.4,
                 delay:0,
