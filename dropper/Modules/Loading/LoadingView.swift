@@ -13,25 +13,10 @@ import Viperit
 final class LoadingView: UserInterface {
     
     @IBOutlet weak var spinner: UIView!
-    @IBOutlet weak var imageTopConstraint: NSLayoutConstraint!
-    @IBOutlet weak var image: UIImageView!
-    @IBOutlet weak var imageLeftConstraint: NSLayoutConstraint!
-    
     var timer: Timer?
     
-    @objc private func doAnimation() {
-        UIView.animate(
-            withDuration: 1.1,
-            delay:0,
-            options: .transitionCrossDissolve,
-            animations: {
-                self.spinner.alpha = 0
-                self.imageLeftConstraint.constant = 30
-                self.imageTopConstraint.constant = 30
-                self.view.layoutIfNeeded()
-            }) { resut in
-                self.presenter.animationComplete()
-        }
+    @objc private func stopRotation() {
+        self.presenter.animationComplete()
     }
     
 //    var count: Int = 0
@@ -70,8 +55,9 @@ extension LoadingView: LoadingViewApi {
     
     func animateImage() {
         self.spinner.rotate(3)
-        //self.count = 0
-        self.timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(doAnimation), userInfo: nil, repeats: false)
+        
+        // spin for a few seconds then stop :-)
+        self.timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(stopRotation), userInfo: nil, repeats: false)
     }
 }
 

@@ -25,9 +25,20 @@ class TetrisClassicTitle: GameTitle {
         try super.init()
         id = "TTC"
         title = "Classic Tetris"
+        shortDescription = "Complete rows of blocks"
         gridRows = 21
         gridColumns = 10
-        accentColorAsHex = UIColor.gameBlock2.asHex()
+        accentColorAsHex = UIColor.gameBackground.asHex()
+        gridHeroLayout = [
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "X4", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "X3", "  ", "  ", "  ", "  "],
+            ["X2", "X2", "X1", "X4", "  ", "X1", "  "],
+            ["X1", "X2", "X2", "X3", "X4", "X2", "X2"],
+        ]
+        gridHeroHighlight = try! GridRange(start: GridReference(0,0), end: GridReference(0,6)).references
     }
     
     required init(from decoder: Decoder) throws {

@@ -88,33 +88,42 @@ extension GameService: GameServiceContract {
         let gameTitles = [try! TetrisClassicTitle(),
                           try! ColourMatcherTitle(),
                           try! GravityMatcherTitle()]
+        
         var allSettings = [Settings?]()
+        
         for title in gameTitles {
             dispatch.enter()
-            title.isLastPlayed = false
+            //title.isLastPlayed = false
             getScoreHistory(for: title) { scores in
                 title.highScore = scores.max() ?? 0
                 dispatch.leave()
             }
             getSettings(for: title) { settings in
+                title.lastPlayed = settings?.lastPlayed
                 allSettings.append(settings)
             }
         }
         
-        if let latestDate = allSettings.max( by: { a, b in
-            b?.lastPlayed ?? Date.distantPast > a?.lastPlayed ?? Date.distantPast
-        })??.lastPlayed {
-            // we have a game that's been played most recently
-            if let index = allSettings.firstIndex(where: { $0?.lastPlayed == latestDate }) {
-                gameTitles[index].isLastPlayed = true
-            }
-        } else {
-            // if no games have been played then select the first one
-            gameTitles[0].isLastPlayed = true
+//        if let latestDate = allSettings.max( by: { a, b in
+//            b?.lastPlayed ?? Date.distantPast > a?.lastPlayed ?? Date.distantPast
+//        })??.lastPlayed {
+//            // we have a game that's been played most recently
+//            if let index = allSettings.firstIndex(where: { $0?.lastPlayed == latestDate }) {
+//                gameTitles[index].isLastPlayed = true
+//            }
+//        } else {
+//            // if no games have been played then select the first one
+//            gameTitles[0].isLastPlayed = true
+//        }
+        
+        // sort the gameTitles by lastplayed
+        var sorted = gameTitles
+        sorted.sort { a, b in
+            a.lastPlayed ?? Date.now > b.lastPlayed ?? Date.now
         }
         
         dispatch.notify(queue: DispatchQueue.main, execute: {
-            completion?(gameTitles)
+            completion?(sorted)
         })
     }
     

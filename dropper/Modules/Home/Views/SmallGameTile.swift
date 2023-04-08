@@ -11,8 +11,4 @@ import UIKit
 class SmallGameTile: UICollectionViewCell {
     @IBOutlet weak var background: UIView!
     @IBOutlet weak var gameTitleLabel: UILabel!
-    
-    override func awakeFromNib() {
-        //
-    }
 }

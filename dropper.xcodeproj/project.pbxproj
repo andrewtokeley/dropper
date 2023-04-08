@@ -17,6 +17,7 @@
 		D8036E4929A225010081CF41 /* BlockGridTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8036E4829A225010081CF41 /* BlockGridTests.swift */; };
 		D80B0A7B29A2932D00E7B43A /* BlockResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D80B0A7A29A2932D00E7B43A /* BlockResult.swift */; };
 		D812552729DD63AA00D6E124 /* UIColorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D812552629DD63AA00D6E124 /* UIColorTests.swift */; };
+		D812552B29DE2FE200D6E124 /* GridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D812552A29DE2FE200D6E124 /* GridView.swift */; };
 		D834301B29A47B4A00D9C052 /* BlockGridDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D834301A29A47B4A00D9C052 /* BlockGridDelegate.swift */; };
 		D834301E29A481B600D9C052 /* ScreenPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D834301D29A481B600D9C052 /* ScreenPosition.swift */; };
 		D834302129A48B5900D9C052 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = D834302029A48B5900D9C052 /* Podfile */; };
@@ -148,6 +149,7 @@
 		D8036E4829A225010081CF41 /* BlockGridTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockGridTests.swift; sourceTree = "<group>"; };
 		D80B0A7A29A2932D00E7B43A /* BlockResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockResult.swift; sourceTree = "<group>"; };
 		D812552629DD63AA00D6E124 /* UIColorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorTests.swift; sourceTree = "<group>"; };
+		D812552A29DE2FE200D6E124 /* GridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridView.swift; sourceTree = "<group>"; };
 		D834301A29A47B4A00D9C052 /* BlockGridDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockGridDelegate.swift; sourceTree = "<group>"; };
 		D834301D29A481B600D9C052 /* ScreenPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenPosition.swift; sourceTree = "<group>"; };
 		D834302029A48B5900D9C052 /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -529,6 +531,7 @@
 				D83DE37429D283A6005F83A0 /* GameTile.swift */,
 				D8DD4B4529DCB32400F64EC0 /* SmallGameTile.xib */,
 				D8DD4B4729DCB34400F64EC0 /* SmallGameTile.swift */,
+				D812552A29DE2FE200D6E124 /* GridView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -771,6 +774,7 @@
 				D83DE36529CAF24F005F83A0 /* GameState.swift in Sources */,
 				D869176B29B48183008C60F0 /* ShapeNode.swift in Sources */,
 				D869177329B80BF7008C60F0 /* ScoreNode.swift in Sources */,
+				D812552B29DE2FE200D6E124 /* GridView.swift in Sources */,
 				D83DE34029C8D2B1005F83A0 /* Settings.swift in Sources */,
 				D8DD4B3529DA5BA400F64EC0 /* LoadingInteractor.swift in Sources */,
 				D83DE35B29C98616005F83A0 /* UserDefaultsExtension.swift in Sources */,

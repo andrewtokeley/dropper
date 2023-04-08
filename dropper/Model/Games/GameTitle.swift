@@ -17,12 +17,16 @@ enum GameTitleError: Error {
 class GameTitle: Codable {
     var id: String = ""
     var title: String = ""
+    var shortDescription = ""
     var highScore: Int = 0
     var gridRows: Int = 21
     var gridColumns: Int = 10
     var rootGameName: String?
     var accentColorAsHex: String?
+    var gridHeroLayout = [[String]]()
+    var gridHeroHighlight = [GridReference]()
     var isLastPlayed: Bool = false
+    var lastPlayed: Date?
     
     init() throws {
         

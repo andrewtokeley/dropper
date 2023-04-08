@@ -26,6 +26,13 @@ class GridRange {
     var start: GridReference
     var end: GridReference
     
+    init(start: GridReference, end: GridReference) throws {
+        guard start.row == end.row || start.column == end.column else { throw GridRangeError.InvalidGridReferences }
+        
+        self.start = start
+        self.end = end
+    }
+    
     var orientation: GridRangeOrientation {
         if start.row == end.row { return .horizontal }
         if start.column == end.column { return .vertical }
@@ -42,11 +49,14 @@ class GridRange {
         }
     }
     
-    init(start: GridReference, end: GridReference) throws {
-        guard start.row == end.row || start.column == end.column else { throw GridRangeError.InvalidGridReferences }
-        
-        self.start = start
-        self.end = end
+    var references: [GridReference] {
+        var references = [GridReference]()
+        for r in start.row..<end.row + 1 {
+            for c in start.column..<end.column + 1 {
+                references.append(GridReference(r,c))
+            }
+        }
+        return references
     }
     
 }

@@ -12,19 +12,9 @@ import UIKit
  GravityMatcher
  */
 class GravityMatcherGame: Game {
-    
-//    required func getLevels() -> [Level] {
-//        var levels = [GravityMatcherLevel]()
-//        for i in 0..<maxLevels {
-//            let level = GravityMatcherLevel(i+1)
-//            levels.append(level)
-//        }
-//        return levels
-//    }
     required init() {
         super.init(try! GravityMatcherTitle(), levelClass: GravityMatcherLevel.self)
     }
-    
 }
 
 class GravityMatcherTitle: GameTitle {
@@ -32,9 +22,30 @@ class GravityMatcherTitle: GameTitle {
         try super.init()
         id = "GMT"
         title = "Gravity Matcher"
+        shortDescription = "Same as Matcher but with gravity!"
         self.gridRows = 15
         self.gridColumns = 10
-        self.accentColorAsHex = UIColor.gameBlock1.asHex()
+        accentColorAsHex = UIColor.gameBackground.asHex()
+        gridHeroLayout = [
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "X3", "X3", "X2", "X3", "  "],
+            ["  ", "  ", "  ", "  ", "X1", "  ", "  "],
+            ["  ", "  ", "  ", "X3", "X1", "  ", "X3"],
+            ["  ", "  ", "  ", "X3", "X3", "X3", "X3"],
+        ]
+        gridHeroHighlight = [
+            GridReference(0, 2),
+            GridReference(0, 3),
+            GridReference(0, 4),
+            GridReference(0, 5),
+            GridReference(0, 6),
+            GridReference(1, 3),
+            GridReference(1, 5),
+            GridReference(1, 6),
+            GridReference(2, 3),
+        ]
     }
     
     required init(from decoder: Decoder) throws {

@@ -23,9 +23,31 @@ class ColourMatcherTitle: GameTitle {
         try super.init()
         id = "TCM"
         title = "Matcher"
+        shortDescription = "Match connected blocks of the same colour"
         gridRows = 21
         gridColumns = 10
-        accentColorAsHex = UIColor.gameBlock3.asHex()
+        accentColorAsHex = UIColor.gameBackground.asHex()
+        gridHeroLayout = [
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ["  ", "X4", "X2", "X3", "X1", "X1", "X1"],
+            ["  ", "  ", "  ", "X1", "X1", "X2", "X1"],
+            ["  ", "  ", "  ", "X1", "X1", "X2", "X1"],
+            ["  ", "  ", "X5", "X4", "X4", "  ", "X1"],
+        ]
+        gridHeroHighlight = [
+            GridReference(0, 6),
+            GridReference(1, 3),
+            GridReference(1, 4),
+            GridReference(1, 6),
+            GridReference(2, 3),
+            GridReference(2, 4),
+            GridReference(2, 6),
+            GridReference(3, 4),
+            GridReference(3, 5),
+            GridReference(3, 6)
+        ]
     }
     
     required init(from decoder: Decoder) throws {

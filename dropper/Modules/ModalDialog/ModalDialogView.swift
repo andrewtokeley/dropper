@@ -72,12 +72,12 @@ final class ModalDialogView: UIViewController {
         // Font
         switch action.style {
         case .standard:
-            button.backgroundColor = .systemBlue
+            button.backgroundColor = .gameBackground
             button.setTitleColor(.white, for: .normal)
             break
         case .cancel:
             button.backgroundColor = .white
-            button.setTitleColor(.systemBlue, for: .normal)
+            button.setTitleColor(.gameBackground, for: .normal)
             break
         case .destructive:
             button.backgroundColor = .systemRed

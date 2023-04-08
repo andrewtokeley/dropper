@@ -30,7 +30,6 @@ extension UIColor {
         var colorString = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
         colorString = colorString.replacingOccurrences(of: "#", with: "").uppercased()
 
-        print(colorString)
         let alpha: CGFloat = 1.0
         let red: CGFloat = self.colorComponentFrom(colorString: colorString, start: 0, length: 2)
         let green: CGFloat = self.colorComponentFrom(colorString: colorString, start: 2, length: 2)
@@ -55,8 +54,20 @@ extension UIColor {
         let floatValue: CGFloat = CGFloat(hexFloat / 255.0)
         return floatValue
     }
+    
     // MARK: - App colours
 
+    static func from(_ blockColour: BlockColour) -> UIColor {
+        switch blockColour {
+            case .colour1: return .gameBlock1
+            case .colour2: return .gameBlock2
+            case .colour3: return .gameBlock3
+            case .colour4: return .gameBlock4
+            case .colour5: return .gameBlock5
+            case .colour6: return .gameBlock6
+        }
+    }
+    
     static var gameBackground: UIColor {
         return UIColor.fromHex(hexString: "#0B5394FF")
     }

@@ -31,7 +31,7 @@ enum GridDirection: Int {
 /**
  Represents a location within the game's grid. Grid's are referenced using a zero based index, where row 0 is the bottom row and column 0 is the left most column.
  */
-class GridReference {
+class GridReference: Codable {
     
     /// Row reference where 1 is the bottom most row
     var row: Int

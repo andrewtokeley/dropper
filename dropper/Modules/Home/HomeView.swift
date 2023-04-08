@@ -15,18 +15,14 @@ final class HomeView: UserInterface {
     var titles = [GameTitle]()
     var states = [GameState?]()
     
-    private func showCollectionView() {
-        self.gamesCollectionView.alpha = 1
-    }
-    
     override func viewDidLoad() {
+        
         self.view.backgroundColor = .white
 
         self.navigationController?.navigationBar.backgroundColor = .gameBackground
         self.navigationController?.navigationBar.tintColor = .white
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         
-        //self.view.addSubview(titleLabel)
         self.view.addSubview(gamesCollectionView)
         self.view.addSubview(selectedGameView)
         
@@ -52,16 +48,15 @@ final class HomeView: UserInterface {
         
         view.register(UINib(nibName: "SmallGameTile", bundle: .main), forCellWithReuseIdentifier: "cell")
         
-        view.alpha = 0
         return view
     }()
     
     private func setConstraints() {
         
-        gamesCollectionView.autoPinEdge(toSuperviewEdge: .top, withInset: 60)
+        gamesCollectionView.autoPinEdge(toSuperviewEdge: .top, withInset: 120)
         gamesCollectionView.autoPinEdge(toSuperviewEdge: .left, withInset: 30)
         gamesCollectionView.autoPinEdge(toSuperviewEdge: .right, withInset: 20)
-        gamesCollectionView.autoSetDimension(.height, toSize: 120)
+        gamesCollectionView.autoSetDimension(.height, toSize: 150)
         
         selectedGameView.autoPinEdge(.top, to: .bottom, of: gamesCollectionView, withOffset: 40)
         selectedGameView.autoPinEdge(toSuperviewEdge: .left, withInset: 20)
@@ -81,10 +76,23 @@ extension HomeView: UICollectionViewDelegateFlowLayout {
 }
 
 extension HomeView: UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let title = titles[indexPath.row]
         let state = states[indexPath.row]
         selectedGameView.configureView(title: title, state: state)
+        //collectionView.performBatchUpdates {
+            // reorder collection view so the
+        
+        titles.move(fromOffsets: IndexSet(integer: indexPath.row), toOffset: 0)
+        collectionView.moveItem(at: indexPath, to: IndexPath(item: 0, section: 0))
+
+        // Assuming you have a UICollectionView instance named "collectionView"
+        let firstIndexPath = IndexPath(item: 0, section: 0) // Assumes you have only one section
+        collectionView.scrollToItem(at: firstIndexPath, at: .left, animated: true)
+
+            //collectionView.reloadData()
+        //}
     }
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -97,16 +105,25 @@ extension HomeView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! SmallGameTile
         
-        //cell.delegate = self
         let title = titles[indexPath.row]
+        
         cell.gameTitleLabel.text = title.title
+        
         if let accentColour = title.accentColorAsHex {
-            cell.background.backgroundColor = UIColor.fromHex(hexString: accentColour)
+            let backgroundColour = UIColor.fromHex(hexString: accentColour)
+            cell.background.backgroundColor = backgroundColour
+            
+            // add a grid
+            let grid = try! BlockGrid(title.gridHeroLayout)
+            let highlighted = title.gridHeroHighlight
+            let gridView:GridView = GridView(grid, gridLinesColour: backgroundColour, highlighted: highlighted)
+            cell.background.subviews.forEach( {$0.removeFromSuperview()} )
+            cell.background.addSubview(gridView)
+            gridView.autoPinEdgesToSuperviewEdges(with: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
         }
         
-//        let state = states[indexPath.row]
-//
-//        cell.configureView(title: title, state: state)
+        
+
         return cell
     }
     
@@ -125,24 +142,15 @@ extension HomeView: GameTileDelegate {
 
 //MARK: - HomeView API
 extension HomeView: HomeViewApi {
+    
     func displayGameTitles(titles: [GameTitle], states: [GameState?]) {
         self.titles = titles
         self.states = states
         self.gamesCollectionView.reloadData()
         
-        // see if one of the games is marked as isLastPlayed
-        let index = self.titles.firstIndex { $0.isLastPlayed } ?? 0
-        self.selectedGameView.configureView(title: self.titles[index], state: self.states[index])
+        // the first game is always the last played
+        self.selectedGameView.configureView(title: self.titles[0], state: self.states[0])
         
-        if self.gamesCollectionView.alpha == 0 {
-            UIView.animate(
-                withDuration: 1.4,
-                delay:0,
-                options: .transitionCrossDissolve,
-                animations: {
-                    self.showCollectionView()
-                })
-        }
     }
     
     func displayConfirmation(title: String, confirmationButtonText: String, confirmationText: String, completion: ((Bool)->Void)?) {
