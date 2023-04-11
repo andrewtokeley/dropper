@@ -12,7 +12,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="GameTile" customModule="dropper" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="302" height="238"/>
+            <rect key="frame" x="0.0" y="0.0" width="302" height="311"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Classic" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hum-vL-WkN" userLabel="titleLabel">
@@ -102,11 +102,19 @@
                         <action selector="handleSecondaryClick:" destination="iN0-l3-epB" eventType="touchUpInside" id="0F5-rl-e0c"/>
                     </connections>
                 </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="game message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MaT-es-o56">
+                    <rect key="frame" x="30" y="247.66666666666666" width="242" height="19.333333333333343"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <color key="textColor" systemColor="systemGrayColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <constraints>
                 <constraint firstItem="MgN-dh-3ht" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="20" id="3o9-hV-v88"/>
+                <constraint firstItem="MaT-es-o56" firstAttribute="top" secondItem="MgN-dh-3ht" secondAttribute="bottom" constant="30" id="46I-3K-DlF"/>
                 <constraint firstItem="Bcl-Cm-WNy" firstAttribute="top" secondItem="hum-vL-WkN" secondAttribute="bottom" constant="5" id="67K-6a-L7u"/>
+                <constraint firstItem="MaT-es-o56" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="30" id="B3E-dE-EzI"/>
                 <constraint firstItem="rFR-oN-1Yp" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="B6I-14-124"/>
                 <constraint firstItem="hum-vL-WkN" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="10" id="Db1-O3-Vdx"/>
                 <constraint firstItem="Bcl-Cm-WNy" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="G9W-7t-79Y"/>
@@ -118,16 +126,18 @@
                 <constraint firstItem="rFR-oN-1Yp" firstAttribute="top" secondItem="Bcl-Cm-WNy" secondAttribute="bottom" constant="5" id="nQW-WL-nhH"/>
                 <constraint firstItem="MgN-dh-3ht" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="nt9-KO-f0f"/>
                 <constraint firstItem="Qea-9K-Bvf" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="wie-2C-9sF"/>
+                <constraint firstItem="MaT-es-o56" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="wqC-tc-lHw"/>
                 <constraint firstItem="hum-vL-WkN" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="10" id="xaJ-m7-686"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
                 <outlet property="highscoreLabel" destination="TZF-rU-cYY" id="Cpz-KU-Oe4"/>
+                <outlet property="messageLabel" destination="MaT-es-o56" id="yjY-2e-BgW"/>
                 <outlet property="primaryButton" destination="Qea-9K-Bvf" id="SQ1-xp-rG0"/>
                 <outlet property="secondaryButton" destination="MgN-dh-3ht" id="pSt-9k-hGy"/>
                 <outlet property="titleLabel" destination="hum-vL-WkN" id="CaM-Zb-O8R"/>
             </connections>
-            <point key="canvasLocation" x="-282.44274809160305" y="-50.70422535211268"/>
+            <point key="canvasLocation" x="-282.44274809160305" y="-25"/>
         </view>
     </objects>
     <resources>

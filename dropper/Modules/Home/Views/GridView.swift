@@ -38,13 +38,19 @@ class GridView: UIView {
     
     // MARK: - Build View
     
-    private func getBlock(_ colour: BlockColour?) -> UIView {
-        let view = UIView()
-        view.layer.borderWidth = 0
-        if let colour = colour {
-            view.backgroundColor = UIColor.from(colour)
+    private func getBlock(_ block: Block?) -> UIView {
+        var view = UIView()
+        
+        if block?.type == .jewel {
+            view = UIImageView(image: UIImage(named: "trophy"))
         } else {
-            view.backgroundColor = UIColor.clear
+            
+            view.layer.borderWidth = 0
+            if let colour = block?.colour {
+                view.backgroundColor = UIColor.from(colour)
+            } else {
+                view.backgroundColor = UIColor.clear
+            }
         }
         return view
                           
@@ -62,7 +68,7 @@ class GridView: UIView {
         stackView.distribution = .fillEqually
         stackView.axis = .horizontal
         for column in 0..<grid.columns {
-            let blockView = getBlock(grid.blocks[row][column]?.colour)
+            let blockView = getBlock(grid.blocks[row][column])
             blockViews[row][column] = blockView
             stackView.addArrangedSubview(blockView)
         }

@@ -82,6 +82,11 @@ class Game {
     var levelAchievements = Achievements.zero
     
     /**
+     Combined achievements gained across all levels
+     */
+    var gameAchievements = Achievements.zero
+    
+    /**
      The progress made towards a goal.
      
      For example, if playing TetrisClassic, the goal may be 10 rows and the goalProgressValue might by 5, meaning you're half way there!

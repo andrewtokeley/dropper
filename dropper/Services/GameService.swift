@@ -56,6 +56,7 @@ extension GameService: GameServiceContract {
                 game.setLevel(state.level)
                 game.score = state.score
                 game.levelAchievements = state.levelAchievements
+                game.gameAchievements = state.gameAchievements
                 game.grid = try! BlockGrid(state.blocks)
                 completion?(game)
             }
@@ -87,7 +88,8 @@ extension GameService: GameServiceContract {
         
         let gameTitles = [try! TetrisClassicTitle(),
                           try! ColourMatcherTitle(),
-                          try! GravityMatcherTitle()]
+                          try! GravityMatcherTitle(),
+                          try! JewelTitle()]
         
         var allSettings = [Settings?]()
         
@@ -103,18 +105,6 @@ extension GameService: GameServiceContract {
                 allSettings.append(settings)
             }
         }
-        
-//        if let latestDate = allSettings.max( by: { a, b in
-//            b?.lastPlayed ?? Date.distantPast > a?.lastPlayed ?? Date.distantPast
-//        })??.lastPlayed {
-//            // we have a game that's been played most recently
-//            if let index = allSettings.firstIndex(where: { $0?.lastPlayed == latestDate }) {
-//                gameTitles[index].isLastPlayed = true
-//            }
-//        } else {
-//            // if no games have been played then select the first one
-//            gameTitles[0].isLastPlayed = true
-//        }
         
         // sort the gameTitles by lastplayed
         var sorted = gameTitles

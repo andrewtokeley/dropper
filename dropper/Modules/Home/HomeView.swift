@@ -81,19 +81,18 @@ extension HomeView: UICollectionViewDataSource {
         let title = titles[indexPath.row]
         let state = states[indexPath.row]
         selectedGameView.configureView(title: title, state: state)
-        //collectionView.performBatchUpdates {
-            // reorder collection view so the
-        
+
+        // move the selected item to the first item
         titles.move(fromOffsets: IndexSet(integer: indexPath.row), toOffset: 0)
+        states.move(fromOffsets: IndexSet(integer: indexPath.row), toOffset: 0)
         collectionView.moveItem(at: indexPath, to: IndexPath(item: 0, section: 0))
 
-        // Assuming you have a UICollectionView instance named "collectionView"
+        // make sure the first item is shown
         let firstIndexPath = IndexPath(item: 0, section: 0) // Assumes you have only one section
         collectionView.scrollToItem(at: firstIndexPath, at: .left, animated: true)
 
-            //collectionView.reloadData()
-        //}
     }
+
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }

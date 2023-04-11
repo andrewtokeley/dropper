@@ -12,12 +12,55 @@ import Viperit
 fileprivate enum SettingsSwitch: Int {
     case showGrid = 0
     case showGhost
+    case enableHaptics
 }
 
-//MARK: SettingsView Class
+private class TableViewDefinitions {
+    
+    var sectionRows = [Int]()
+    var sectionHeaders = [String?]()
+    var sectionFooters = [String?]()
+    var tableViewCells: [IndexPath: UITableViewCell] = [:]
+    
+    init(sectionRows: [Int], sectionHeaders: [String?], sectionFooters: [String?]) {
+        self.sectionRows = sectionRows
+        self.sectionHeaders = sectionHeaders
+        self.sectionFooters = sectionFooters
+    }
+    
+    var sectionCount: Int {
+        return sectionRows.count
+    }
+
+    func rowsInSection(_ section: Int) -> Int {
+        guard section < sectionRows.count else { return 0 }
+        return sectionRows[section]
+    }
+    func titleForHeader(_ section: Int) -> String? {
+        guard section < sectionHeaders.count else { return nil }
+        return sectionHeaders[section]
+    }
+    func titleForFooter(_ section: Int) -> String? {
+        guard section < sectionFooters.count else { return nil }
+        return sectionFooters[section]
+    }
+    func tableViewCellFor(_ indexPath: IndexPath) -> UITableViewCell? {
+        guard indexPath.section < sectionFooters.count else { return nil }
+        guard indexPath.row < rowsInSection(indexPath.section) else { return nil }
+        return tableViewCells[indexPath]
+    }
+}
+
+// MARK: - SettingsView Class
+
 final class SettingsView: UserInterface {
     
     private var showClearHighScoresOption = false
+    private var tableViewDefinitions = TableViewDefinitions(
+        sectionRows: [2,1,1],
+        sectionHeaders: ["Game Options", "Vibrations", "Highscores"],
+        sectionFooters: [nil, "Vibrations when you clear a row or make a match", "This is permanent"]
+        )
     
     lazy private var tableView: UITableView = {
         let tableView = UITableView(frame: self.view.frame, style: .grouped)
@@ -56,6 +99,21 @@ final class SettingsView: UserInterface {
         return switchView
     }()
     
+    lazy var enableHapticsTableViewCell: UITableViewCell = {
+        let cell = UITableViewCell(style: UITableViewCell.CellStyle.value1, reuseIdentifier: nil)
+        cell.accessoryView = enableHapticsSwitch
+        cell.textLabel?.text = "Enable Haptics"
+        cell.selectionStyle = .none
+        return cell
+    }()
+    
+    lazy var enableHapticsSwitch: UISwitch = {
+        let switchView = UISwitch()
+        switchView.addTarget(self, action: #selector(handleSwitchToggle(_:)), for: .valueChanged)
+        switchView.tag = SettingsSwitch.enableHaptics.rawValue
+        return switchView
+    }()
+    
     lazy var clearStateTableViewCell: UITableViewCell = {
         let cell = UITableViewCell(style: UITableViewCell.CellStyle.value1, reuseIdentifier: nil)
         let button = UIButton(primaryAction: UIAction { (action) in
@@ -78,6 +136,14 @@ final class SettingsView: UserInterface {
         super.loadView()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(handleClose(_:)))
         self.view.addSubview(tableView)
+        
+        self.tableViewDefinitions.tableViewCells = [
+            IndexPath(row: 0, section: 0): showGridTableViewCell,
+            IndexPath(row: 1, section: 0): showGhostTableViewCell,
+            IndexPath(row: 0, section: 1): enableHapticsTableViewCell,
+            IndexPath(row: 0, section: 2): clearStateTableViewCell
+        ]
+        
         setConstraints()
     }
     
@@ -92,6 +158,8 @@ final class SettingsView: UserInterface {
     @objc private func handleSwitchToggle(_ sender: UISwitch) {
         if let switchView = SettingsSwitch(rawValue: sender.tag) {
             switch switchView {
+            case SettingsSwitch.enableHaptics:
+                presenter.didSelectEnableHaptics(enabled: sender.isOn)
             case SettingsSwitch.showGrid:
                 presenter.didUpdateShowGrid(show: sender.isOn)
                 break
@@ -117,6 +185,7 @@ extension SettingsView: SettingsViewApi {
 
         showGridSwitch.isOn = settings.showGrid
         showGhostSwitch.isOn = settings.showGhost
+        enableHapticsSwitch.isOn = settings.enableHaptics
         
         self.showClearHighScoresOption = showClearHighScores
         self.tableView.reloadData()
@@ -134,47 +203,29 @@ extension SettingsView: UITableViewDelegate {
 extension SettingsView: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        if section == 0 {
-            return ""
-        }
-        return "This action will remove all high scores for this game."
+        return tableViewDefinitions.titleForFooter(section)
     }
+
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+        return tableViewDefinitions.sectionCount
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if section == 0 {
-            return "Game Options"
-        } else {
-            return "Scores"
-        }
+        return tableViewDefinitions.titleForHeader(section)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return 2
-        } else {
-            return 1
-        }
+        return tableViewDefinitions.rowsInSection(section)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let section = indexPath.section
-        let row = indexPath.row
         
-        if section == 0 {
-            if row == 0 {
-                return showGridTableViewCell
-            } else {
-                return showGhostTableViewCell
-            }
-        } else if section == 1 {
-            
-            if let button = clearStateTableViewCell.viewWithTag(123) as? UIButton {
+        if let cell = tableViewDefinitions.tableViewCellFor(indexPath) {
+            // special case for clearStateTableView
+            if let button = cell.viewWithTag(123) as? UIButton {
                 button.isEnabled = self.showClearHighScoresOption
             }
-            return clearStateTableViewCell
+            return cell
         }
         return UITableViewCell()
     }

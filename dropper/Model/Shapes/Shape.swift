@@ -67,7 +67,7 @@ class Shape {
     var blocks: [BlockResult] {
         return references.enumerated().map { (index, reference) in
             BlockResult(
-                block: Block(self.colours[index], .shape, self.isGhost),
+                block: Block(self.colours[index], originIndex == index ? .shapeOrigin : .shape, self.isGhost),
                 isInsideGrid: true,
                 gridReference: reference) }
     }

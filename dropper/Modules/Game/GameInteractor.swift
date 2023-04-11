@@ -22,7 +22,9 @@ final class GameInteractor: Interactor {
         self.gameService.getSettings(for: game.title) { settings in
             
             if let settings = settings {
-                    
+                
+                self.presenter.enableHaptics(settings.enableHaptics)
+                
                 // save the date this title was played
                 var updateSettings = settings
                 updateSettings.lastPlayed = Date.now
@@ -88,7 +90,12 @@ extension GameInteractor: GameInteractorApi {
         guard let level = game.currentLevel else { return }
         
         game.levelAchievements.merge(achievements)
-        let points = level.pointsFor(achievements, hardDrop: hardDrop)
+        
+        // track the combined achievements across all levels
+        game.gameAchievements.merge(achievements)
+        
+        let points = level.pointsFor(moveAchievements: achievements, levelAchievements: game.levelAchievements, hardDrop: hardDrop)
+        
         game.score += points
         
         if (points > 0) {
@@ -108,7 +115,7 @@ extension GameInteractor: GameInteractorApi {
         if level.goalAchieved(game.levelAchievements) {
             if game.moveToNextLevel() {
                 if let level = game.currentLevel {
-                
+                    
                     // reset goal progress count
                     self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: nil, goalUnit: level.goalUnit)
                     

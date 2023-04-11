@@ -162,7 +162,7 @@ final class GameView: UserInterface {
         let panPoint = sender.location(in: self.view)
         
         // what proportion of a block width do you need to pan before it moves?
-        let sensitivity: CGFloat = 0.5
+        let sensitivity: CGFloat = 0.8
         
         // how fast you have to pan down before it's considered a drop swipe
         // the higher the number the faster you need to swipe

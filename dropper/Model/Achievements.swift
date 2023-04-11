@@ -20,6 +20,22 @@ enum Achievement: Int {
     case match20
     case colourMatch
     case colourMatchGroup
+    case jewel
+    
+    var description: String {
+        switch self {
+        case .oneRow: return "1 Row"
+        case .twoRows: return "2 Row"
+        case .threeRows: return "3 Row"
+        case .fourRows: return "4 Row"
+        case .explodedBlock: return "Explodeed Blocks"
+        case .match10: return "Match 10"
+        case .match20: return "Match 20"
+        case .colourMatch: return "Colour Match"
+        case .colourMatchGroup: return "Colour Match Group"
+        case .jewel: return "Jewel"
+        }
+    }
 }
 
 class Achievements: Codable {
@@ -42,10 +58,18 @@ class Achievements: Codable {
         state[Achievement.match20.rawValue] = 0
         state[Achievement.colourMatch.rawValue] = 0
         state[Achievement.colourMatchGroup.rawValue] = 0
+        state[Achievement.jewel.rawValue] = 0
     }
     
     init() {
         clear()
+    }
+    
+    /**
+     Returns the total number of rows removed based on row achievements
+     */
+    public var totalRowsRemoved: Int {
+        return get(.oneRow) + 2 * get(.twoRows) + 3 * get(.threeRows) + 4 * get(.fourRows)
     }
     
     /**
@@ -96,5 +120,23 @@ class Achievements: Codable {
         addTo(.match20, achievements.get(.match20))
         addTo(.colourMatch, achievements.get(.colourMatch))
         addTo(.colourMatchGroup, achievements.get(.colourMatchGroup))
+        addTo(.jewel, achievements.get(.jewel))
+    }
+}
+
+extension Achievements: CustomStringConvertible {
+    var description: String {
+        var result: String = ""
+        for achievement in state {
+            if achievement.value > 0 {
+                if let achievementAsString = Achievement(rawValue: achievement.key) {
+                    result += "\(achievementAsString):\(achievement.value)\n"
+                }
+            }
+        }
+        if result != "" {
+            return result
+        }
+        return "No Achievements"
     }
 }

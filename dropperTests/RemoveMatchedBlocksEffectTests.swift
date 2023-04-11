@@ -23,7 +23,7 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XR", "XY", "XR", "  ", "  "],
+                ["  ", "  ", "X1", "X2", "X1", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
@@ -42,11 +42,11 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
         let grid = try! BlockGrid([
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "XR", "  ", "  ", "  "],
-                ["  ", "  ", "XR", "XR", "XR", "  ", "  "],
-                ["  ", "  ", "XR", "XR", "XR", "  ", "  "],
-                ["  ", "  ", "  ", "XR", "XR", "  ", "  "],
-                ["  ", "  ", "  ", "XR", "XR", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
+                ["  ", "  ", "X1", "X1", "X1", "  ", "  "],
+                ["  ", "  ", "X1", "X1", "X1", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "X1", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "X1", "  ", "  "],
             ])
         
         let effect = RemoveMatchedBlocksEffect(minimumMatchCount: 10)
@@ -64,7 +64,7 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XR", "XR", "XR", "  ", "  "],
+                ["  ", "  ", "X1", "X1", "X1", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
@@ -86,7 +86,7 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XR", "XR", "XR", "  ", "  "],
+                ["  ", "  ", "X1", "X1", "X1", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
@@ -102,13 +102,13 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
     func testMatchMultiple() throws {
         
         let grid = try! BlockGrid([
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XR", "XR", "XR", "  ", "  "],
+                ["  ", "  ", "X1", "X1", "X1", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["XR", "XR", "XR", "XR", "  ", "  ", "  "],
+                ["X1", "X1", "X1", "X1", "  ", "  ", "  "],
             ])
         
         let effect = RemoveMatchedBlocksEffect()
@@ -121,13 +121,13 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
     func testMatchMultipleColours() throws {
         
         let grid = try! BlockGrid([
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XB", "XB", "XB", "  ", "  "],
+                ["  ", "  ", "X2", "X2", "X2", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["XY", "XY", "XY", "XY", "  ", "  ", "  "],
+                ["X3", "X3", "X3", "X3", "  ", "  ", "  "],
             ])
         
         let effect = RemoveMatchedBlocksEffect()
@@ -140,13 +140,13 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
     func testSingleComplexShape() throws {
         
         let grid = try! BlockGrid([
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "XR", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "XR", "XR", "XR", "XR", "  ", "  "],
-                ["  ", "  ", "XR", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XR", "  ", "  ", "  ", "  "],
-                ["XR", "XR", "XR", "XR", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "X1", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "X1", "X1", "X1", "X1", "  ", "  "],
+                ["  ", "  ", "X1", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "X1", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "X1", "X1", "  ", "  ", "  "],
             ])
         
         let effect = RemoveMatchedBlocksEffect()
@@ -159,13 +159,13 @@ class RemoveMatchedBlocksEffectTests: XCTestCase {
     func testGreaterThanThreeOnly() throws {
         
         let grid = try! BlockGrid([
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
-                ["XR", "XR", "  ", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
+                ["X1", "X1", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XB", "XB", "  ", "  ", "  "],
+                ["  ", "  ", "X2", "X2", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["XY", "XY", "XY", "XY", "  ", "  ", "  "],
+                ["X3", "X3", "X3", "X3", "  ", "  ", "  "],
             ])
         
         let effect = RemoveMatchedBlocksEffect(minimumMatchCount: 3)

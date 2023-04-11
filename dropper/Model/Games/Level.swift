@@ -84,8 +84,14 @@ class Level {
     }
     
     /**
-     Returns the points awarded for the given achievements
-    
+     Returns the points awarded based on the current move's achievements
+     
+     - Parameters:
+        - moveAchievements: the achievements made in the last move (shape drop)
+        - levelAchievements: the combined achievements for the level so far (optional) - this isn't used by all games.
+        
+    The default points are;
+     
      - 100*levei points for each single row
      - 300*level* poiints for each double row
      - 500*level points for each triple row
@@ -93,22 +99,22 @@ class Level {
      
      - 300 points for each colour matched block * level + 100 points for each block over the block count
      */
-    func pointsFor(_ achievements: Achievements, hardDrop: Bool = false) -> Int {
+    func pointsFor(moveAchievements: Achievements, levelAchievements: Achievements? = nil, hardDrop: Bool = false) -> Int {
         var points = 0
 
         let blockPoint = hardDrop ? 2 : 1
         
         // these are Tetris Clasic points
-        points += achievements.get(.oneRow) * 100 * number
-        points += achievements.get(.twoRows) * 300 * number
-        points += achievements.get(.threeRows) * 500 * number
-        points += achievements.get(.fourRows) * 800 * number
-        points += achievements.get(.explodedBlock) * blockPoint
+        points += moveAchievements.get(.oneRow) * 100 * number
+        points += moveAchievements.get(.twoRows) * 300 * number
+        points += moveAchievements.get(.threeRows) * 500 * number
+        points += moveAchievements.get(.fourRows) * 800 * number
+        points += moveAchievements.get(.explodedBlock) * blockPoint
         
         // Matcher points
         // e.g. if the goal was to match 15 blocks of the same colour,
         // and they match 20, then they get 300 base points + 20-15=5 * 100 extra points
-        let numberOfBlocksMatched = achievements.get(.colourMatch)
+        let numberOfBlocksMatched = moveAchievements.get(.colourMatch)
         let numberOfMatches = numberOfBlocksMatched/15
         let numberOfExtraBlocks = numberOfBlocksMatched - numberOfMatches * 15
         points += (300 * numberOfMatches + numberOfExtraBlocks * 100)
@@ -126,4 +132,12 @@ class Level {
         }
         return shape
     }
+    
+    /**
+     Some games have levels that start with some blocks on the grid
+     */
+    var initialBlocks: ([Block], [GridReference])? {
+        return nil
+    }
+    
 }

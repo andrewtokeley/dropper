@@ -32,23 +32,26 @@ class RemoveMatchedBlocksEffect: GridEffect {
      */
     override func apply(_ grid: BlockGrid) -> EffectResult {
         self.effectResults.clear()
-        var removeBlocks = [Block]()
-        let groups = findConnectedGroups(grid: grid, minimumMatchCount: self.minimumMatchCount)
+
+        let gridAfter = try! BlockGrid(grid.blocks)
+        
+        let groups = findConnectedGroups(grid: gridAfter, minimumMatchCount: self.minimumMatchCount)
         if groups.count > 0 {
             for group in groups {
-                removeBlocks.append(contentsOf: group.map { $0.block! })
-                grid.removeBlocks(group.map { $0.gridReference }, suppressDelegateCall: true)
+                gridAfter.removeBlocks(group.map { $0.gridReference }, suppressDelegateCall: true)
             }
         }
         
-        effectResults.blocksRemoved = removeBlocks
-        effectResults.achievments.addTo(.explodedBlock, removeBlocks.count)
+        effectResults = effectsFrom(grid, gridAfter)
         
         // You get an achievement for every block that was matched and removed across all groups
-        effectResults.achievments.addTo(.colourMatch, removeBlocks.count)
+        effectResults.achievments.addTo(.colourMatch, effectResults.blocksRemoved.count)
         
         // You also get an achievement for every group of blocks
         effectResults.achievments.addTo(.colourMatchGroup, groups.count)
+        
+        // apply the changes to the original grid
+        let _ = grid.removeBlocks(effectResults.blocksRemoved.map { $0.gridReference }, suppressDelegateCall:  true)
         
         return effectResults
     }

@@ -48,10 +48,13 @@ class ShapeNode: SKSpriteNode {
      */
     var ghostShapeNode: ShapeNode? {
         // copy doesn't copy any of the custom properties, just the node stuff
+        // Also not that for copy() to work, ShapeNode needs to implement init(texture:color:size)
         if let node = self.copy() as? ShapeNode {
             node.removeAllActions()
             for child in node.children {
                 if let blockNode = child as? BlockNode {
+                    // why doesn't this work??
+                    //blockNode.setGhostState(true)
                     if let bodyNode = blockNode.childNode(withName: "bodyNode") as? SKShapeNode {
                         bodyNode.fillColor = bodyNode.fillColor.withAlphaComponent(0.5)
                     }
@@ -151,7 +154,9 @@ class ShapeNode: SKSpriteNode {
         if let node = self.childNode(withName: block.id) {
             node.run(SKAction.fadeOut(withDuration: 0.5)) {
                 node.removeFromParent()
-                self.blockNodes.removeAll(where: { $0.block.id == block.id})
+                
+                // This is a little dodgy and relies on the BlockNode being given the Block's id as its name.
+                self.blockNodes.removeAll(where: { $0.name == block.id})
                 
                 // if this was the last block let the completion handler know
                 completion?(self.blockNodes.count)

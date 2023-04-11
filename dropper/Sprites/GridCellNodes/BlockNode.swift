@@ -7,25 +7,13 @@
 
 import SpriteKit
 
-class BlockNode: SKSpriteNode {
+class BlockNode: GridCellNode {
     
-    public var colour: UIColor = .red {
+    var isGhost: Bool = false
+    
+    var blockColour: BlockColour = .colour1 {
         didSet {
-            rectangle.fillColor = colour
-        }
-    }
-    
-    var block: Block!
-    
-    var blockColour: UIColor {
-        switch block.colour {
-            case .colour1: return .gameBlock1
-            case .colour2: return .gameBlock2
-            case .colour3: return .gameBlock3
-            case .colour4: return .gameBlock4
-            case .colour5: return .gameBlock5
-            case .colour6: return .gameBlock6
-        default: return .white
+            rectangle.fillColor = UIColor.from(blockColour)
         }
     }
     
@@ -33,11 +21,9 @@ class BlockNode: SKSpriteNode {
         let node = SKShapeNode(rect: CGRect(origin: CGPoint(x:-self.size.width/2, y:-self.size.height/2), size: self.size), cornerRadius: 0)
         node.strokeColor = UIColor.white
         node.lineWidth = 2
-        node.fillColor = blockColour
+        node.fillColor = UIColor.from(blockColour)
         node.name = "bodyNode"
-        if block.isGhost {
-            node.fillColor = blockColour.withAlphaComponent(0.5)
-        }
+
         return node
     }()
     
@@ -47,25 +33,29 @@ class BlockNode: SKSpriteNode {
      Changes the block's appearance to appear like a ghost or not.
      */
     public func setGhostState(_ isGhost: Bool) {
+        self.isGhost = isGhost
         let alpha = isGhost ? 0.5 : 1
         rectangle.fillColor = rectangle.fillColor.withAlphaComponent(alpha)
     }
     
     // MARK: - Initializers
     
-    init (block: Block, size: CGFloat) {
-        super.init(texture: nil, color: .clear, size: CGSize(width: size, height: size))
-        self.block = block
+    init(colour: BlockColour, size: CGFloat, name: String? = nil) {
+        super.init(dimension: size, name: name)
+        self.blockColour = colour
         addChild(rectangle)
     }
     
+    convenience init (block: Block, size: CGFloat) {
+        self.init(colour: block.colour, size: size, name: block.id)
+    }
+    
     override init(texture: SKTexture?, color: UIColor, size: CGSize) {
-        super.init(texture: nil, color: .clear, size: CGSize.zero)
+        super.init(dimension: size.width, name: nil)
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        
     }
     
     // MARK: - Actions
@@ -73,7 +63,7 @@ class BlockNode: SKSpriteNode {
     /**
      Animate the block to simulate an explosion
      */
-    public func explode(_ completion: (()->Void)?) {
+    override func explode(_ completion: (()->Void)?) {
         let pulseDown = SKAction.scale(to: CGFloat.random(in: 0.2..<0.6), duration: 0.05)
         let move = SKAction.moveBy(x: CGFloat.random(in: -45..<45), y: CGFloat.random(in: 50..<200), duration: 1.2)
         move.timingMode = .easeOut

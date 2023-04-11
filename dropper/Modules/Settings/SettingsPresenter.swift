@@ -33,6 +33,13 @@ final class SettingsPresenter: Presenter {
 // MARK: - SettingsPresenter API
 extension SettingsPresenter: SettingsPresenterApi {
     
+    func didSelectEnableHaptics(enabled: Bool) {
+        if let title = self.gameTitle {
+            settings.enableHaptics = enabled
+            interactor.saveSettings(for: title, settings: settings)
+        }
+    }
+    
     func didClearHighScores() {
         view.removeClearHighScoresOption()
     }

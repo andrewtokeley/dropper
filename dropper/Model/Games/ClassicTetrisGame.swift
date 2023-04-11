@@ -36,7 +36,7 @@ class TetrisClassicTitle: GameTitle {
             ["  ", "  ", "X4", "  ", "  ", "  ", "  "],
             ["  ", "  ", "X3", "  ", "  ", "  ", "  "],
             ["X2", "X2", "X1", "X4", "  ", "X1", "  "],
-            ["X1", "X2", "X2", "X3", "X4", "X2", "X2"],
+            ["X1", "X2", "X2", "X2", "X4", "X2", "X2"],
         ]
         gridHeroHighlight = try! GridRange(start: GridReference(0,0), end: GridReference(0,6)).references
     }

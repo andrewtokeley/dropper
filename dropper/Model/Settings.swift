@@ -10,8 +10,8 @@ import Foundation
 struct Settings: Codable {
     var showGrid: Bool = false
     var enableHaptics: Bool = false
-    var showGhost: Bool = true
-    var lastPlayed: Date?
+    var showGhost: Bool = false
+    var lastPlayed: Date = Date.distantPast
     
     static var defaultSettings: Settings {
         return Settings(showGrid: true, enableHaptics: true, showGhost: true)

@@ -21,7 +21,7 @@ final class LevelTests: XCTestCase {
         let achievements = Achievements()
         achievements.addTo(.colourMatch, 20)
         
-        let points = game.currentLevel?.pointsFor(achievements) ?? 0
+        let points = game.currentLevel?.pointsFor(moveAchievements: achievements) ?? 0
         
         // We should get 300 base points plus 5*100 points for the extra 5 blocks
         XCTAssertEqual(points, 800)

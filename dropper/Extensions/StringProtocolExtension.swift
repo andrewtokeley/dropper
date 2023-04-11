@@ -8,6 +8,15 @@
 import Foundation
 
 extension StringProtocol {
+    
+    func addLeadingSpacesToLength(_ length: Int) -> String {
+        guard length > self.count else { return self as! String }
+        
+        let spaceString = String(repeating: " ", count: length - self.count)
+        let paddedString = spaceString + self
+        return paddedString
+    }
+    
     func index<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> Index? {
         range(of: string, options: options)?.lowerBound
     }

@@ -26,6 +26,7 @@ protocol SettingsPresenterApi: PresenterProtocol {
     func didClearHighScores()
     func didUpdateShowGrid(show: Bool)
     func didUpdateShowGhost(show: Bool)
+    func didSelectEnableHaptics(enabled: Bool)
     func didSaveSettings(_ settings: Settings)
     func didSelectClose()
 }

@@ -16,11 +16,11 @@ class EffectResult {
         return blocksRemoved.count > 0 || (blocksMoved.count > 0 && blocksMovedTo.count > 0)
     }
     
-    /// Array of blocks removed by the effect
-    var blocksRemoved = [Block]()
+    /// BlockResult array for each block that's been removed.
+    var blocksRemoved = [BlockResult]()
     
-    /// Array of blocks moved by the effect, for each moved block there will be a corresponding ``blocksMovedTo`` element
-    var blocksMoved = [Block]()
+    /// BlockResult array for each block that's been moved. For each block there will be a corresponding ``blocksMovedTo`` element
+    var blocksMoved = [BlockResult]()
     
     /// Array of references for each block moved by the effect.
     var blocksMovedTo = [GridReference]()
@@ -29,8 +29,8 @@ class EffectResult {
     var achievments = Achievements.zero
     
     func clear() {
-        blocksMoved = [Block]()
-        blocksRemoved = [Block]()
+        blocksMoved = [BlockResult]()
+        blocksRemoved = [BlockResult]()
         blocksMovedTo = [GridReference]()
         achievments = Achievements.zero
     }

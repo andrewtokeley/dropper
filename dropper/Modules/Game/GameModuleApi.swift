@@ -140,6 +140,8 @@ protocol GamePresenterApi: PresenterProtocol {
 
     //MARK: - Interactor -> Presenter
     
+    func enableHaptics(_ enabled: Bool)
+
     /**
      Called by Interactor when a game has been restored from state. The Presenter will work with the View to update levels and scores and add the blocks back to the grid.
      */

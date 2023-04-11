@@ -21,9 +21,7 @@ protocol BlockGridDelegate {
     func blockGrid(_ blockGrid: BlockGrid, blockMoved block: Block, to: GridReference)
     func blockGrid(_ blockGrid: BlockGrid, blocksMoved blocks: [Block], to: [GridReference])
     func blockGrid(_ blockGrid: BlockGrid, blockAdded block: Block, reference: GridReference)
-    //func blockGrid(_ blockGrid: BlockGrid, blockRemoved block: Block)
+    func blockGrid(_ blockGrid: BlockGrid, blocksAdded blocks: [Block], references: [GridReference])
     func blockGrid(_ blockGrid: BlockGrid, blocksRemoved blocks: [Block])
-    
-    
     
 }

@@ -8,33 +8,35 @@
 import Foundation
 import UIKit
 
+/**
+ This effect will identify any rows containing no blocks and move all blocks located above it down into the empty row.
+ 
+ Jewels, shape or wall blocks are unaffected by this effect and additionally blocks that can drop can't drop through them.
+ */
 class DropIntoEmptyRowsEffect: GridEffect {
     
     override func apply(_ grid: BlockGrid) -> EffectResult {
         self.effectResults.clear()
-        var blocksToMove = [BlockResult]()
         
-        // for each blank row, move all the blocks above it down one space
-        for row in 0..<grid.rows {
-            let blocks = grid.getRow(row)
+        // take a copy of the grid, so we can actually implement the gravity movements before committing
+        let gridCopy = try! BlockGrid(grid.blocks)
+        
+        // for each empty row, move all the blocks above it down one space
+        // note we reverse the order so we start with the top most empty row to avoid the indexes
+        // being changed
+        for r in gridCopy.getEmptyRowIndexes().reversed() {
             
-            let isEmpty = blocks.filter({ $0.block != nil } ).count == 0
-            if isEmpty {
-                for above in row+1..<grid.rows {
-                    let blocksAbove = grid.getRow(above).filter { $0.block != nil }
-                    blocksToMove.append(contentsOf: blocksAbove)
-                }
-            }
+            // drop all blocks above this that can move down one row
+            let blocksAbove = gridCopy.getRows(Array(r...gridCopy.rows)).filter({$0.block?.type == .block})
+            let blocksAboveReferences = blocksAbove.map { $0.gridReference }
+            
+            let _ = gridCopy.moveBlocks(from: blocksAboveReferences, direction: .down, suppressDelegateCall: true)
         }
         
-        if blocksToMove.count > 0 {
-            let _ = grid.moveBlocks(from: blocksToMove.map { $0.gridReference }, direction:.down, suppressDelegateCall: true)
-        }
-        // move to
-        let to = blocksToMove.map { $0.gridReference.adjacent(BlockMoveDirection.down.gridDirection) }
+        effectResults = effectsFrom(grid, gridCopy)
         
-        effectResults.blocksMoved = blocksToMove.map { $0.block! }
-        effectResults.blocksMovedTo = to
+        // apply the changes to the original grid
+        let _ = grid.moveBlocks(from: effectResults.blocksMoved.map { $0.gridReference }, to: effectResults.blocksMovedTo, suppressDelegateCall: true)
         
         return effectResults
     }

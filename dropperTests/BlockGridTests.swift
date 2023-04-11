@@ -18,6 +18,23 @@ class BlockGridTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
+    func testState() throws {
+        let grid = try! BlockGrid([
+                ["  ", "  ", "X1", "X2", "X3", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "S2", "S2", "  ", "  ", "  "],
+                ["  ", "S2", "s2", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+            ])
+        XCTAssertEqual(grid.shapeBlocks.count, 4)
+        let state = grid.state
+        
+        let gridCopy = try! BlockGrid(state)
+        XCTAssertEqual(gridCopy.shapeBlocks.count, 4)
+    }
+    
     func testAddingShapeWithDefaultReference() throws {
         
         let grid = try BlockGrid(rows: 10, columns: 10)
@@ -26,6 +43,27 @@ class BlockGridTests: XCTestCase {
         XCTAssertFalse(grid.addShape(Shape.L(.colour2)))
     
     }
+    
+    /**
+     Getting empty rows
+     */
+    func testGetEmptyRows() throws {
+        
+        let grid = try BlockGrid([
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X2", "  ", "  "]
+            ])
+        
+        // should return only 2 empty rows at 1 and 2
+        let emptyRows = grid.getEmptyRowIndexes()
+        XCTAssertEqual(emptyRows.count, 2)
+        XCTAssertEqual(emptyRows[0],1)
+        XCTAssertEqual(emptyRows[1],2)
+    }
+    
     /**
      Standard initialisaton using string array
      */
@@ -83,8 +121,8 @@ class BlockGridTests: XCTestCase {
         let grid = try! BlockGrid([
                 ["  ", "  ", "S1", "s1", "S1", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "XR", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "X2", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
@@ -132,9 +170,9 @@ class BlockGridTests: XCTestCase {
         
         let grid = try! BlockGrid([
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
-                ["  ", "  ", "XB", "XY", "XB", "  ", "  "],
-                ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
+                ["  ", "  ", "X1", "X2", "X1", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
@@ -144,22 +182,19 @@ class BlockGridTests: XCTestCase {
         
         XCTAssertEqual(adjacents.count, 4)
         XCTAssertNil(adjacents.first(where: {$0.block == nil }))
-        XCTAssertNil(adjacents.first(where: {$0.block?.colour != .colour4 }))
-//        let left = grid.get(GridReference(4,2))
-//        XCTAssertEqual(left.block?.colour, .yellow)
-//        XCTAssertEqual(left.isInsideGrid, true)
-        
+        // all the adjacent colours should be 1
+        XCTAssertNil(adjacents.first(where: {$0.block?.colour != .colour1 }))
     }
     
     func testGetColumnGaps() throws {
         let grid = try! BlockGrid([
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
-                ["XB", "  ", "  ", "XB", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "XB", "  ", "  ", "  "],
-                ["XB", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "XB", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XB", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
+                ["X1", "  ", "  ", "X1", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
+                ["X1", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "X1", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "X1", "  ", "  ", "  ", "  "],
             ])
         
         var gaps = grid.getColumnGaps(0)
@@ -262,8 +297,8 @@ class BlockGridTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XY", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X1", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X2", "  ", "  "],
             ])
         
         // add a horizontal longBar to top
@@ -314,8 +349,8 @@ class BlockGridTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "XY", "  ", "XY", "  ", "  "],
-                ["  ", "  ", "XB", "  ", "XR", "  ", "  "],
+                ["  ", "  ", "X1", "  ", "X1", "  ", "  "],
+                ["  ", "  ", "X2", "  ", "X2", "  ", "  "],
             ])
         // add an I horizontal
         let shape = Shape.I(.colour4)
@@ -398,10 +433,10 @@ class BlockGridTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "S1", "s1", "S1", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XY", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XB", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XY", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X2", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X1", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X2", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X1", "  ", "  "],
             ])
         
         // Should be abel to move once
@@ -411,42 +446,15 @@ class BlockGridTests: XCTestCase {
         XCTAssertFalse(grid.moveShape(.down))
     }
     
-//    func testMoveAndSplitPlayer() throws {
-//        let grid = try! BlockGrid([
-//                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-//                ["  ", "  ", "PY", "PB", "PR", "  ", "  "],
-//                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-//                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
-//                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
-//                ["  ", "  ", "  ", "  ", "XY", "  ", "  "],
-//                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
-//            ])
-//        
-//        // Should be able to move once
-//        XCTAssertEqual(grid.playerBlocks.count, 3)
-//        XCTAssertTrue(grid.movePlayer(.down))
-//        
-//        // Since the red player blocks will match the red blocks, it will split to be only two blocks and be able to keep moving down
-//        
-//        // Check something was removed
-//        let removeMatchesEffect = RemoveMatchedBlocksEffect(grid: grid)
-//        XCTAssertTrue(removeMatchesEffect.apply())
-//
-//        // That only two player blocks are left and it can move down further
-//        XCTAssertEqual(grid.playerBlocks.count, 2)
-//        XCTAssertTrue(grid.movePlayer(.down))
-//        
-//    }
-//
     func testAddPlayerFailsIfNoRoom() throws {
         let grid = try! BlockGrid([
-                ["  ", "  ", "  ", "XB", "XB", "  ", "  "],
-                ["  ", "  ", "XY", "XB", "XR", "  ", "  "],
+                ["  ", "  ", "  ", "X1", "X1", "  ", "  "],
+                ["  ", "  ", "X3", "X1", "X2", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XY", "  ", "  "],
-                ["  ", "  ", "  ", "  ", "XR", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X2", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X3", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X4", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "X2", "  ", "  "],
             ])
         
         // add a L shape
@@ -524,10 +532,10 @@ class BlockGridTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "S1", "S1", "  ", "  ", "  ", "  "],
-                ["S1", "s1", "  ", "XB", "  ", "  ", "  "],
-                ["  ", "  ", "XB", "  ", "  ", "  ", "  "],
-                ["  ", "XB", "XB", "  ", "  ", "  ", "  "],
-                ["  ", "XB", "  ", "  ", "  ", "  ", "  "],
+                ["S1", "s1", "  ", "X1", "  ", "  ", "  "],
+                ["  ", "  ", "X1", "  ", "  ", "  ", "  "],
+                ["  ", "X1", "X1", "  ", "  ", "  ", "  "],
+                ["  ", "X1", "  ", "  ", "  ", "  ", "  "],
             ])
         
 //        let shape = Shape.S(.colour1)

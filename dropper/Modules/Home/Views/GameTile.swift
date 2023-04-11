@@ -24,6 +24,7 @@ class GameTile: UIView {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var primaryButton: UIButton!
     @IBOutlet weak var secondaryButton: UIButton!
+    @IBOutlet weak var messageLabel: UILabel!
     
     //MARK: - Event Handlers
 
@@ -63,9 +64,24 @@ class GameTile: UIView {
             primaryButton.setTitle("Continue Game", for: .normal)
             secondaryButton.alpha = 1
             secondaryButton.setTitle("New Game", for: .normal)
+            
+            var scoreMessage: String = ""
+            if state!.score > 0 {
+                scoreMessage = "\nYour current score is \(state!.score)"
+                if let _ = title as? JewelTitle {
+                    if let jewels = state?.gameAchievements.get(.jewel) {
+                        if jewels > 1 {
+                            scoreMessage += " and you've get \(jewels) jewels!"
+                        }
+                    }
+                }
+            }
+            
+            messageLabel.text = "Continue to keep the game alive! \(scoreMessage)"
         } else {
             secondaryButton.alpha = 0
             primaryButton.setTitle("New Game", for: .normal)
+            messageLabel.text = ""
         }
     }
     

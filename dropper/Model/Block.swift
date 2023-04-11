@@ -8,75 +8,6 @@
 import Foundation
 import UIKit
 
-/// Enumerated value for each visual type of block
-enum BlockType: Int, Codable {
-    /// The block is part of the grid's active shape
-    case shape = 0
-    /// The block is a standard block in the grid
-    case block
-    /// This is a wall block. Not current used.
-    case wall
-    
-    /**
-     Debug description of the BlockType
-     */
-    var description: String {
-        switch self {
-        case .block: return "Block"
-        case .shape: return "Player"
-        case .wall: return "Wall"
-        }
-    }
-}
-
-/// Enumerated value for each visual type of block
-enum BlockColour: Int, Codable {
-    
-    case colour1 = 0
-    case colour2
-    case colour3
-    case colour4
-    case colour5
-    case colour6
-    
-    static var random: BlockColour {
-        return BlockColour(rawValue: Int.random(in: 0..<5)) ?? .colour4
-    }
-    
-    /**
-     Returns an array of unique random colours
-     */
-    static func random(_ count: Int) -> [BlockColour] {
-        var colours = [BlockColour]()
-        while colours.count < count {
-            let colour = BlockColour.random
-            if !colours.contains(colour) {
-                colours.append(colour)
-            }
-        }
-        return colours
-    }
-    
-    static func randomSet(_ count: Int) -> [BlockColour] {
-        var result = [BlockColour]()
-        for _ in 0..<count {
-            result.append(BlockColour.random)
-        }
-        return result
-    }
-    
-    /// Debug info
-    var description: String {
-        switch self {
-        case .colour1: return "Colour1"
-        case .colour2: return "Colour2"
-        case .colour3: return "Colour3"
-        case .colour4: return "Colour4"
-        case .colour5: return "Colour5"
-        case .colour6: return "Colour6"
-        }
-    }
-}
 
 /**
  Represents a single block in the game.
@@ -99,6 +30,11 @@ class Block: Codable {
     
     /// Determines whether a player block is the centre of rotation. This property is ignored for non-player blocks
     var isOrigin: Bool = false
+    
+    /// Code for the block, e.g. X2
+    var code: String {
+        return "\(type.rawValue)\(colour.rawValue)"
+    }
     
     /// Initialise a new Block instance
     ///

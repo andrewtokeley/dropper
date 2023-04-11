@@ -10,7 +10,7 @@ import UIKit
 
 enum BlockGridError: Error {
     /// Thrown by BlockGrid initialisers if supplied inconsistent state.
-    case InvalidInitialBlocks
+    case InvalidInitialBlocks(_ message: String = "")
     
     /// Thrown if attempt to add a new shape fails
     case CantAddShape
@@ -80,7 +80,53 @@ class BlockGrid {
         return shape.blocks
     }
     
+    var state: [[String]] {
+        var result = [[String]]()
+        for r in 0..<rows {
+            var row = [String]()
+            for c in 0..<columns {
+                var code = "  "
+                let reference = GridReference(r,c)
+                let block = get(reference)
+                if block.block == nil {
+                    if let shapeIndex = shape?.blocks.firstIndex(where: { $0.gridReference == reference }) {
+                        code = shape!.blocks[shapeIndex].block!.code
+                    }
+                } else {
+                    code = block.block!.code
+                }
+                row.append(code)
+            }
+            result.append(row)
+        }
+        return result
+    }
+    
     // MARK: - Initialisers
+    
+    /**
+     Initialise new BlockGrid from a matrix of Block instances.
+     
+     - Parameters:
+        - blocks: ``Block``matrix, where blocks[0,0] is the block at row 0, column 0, and a nil means there's no block.
+        - shape: adds a shape to the grid
+     - Throws:
+     Throws a ``BlockGridError/InvalidInitialBlocks`` is the matrix elements don't all have the same number of elements.
+     */
+    init(_ blocks: [[Block?]], shape: Shape? = nil) throws {
+        guard blocks.count > 0 && blocks[0].count > 0 else { throw BlockGridError.InvalidInitialBlocks() }
+        guard blocks.first(where: { $0.count != blocks[0].count }) == nil else { throw BlockGridError.InvalidInitialBlocks() }
+        
+        self.rows = blocks.count
+        self.columns = blocks[0].count
+        self.blocks = blocks
+        if let shape = shape {
+            let result = self.addShape(shape)
+            if !result {
+                throw BlockGridError.CantAddShape
+            }
+        }
+    }
     
     /**
      Initialises a blank grid
@@ -89,6 +135,7 @@ class BlockGrid {
         try self.init(Array(repeating: Array(repeating: nil, count: columns), count: rows) )
     }
     
+
     /**
      Initialises a grid with blocks represented by the string elements of the 2D array.
      
@@ -96,15 +143,16 @@ class BlockGrid {
   
      This initialiser is intended to be used as a convenience for testing.
      
-     Valid strings to represent blocks include,
+     Blocks are identified by two characters, the first specifies the type of block (Shape, Block(X), Medal) and the second the colour (1...6)
      - X1: standard block set to ``BlockColour/colour1``
      - X2: standard block set to ``BlockColour/colour2``
      - ...X4: : standard block set to ``BlockColour/colour4``
+     - J1: medal block set to ``BlockColour/colour1``
+     - J2: medal block set to ``BlockColour/colour2``
+     - ...M4: : medal block set to ``BlockColour/colour4``
      - S1: shape block set to ``BlockColour/colour1``
      - ...S4: shape block set to ``BlockColour/colour4``
      - A small 's' represents the origin of the shape
-     
-     Note, some older tests may be using XB, XR, XO, XY and PB, PR, PO, PY but these should be avoided.
      
      For example;
      ````
@@ -131,82 +179,62 @@ class BlockGrid {
         
         for r in 0..<rows {
             if columns != blocks[rows-r-1].count {
-                throw BlockGridError.InvalidInitialBlocks
+                throw BlockGridError.InvalidInitialBlocks("Number of columns entries must be the same for each row.")
             }
             result.append(Array(repeating: nil, count: columns))
             for c in 0..<columns {
                 
                 let char = blocks[rows-r-1][c]
-                if char.starts(with: "s") {
-                    shapeOrigin = GridReference(r,c)
+                
+                if char.count != 2 {
+                    throw BlockGridError.InvalidInitialBlocks("Illegal cell code - must be two characters, e.g. X1")
                 }
-                switch char {
-                case "PO", "S1", "s1":
-                    shapeReferences.append(GridReference(r,c))
-                    shapeColours.append(BlockColour.colour1)
-                case "PY", "S2", "s2":
-                    shapeReferences.append(GridReference(r,c))
-                    shapeColours.append(BlockColour.colour2)
-                case "PR", "S3", "s3":
-                    shapeReferences.append(GridReference(r,c))
-                    shapeColours.append(BlockColour.colour3)
-                case "PB","S4","s4":
-                    shapeReferences.append(GridReference(r,c))
-                    shapeColours.append(BlockColour.colour4)
-                case "XO", "X1":
-                    result[r][c] = Block(.colour1, .block)
-                case "XY", "X2":
-                    result[r][c] = Block(.colour2, .block)
-                case "XR", "X3":
-                    result[r][c] = Block(.colour3, .block)
-                case "XB", "X4":
-                    result[r][c] = Block(.colour4, .block)
-                case "XX", "WW":
-                    result[r][c] = Block(.colour6, .wall)
-                default:
-                    result[r][c] = nil
+                
+                // Block Colour
+                var colour: BlockColour?
+                if let number = Int(String(char.last!)) {
+                    colour = BlockColour(rawValue: number)
+                }
+                let type = BlockType(rawValue: String(char.first!))
+                if colour == nil || type == nil {
+                    if char == "  " {
+                        result[r][c] = nil
+                    } else {
+                        // illegal set of characters
+                        throw BlockGridError.InvalidInitialBlocks("Unrecognised cell code, \(char)")
+                    }
+                } else {
+                    print(char)
+                    if type == .shapeOrigin {
+                        shapeOrigin = GridReference(r,c)
+                        if shapeOrigin == GridReference.zero {
+                            throw BlockGridError.CantAddShape
+                        }
+                    }
+                    
+                    if type == .shape || type == .shapeOrigin {
+                        shapeReferences.append(GridReference(r,c))
+                        shapeColours.append(colour!)
+                    } else {
+                        result[r][c] = Block(colour!, type!)
+                    }
                 }
             }
         }
+        
         var shape: Shape?
         if shapeReferences.count > 0 {
-            if shapeOrigin == GridReference.zero {
-                throw BlockGridError.InvalidInitialBlocks
-            } else {
-                // normalise so that origin is at (0,0)
-                let references = shapeReferences.map { $0 - shapeOrigin }
-                shape = try? Shape(references: references, colours: shapeColours)
-                
-                // move into place
-                shape?.move(shapeOrigin)
-            }
+            // normalise so that origin is at (0,0)
+            let references = shapeReferences.map { $0 - shapeOrigin }
+            shape = try? Shape(references: references, colours: shapeColours)
+            
+            // move into place
+            shape?.move(shapeOrigin)
         }
+        
         try self.init(result, shape: shape)
     }
     
-    /**
-     Initialise new BlockGrid from a matrix of Block instances.
-     
-     - Parameters:
-        - blocks: ``Block``matrix, where blocks[0,0] is the block at row 0, column 0, and a nil means there's no block.
-        - shape: adds a shape to the grid
-     - Throws:
-     Throws a ``BlockGridError/InvalidInitialBlocks`` is the matrix elements don't all have the same number of elements.
-     */
-    init(_ blocks: [[Block?]], shape: Shape? = nil) throws {
-        guard blocks.count > 0 && blocks[0].count > 0 else { throw BlockGridError.InvalidInitialBlocks }
-        guard blocks.first(where: { $0.count != blocks[0].count }) == nil else { throw BlockGridError.InvalidInitialBlocks }
-        
-        self.rows = blocks.count
-        self.columns = blocks[0].count
-        self.blocks = blocks
-        if let shape = shape {
-            let result = self.addShape(shape)
-            if !result {
-                throw BlockGridError.CantAddShape
-            }
-        }
-    }
     
     // MARK: - Position Functions
     
@@ -308,13 +336,70 @@ class BlockGrid {
         return result
     }
     
-    /// Returns each block in a row
-    /// - Parameter row: zero based reference reference
-    /// - Returns: array of ``BlockResult`` instances where the first column is the first element (index 0)
+    /**
+     Returns each block in a row, including empty cells.
+    
+     - Parameter row: zero based reference to the row
+     - Returns: array of ``BlockResult`` instances where the first column is the first element (index 0)
+     */
     func getRow(_ row: Int) -> [BlockResult] {
         var result = [BlockResult]()
         for column in 0..<columns {
             result.append(get(GridReference(row, column)))
+        }
+        return result
+    }
+    
+    /**
+     Returns BlockResults array of all blocks in the specified rows
+    
+     - Parameter rows: array of row indexes to return
+     - Returns: array of ``BlockResult`` instances where the first column is the first element (index 0)
+     */
+    func getRows(_ rows: [Int]) -> [BlockResult] {
+        var result = [BlockResult]()
+        for r in rows {
+            result.append(contentsOf: getRow(r))
+        }
+        return result
+    }
+    
+    /**
+     Returns the index of each row that is full. A full row has no empty cells.
+     */
+    func getFullRowIndexes() -> [Int] {
+        var result = [Int]()
+        for r in 0..<rows {
+            let isFull = getRow(r).filter({$0.block == nil}).count == 0
+            if isFull {
+                result.append(r)
+            }
+        }
+        return result
+    }
+    
+    /**
+     Returns the index of each empty row.
+     
+     - Important: Note that a row is considered empty if it contains no blocks **AND** there are other blocks (of type .block) above this row.
+     */
+    func getEmptyRowIndexes() -> [Int] {
+        var result = [Int]()
+        
+        // find the highest .block in the grid
+        let allBlocks = getAll().filter({ $0.block?.type == .block })
+        let topBlock = allBlocks.max { a, b in
+            b.gridReference.row > a.gridReference.row
+        }
+        
+        if let topRow = topBlock?.gridReference.row {
+            for r in 0..<topRow {
+                let row = getRow(r)
+                let isEmpty = row.filter({ $0.block == nil } ).count == columns
+                if isEmpty {
+                    result.append(r)
+                }
+            }
         }
         return result
     }
@@ -437,7 +522,7 @@ class BlockGrid {
         for i in 0..<blocks.count {
             addBlock(block: blocks[i], reference: references[i], supressDelegateCallback: true)
         }
-        //delegate?.blockGrid(self, blocksMoved: blocks, to: references)
+        delegate?.blockGrid(self, blocksAdded: blocks, references: references)
         return true
     }
     
@@ -476,8 +561,8 @@ class BlockGrid {
         guard let block = get(reference).block else { return false }
         guard isInGrid(reference.adjacent(direction.gridDirection)) else { return false }
 
-        // Can't move a block of type .fixed
-        if block.type == .wall {
+        // Can only move blocks
+        if block.type != .block {
             return false
         }
         
@@ -537,6 +622,7 @@ class BlockGrid {
     func moveBlocks(from: [GridReference], to: [GridReference], suppressDelegateCall: Bool = false) -> Bool {
         guard from.count != 0 else { return false }
         guard from.count == to.count else { return false }
+        guard canMove(references: from, to: to) else { return false }
         
         // get references to the block instances to move
         let fromBlocks = get(from)
@@ -584,13 +670,13 @@ class BlockGrid {
      Note the function will also return false if either from or to locations fall outside the grid dimensions.
      */
     func moveBlock(from: GridReference, to: GridReference) -> Bool {
-        guard isInGrid(from) && isInGrid(to) else { return false }
-        guard let block = get(from).block else { return false }
-
-        blocks[from.row][from.column] = nil
-        blocks[to.row][to.column] = block
+        guard canMove(references: [from], to: [to]) else { return false }
         
-        delegate?.blockGrid(self, blockMoved: block, to: to)
+        let block = get(from).block
+        blocks[from.row][from.column] = nil
+        blocks[to.row][to.column] = block!
+        
+        delegate?.blockGrid(self, blockMoved: block!, to: to)
         return true
     }
     
@@ -734,32 +820,6 @@ class BlockGrid {
         return transformedReferences
     }
 
-
-    /**
-     Returns the transformed grid references for the shape, or nil if the player can't be rotated
-     */
-//    private var rotatedShapeGridReference: ShapeRotationResult {
-//        guard let shape = self.shape else { return ShapeRotationResult(canRotate: false) }
-//        
-//        var result = ShapeRotationResult(canRotate: false)
-//        if let wallKicks = shape.wallKicks[shape.orientation] {
-//            
-//            // iterate the wallKicks offsets
-//            for kick in wallKicks {
-//                
-//                let transformedReferences = shape.getRotationWithKick(kick)
-//                if canMove(references: shape.references, to: transformedReferences) {
-//                    // this kick worked!
-//                    result.wallKick = kick
-//                    result.canRotate = true
-//                    result.transformedReferences = transformedReferences
-//                }
-//            }
-//        }
-//        
-//        return result
-//    }
-  
     /**
      Rotates the active shape clockwise 90 degrees.
      
@@ -809,27 +869,37 @@ class BlockGrid {
 extension BlockGrid: CustomStringConvertible {
     
     var description: String {
-        var result = (Array(0..<columns).map { String($0) }).joined(separator: "|")
+        // this will create "  0| 1| 2| 3| 4|..."
+        var result = (Array(0..<columns).map { String($0).addLeadingSpacesToLength(2) }).joined(separator: "|")
         result = " " + result
         for r in 0..<rows {
             var row = [String]()
             for c in 0..<columns {
                 let reference = GridReference(r,c)
                 let block = get(reference)
-                if block.block != nil {
-                    row.append("X")
-                } else if shape?.references.contains(reference) ?? false {
-                    if shape?.origin == reference {
-                        row.append("s")
-                    } else {
-                        row.append("S")
+                
+                var code: String = "__"
+                if let typeCode = block.block?.type.rawValue {
+                    if let colourCode = block.block?.colour.rawValue {
+                        code = "\(typeCode)\(colourCode)"
                     }
-                } else {
-                    row.append(" ")
                 }
+                
+                // check if there's a shape here
+                if let shapeIndex = shape?.references.firstIndex(where: {$0 == reference }) {
+                    let colour = shape!.colours[shapeIndex].rawValue
+                    if shape?.origin == reference {
+                        code = "s\(colour)"
+                    } else {
+                        code = "S\(colour)"
+                    }
+                }
+                row.append(code)
             }
             result = String(r) + row.joined(separator: "|") + "\n" + result
         }
+        result = " " + Array(0..<columns).map { String($0).addLeadingSpacesToLength(2) }.joined(separator: "|") + "\n" + result
+        
         return result
     }
 }

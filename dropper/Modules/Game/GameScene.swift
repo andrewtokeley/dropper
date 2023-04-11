@@ -98,9 +98,8 @@ class GameScene: SKScene {
     /// The number of columns in the grid
     private var columns: Int = 0
     
-    /// Reference to the BlockNodes in the grid
-    // private var blockNodes = [[BlockNode?]]()
-    private var blockNodes = [BlockNode]()
+    /// Reference to the GridCellNodes in the grid
+    private var blockNodes = [GridCellNode]()
     
     /// ShapeNode that represents the active shape
     private var shapeNode: ShapeNode?
@@ -303,8 +302,8 @@ class GameScene: SKScene {
         return position
     }
     
-    private func getNode(_ block: Block) -> BlockNode? {
-        blockNodes.first(where: { $0.block == block })
+    private func getNode(_ block: Block) -> GridCellNode? {
+        blockNodes.first(where: { $0.name == block.id })
     }
         
     public func startGameLoop(_ loopTimeInterval: TimeInterval) {
@@ -453,10 +452,10 @@ class GameScene: SKScene {
     }
     
     public func moveShape(_ direction: BlockMoveDirection, speed: CGFloat, completion: (()->Void)? = nil) {
-        if let playerNode = shapeNode {
+        if let shapeNode = shapeNode {
             let x = CGFloat(direction.gridDirection.offset.columnOffset)*blockSize
             let y = CGFloat(direction.gridDirection.offset.rowOffset)*blockSize
-            playerNode.run(SKAction.moveBy(
+            shapeNode.run(SKAction.moveBy(
                 x: x,
                 y: y,
                 duration: speed)) {
@@ -468,10 +467,10 @@ class GameScene: SKScene {
     }
     
     public func moveShape(_ reference: GridReference, speed: CGFloat, completion: (()->Void)? = nil) {
-        if let playerNode = shapeNode {
+        if let shapeNode = shapeNode {
             let newPosition = getPosition(reference)
-            playerNode.removeAllActions()
-            playerNode.run(SKAction.move(to: newPosition, duration: speed)) {
+            shapeNode.removeAllActions()
+            shapeNode.run(SKAction.move(to: newPosition, duration: speed)) {
                 completion?()
             }
         } else {
@@ -480,9 +479,9 @@ class GameScene: SKScene {
     }
     
     func removeShape() {
-        if let playerBlockNode = shapeNode?.blockNodes {
-            for playerBlockNode in playerBlockNode {
-                self.blockNodes.removeAll(where: {$0 == playerBlockNode })
+        if let shapeBlockNode = shapeNode?.blockNodes {
+            for node in shapeBlockNode {
+                self.blockNodes.removeAll(where: {$0 == node })
             }
             shapeNode?.removeFromParent()
         }
@@ -492,18 +491,15 @@ class GameScene: SKScene {
      Removes the player and replaces it with blocks of the given type
      */
     func convertShapeToType(_ type: BlockType) {
-        if let playerNode = shapeNode {
-            for node in playerNode.blockNodes {
-                if let block = node.block {
-                    block.type = type
-                    // get the nodes postion in the scene's coordinate system
-                    if let parent = node.parent {
-                        if let positionInScene = node.scene?.convert(node.position,
-                                                                     from: parent) {
-                            self.addBlock(block: block, position: positionInScene)
-                        }
+        if let shapeNode = shapeNode {
+            for shapeBlockNode in shapeNode.blockNodes {
+                // create a standard block to replace the shape block
+                let block = Block(shapeBlockNode.blockColour, type, false)
+                if let parent = shapeBlockNode.parent {
+                    if let positionInScene = shapeBlockNode.scene?.convert(shapeBlockNode.position,
+                                                                 from: parent) {
+                        self.addBlock(block: block, position: positionInScene)
                     }
-                    
                 }
             }
         }
@@ -521,12 +517,12 @@ class GameScene: SKScene {
         
         let dispatch = DispatchGroup()
         for node in blockNodes {
-            if !(shapeNode?.blockNodes.contains(node) ?? false) {
+            //if !(shapeNode?.blockNodes.contains(node) ?? false) {
                 dispatch.enter()
                 node.run(shake) {
                     dispatch.leave()
                 }
-            }
+            //}
         }
         dispatch.notify(queue: DispatchQueue.main, execute: {
             completion?()
@@ -551,10 +547,17 @@ class GameScene: SKScene {
     }
     
     private func addBlock(block: Block, position: CGPoint, completion: (()->Void)? = nil) {
-        let node = BlockNode(block: block, size: blockSize)
-        node.position = position
-        addChild(node)
-        blockNodes.append(node)
+        var node: GridCellNode?
+        if block.type == .block {
+            node = BlockNode(block: block, size: blockSize)
+        } else if block.type == .jewel {
+            node = JewelNode(size: CGSize(width: blockSize*0.9, height: blockSize*0.9), name: block.id)
+        }
+        if let node = node {
+            node.position = position
+            addChild(node)
+            blockNodes.append(node)
+        }
         completion?()
     }
     

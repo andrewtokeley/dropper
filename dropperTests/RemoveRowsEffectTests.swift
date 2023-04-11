@@ -10,15 +10,34 @@ import XCTest
 
 class RemoveRowsEffectTests: XCTestCase {
     
+    
+    func testRemoveRowWithJewel() throws {
+        let grid = try! BlockGrid([
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["X2", "X1", "J1", "X2", "X4", "X2", "X2"],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
+                ["  ", "  ", "  ", "  ", "  ", "  ", "  "]
+            ])
+        
+        let effect = RemoveRowsEffect()
+        let result = effect.apply(grid)
+        XCTAssertEqual(result.blocksRemoved.count, 7)
+        XCTAssertEqual(result.achievments.get(.jewel), 1)
+        XCTAssertEqual(result.achievments.get(.oneRow), 1)
+    }
+    
     func testRemoveSingleRow() throws {
         let grid = try! BlockGrid([
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["XB", "XB", "XY", "  ", "XR", "  ", "XY"],
-                ["XB", "XB", "XY", "XR", "XR", "XB", "XY"],
-                ["XB", "XB", "XY", "  ", "XR", "  ", "XY"],
+                ["X1", "X1", "X3", "  ", "X2", "  ", "X3"],
+                ["X1", "X1", "X3", "X2", "X2", "X1", "X3"],
+                ["X1", "X1", "X3", "  ", "X2", "  ", "X3"],
             ])
         
         let effect = RemoveRowsEffect()
@@ -36,10 +55,10 @@ class RemoveRowsEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["XB", "XB", "XY", "  ", "XR", "  ", "XY"],
-                ["XB", "XB", "XY", "XR", "XR", "XB", "XY"],
-                ["XB", "XB", "XY", "XR", "XR", "XB", "XY"],
-                ["XB", "XB", "XY", "  ", "XR", "  ", "XY"],
+                ["X1", "X1", "X3", "  ", "X2", "  ", "X3"],
+                ["X1", "X1", "X3", "X2", "X2", "X1", "X3"],
+                ["X1", "X1", "X3", "X2", "X2", "X1", "X3"],
+                ["X1", "X1", "X3", "  ", "X2", "  ", "X3"],
             ])
         
         let effect = RemoveRowsEffect()
@@ -58,11 +77,11 @@ class RemoveRowsEffectTests: XCTestCase {
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
                 ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-                ["XB", "XB", "XY", "  ", "XR", "  ", "XY"],
-                ["XB", "XB", "XY", "XR", "XR", "XB", "XY"],
-                ["XB", "XB", "XY", "XR", "XR", "XB", "XY"],
-                ["XB", "XB", "XY", "XR", "XR", "XB", "XY"],
-                ["XB", "XB", "XY", "  ", "XR", "  ", "XY"],
+                ["X1", "X1", "X3", "  ", "X2", "  ", "X3"],
+                ["X1", "X1", "X3", "X2", "X2", "X1", "X3"],
+                ["X1", "X1", "X3", "X2", "X2", "X1", "X3"],
+                ["X1", "X1", "X3", "X2", "X2", "X1", "X3"],
+                ["X1", "X1", "X3", "  ", "X2", "  ", "X3"],
             ])
         
         let effect = RemoveRowsEffect()

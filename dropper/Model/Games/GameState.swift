@@ -17,7 +17,8 @@ struct GameState: Codable {
         return blocks[0].count
     }
     var level: Int = 1
-    var levelAchievements = Achievements()
+    var gameAchievements = Achievements.zero
+    var levelAchievements = Achievements.zero
     var title: GameTitle!
     
     init(game: Game) {
@@ -26,5 +27,6 @@ struct GameState: Codable {
         self.level = game.currentLevel?.number ?? 1
         self.title = game.title
         self.levelAchievements = game.levelAchievements
+        self.gameAchievements = game.gameAchievements
     }
 }

@@ -56,6 +56,8 @@ final class GamePresenter: Presenter {
     
     private var setup: GameSetupData?
     
+    private var hapticsEnabled: Bool = false
+    
     /**
      This is the entry point for the Module and kicks of the Interactor's first call to create a new Game instance for the given genre.
      */
@@ -95,6 +97,10 @@ final class GamePresenter: Presenter {
 extension GamePresenter: GamePresenterApi {
     
     // MARK: - From Interactor
+    
+    func enableHaptics(_ enabled: Bool) {
+        hapticsEnabled = enabled
+    }
     
     func didRestoreState(_ state: GameState, settings: Settings) {
         //didCreateNewGame(rows: state.rows, columns: state.columns, settings: settings)
@@ -137,12 +143,12 @@ extension GamePresenter: GamePresenterApi {
         let startGameAction = ModalDialogAction(title: primaryButton, style: .standard, handler: { _ in
             if (!fromState) {
                 self.view.updateLevelProgress(0, goalUnit: nil)
+                if let initialBlocks = level.initialBlocks {
+                    let _ = self.grid.addBlocks(blocks: initialBlocks.0, references: initialBlocks.1)
+                }
             }
             self.interactor.didLoadLevel()
         })
-//        let goHomeAction =  ModalDialogAction(title: "Cancel", style: .cancel, handler: { _ in
-//            self.router.navigateHome()
-//        })
         
         if !fromState {
             let blocks = self.grid.getAll().map { $0.block! }
@@ -289,7 +295,12 @@ extension GamePresenter: GamePresenterApi {
         // Apply removes
         if effects.blocksRemoved.count > 0 {
             dispatch.enter()
-            self.view.removeBlocks(effects.blocksRemoved) {
+            self.view.removeBlocks(effects.blocksRemoved.map { $0.block! }) {
+                if self.hapticsEnabled {
+                    print("haptics!")
+                    let generator = UIImpactFeedbackGenerator(style: .light)
+                    generator.impactOccurred()
+                }
                 dispatch.leave()
             }
         }
@@ -297,7 +308,7 @@ extension GamePresenter: GamePresenterApi {
         // Apply moves
         if effects.blocksMoved.count > 0 {
             dispatch.enter()
-            self.view.moveBlocks(effects.blocksMoved, to: effects.blocksMovedTo) {
+            self.view.moveBlocks(effects.blocksMoved.map { $0.block! }, to: effects.blocksMovedTo) {
                 dispatch.leave()
             }
         }
@@ -314,6 +325,7 @@ extension GamePresenter: SettingsDelegate {
     func didUpdateSettings(_ settings: Settings) {
         view.showGrid(settings.showGrid)
         view.showGhost(settings.showGhost)
+        enableHaptics(settings.enableHaptics)
     }
 }
 
@@ -372,6 +384,11 @@ extension GamePresenter: BlockGridDelegate {
             //self.removeMatches()
         }
     }
+    func blockGrid(_ blockGrid: BlockGrid, blocksAdded blocks: [Block], references: [GridReference]) {
+        view.addBlocks(blocks, references: references) {
+            //
+        }
+    }
     
     func blockGrid(_ blockGrid: BlockGrid, blocksMoved blocks: [Block], to: [GridReference]) {
         view.moveBlocks(blocks, to: to) {
@@ -390,6 +407,7 @@ extension GamePresenter: EffectsRunnerDelegate {
     
     func didFinishEffectsRun(_ runner: EffectsRunner, achievements: Achievements) {
         self.isRotating = false
+        
         interactor.recordAchievements(achievements, with: self.isDropping)
         self.isDropping = false
         
