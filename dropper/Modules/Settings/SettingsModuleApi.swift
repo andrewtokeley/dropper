@@ -16,7 +16,7 @@ protocol SettingsRouterApi: RouterProtocol {
 protocol SettingsViewApi: UserInterfaceProtocol {
     func displayTitle(_ title: String)
     func displaySettings(_ settings: Settings, showClearHighScores: Bool)
-    func removeClearHighScoresOption()
+    func enableClearHighScoresOption(_ enable: Bool)
 }
 
 //MARK: - SettingsPresenter API
@@ -33,7 +33,7 @@ protocol SettingsPresenterApi: PresenterProtocol {
 
 //MARK: - SettingsInteractor API
 protocol SettingsInteractorApi: InteractorProtocol {
-    func loadSettings(for title: GameTitle)
-    func saveSettings(for title: GameTitle, settings: Settings)
-    func clearHighScores(for title: GameTitle)
+    func loadSettings(for title: GameTitle?)
+    func saveSettings(settings: Settings, for title: GameTitle?)
+    func clearHighScores(for title: GameTitle?)
 }

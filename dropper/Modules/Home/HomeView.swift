@@ -18,9 +18,11 @@ final class HomeView: UserInterface {
     override func viewDidLoad() {
         
         self.view.backgroundColor = .white
-
-        self.navigationController?.navigationBar.backgroundColor = .gameBackground
-        self.navigationController?.navigationBar.tintColor = .white
+        self.navigationItem.rightBarButtonItems = [settingsButton]
+//        self.navigationController?.navigationBar.backgroundColor = .white
+//        self.navigationController?.navigationBar.tintColor = .gameBackground
+        
+        // don't show a back button when navigating anywhere from here.
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         
         self.view.addSubview(gamesCollectionView)
@@ -34,6 +36,15 @@ final class HomeView: UserInterface {
     lazy var selectedGameView: GameTile = {
         let view: GameTile = UIView.fromNib()
         view.delegate = self
+        return view
+    }()
+    
+    lazy var settingsButton: UIBarButtonItem = {
+        
+        let view = UIBarButtonItem(title: NSString(string: "\u{2699}\u{0000FE0E}") as String, style: .plain, target: self, action: #selector(handleSettingsClick))
+        let font = UIFont.systemFont(ofSize: 40)
+        let attributes = [NSAttributedString.Key.font : font, NSAttributedString.Key.foregroundColor: UIColor.gameBackground]
+        view.setTitleTextAttributes(attributes, for: .normal)
         return view
     }()
     
@@ -65,6 +76,9 @@ final class HomeView: UserInterface {
         
     }
     
+    @objc func handleSettingsClick(_ sender: UIBarButtonItem) {
+        presenter.didSelectSettings()
+    }
 }
 
 extension HomeView: UICollectionViewDelegateFlowLayout {

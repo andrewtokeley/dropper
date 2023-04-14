@@ -256,6 +256,9 @@ class Shape {
     
     // MARK: - Static Shape Methods
     
+    /**
+     Returns a random Shape with the specified number of colours. 
+     */
     static func random(_ numberOfColours: Int) -> Shape {
         let s = ShapeReference.random
         return try! Shape(references: s.references, numberOfColours:  numberOfColours, name: s.name)

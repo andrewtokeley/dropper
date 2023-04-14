@@ -61,21 +61,22 @@ class BlockNode: GridCellNode {
     // MARK: - Actions
     
     /**
-     Animate the block to simulate an explosion
-     */
-    override func explode(_ completion: (()->Void)?) {
+     Animate the block to simulate an explosion.
+    */
+    override func explode(_ completion: ((BlockExplosionState) -> Void)?) {
+        
         let pulseDown = SKAction.scale(to: CGFloat.random(in: 0.2..<0.6), duration: 0.05)
         let move = SKAction.moveBy(x: CGFloat.random(in: -45..<45), y: CGFloat.random(in: 50..<200), duration: 1.2)
         move.timingMode = .easeOut
         let fade = SKAction.fadeOut(withDuration: 1.2)
+        rectangle.run(pulseDown) {
+            completion?(.started)
+        }
         rectangle.run(move)
         rectangle.run(fade) {
+            completion?(.dustSettled)
             self.removeFromParent()
         }
-        rectangle.run(pulseDown) {
-            completion?()
-        }
-        
     }
     
 }

@@ -30,8 +30,8 @@ final class JewelTests: XCTestCase {
             moveAchievements: moveAchievements,
             levelAchievements: levelAchievements)
         
-        // 500 + 1000 - 200
-        XCTAssertEqual(points,1300)
+        // 500 + 1000 - 300 (less three rows to get here)
+        XCTAssertEqual(points,1200)
     }
 
     func testAddJewel() throws {

@@ -15,9 +15,10 @@ final class LoadingRouter: Router {
 
 // MARK: - LoadingRouter API
 extension LoadingRouter: LoadingRouterApi {
+    
     func navigateToHome() {
         let module = AppModules.home.build()
-        module.router.present(from: self.viewController, embedInNavController: false, presentationStyle: .fullScreen, transitionStyle: .crossDissolve, setupData: nil, completion: nil)
+        module.router.present(from: self.viewController, embedInNavController: true, presentationStyle: .fullScreen, transitionStyle: .crossDissolve, setupData: nil, completion: nil)
     }
 }
 

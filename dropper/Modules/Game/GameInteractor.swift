@@ -15,12 +15,13 @@ final class GameInteractor: Interactor {
     var nextShape: Shape?
     var firstShapeOfGame: Bool = true
     let gameService = ServiceFactory.sharedInstance.gameService
+    let settingsService = ServiceFactory.sharedInstance.settingsService
     
     private func configurePresenter(_ game: Game, fromState: Bool) {
         self.game = game
         
-        self.gameService.getSettings(for: game.title) { settings in
-            
+        //self.gameService.getSettings(for: game.title) { settings in
+        self.settingsService.getSettings() { settings in
             if let settings = settings {
                 
                 self.presenter.enableHaptics(settings.enableHaptics)
@@ -56,7 +57,7 @@ final class GameInteractor: Interactor {
         let shape = nextShape
         nextShape = level.nextShape()
         
-        presenter.addNewShape(shape!, nextShape: nextShape!, pauseBeforeStarting: self.firstShapeOfGame)
+        presenter.addNewShape(shape!, nextShape: nextShape!)
         self.firstShapeOfGame = false
     }
 }
@@ -117,9 +118,11 @@ extension GameInteractor: GameInteractorApi {
                 if let level = game.currentLevel {
                     
                     // reset goal progress count
-                    self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: nil, goalUnit: level.goalUnit)
-                    
-                    self.presenter.didFetchNextLevel(level, fromState: false)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        self.presenter.didUpdateTotals(points: nil, score: nil, goalProgressValue: nil, goalUnit: level.goalUnit)
+                        
+                        self.presenter.didFetchNextLevel(level, fromState: false)
+                    }
                 }
             } else {
                 // no morew levels!
@@ -130,11 +133,27 @@ extension GameInteractor: GameInteractorApi {
         }
     }
     
+    func saveScores() async -> Bool {
+        guard let game = self.game else { return false }
+        let score = Score(points: game.score, gameAchievements: game.gameAchievements)
+        let isHighScore = try? await self.gameService.addScore(for: game.title, score: score)
+        return isHighScore ?? false
+    }
+    
     func saveScores(completion: ((Bool)->Void)?) {
         guard let game = self.game else { return }
-        self.gameService.addScore(for: game.title, score: game.score) { isHighScore, error in
-            completion?(isHighScore ?? false)
-        }
+        
+        let score = Score(points: game.score, gameAchievements: game.gameAchievements)
+        
+        self.gameService.addScore(for: game.title, score: score, completion: { result in
+            switch result {
+            case let .success(isHighscore):
+                completion?(isHighscore)
+            default:
+                completion?(false)
+            }
+        })
+        
     }
     
     func saveState() {
@@ -147,7 +166,7 @@ extension GameInteractor: GameInteractorApi {
     func clearState() {
         guard let game = self.game else { return }
         gameService.clearGameState(for: game.title) { result in
-            //
+            
         }
     }
 }

@@ -8,6 +8,13 @@
 import Foundation
 import SpriteKit
 
+enum BlockExplosionState {
+    // initial state when the block disappears and the sparks start flying
+    case started
+    
+    // final state when the dust has settled and there's no trace of the block
+    case dustSettled
+}
 /**
  Represents a sprite that can be rendered inside a cell of the grid.
  */
@@ -24,9 +31,11 @@ class GridCellNode: SKSpriteNode {
         self.name = name
     }
     
-    public func explode(_ completion: (()->Void)?) {
+    public func explode(_ completion: ((_ state: BlockExplosionState)->Void)?) {
+        // with no explosion animation, the states happen simultaneously
         self.removeFromParent()
-        completion?()
+        completion?(.started)
+        completion?(.dustSettled)
     }
     
     override init(texture: SKTexture?, color: UIColor, size: CGSize) {

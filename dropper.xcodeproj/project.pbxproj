@@ -77,6 +77,9 @@
 		D83F630329C032BA001120C7 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F62FD29C032BA001120C7 /* HomeView.swift */; };
 		D83F630629C0E9B2001120C7 /* SKNodeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */; };
 		D83F630829C1A039001120C7 /* AutoPositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83F630729C1A039001120C7 /* AutoPositionTests.swift */; };
+		D848B9F729E511C2004E4CDC /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D848B9F629E511C2004E4CDC /* SettingsService.swift */; };
+		D848B9F929E53C94004E4CDC /* TableViewDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D848B9F829E53C94004E4CDC /* TableViewDefinitions.swift */; };
+		D848B9FB29E7B408004E4CDC /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = D848B9FA29E7B408004E4CDC /* Score.swift */; };
 		D869175529A7F259008C60F0 /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D869175429A7F259008C60F0 /* UIColorExtension.swift */; };
 		D869175929A97685008C60F0 /* PlayerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D869175829A97685008C60F0 /* PlayerNode.swift */; };
 		D869175C29A9C373008C60F0 /* RemoveMatchedBlocksEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = D869175B29A9C373008C60F0 /* RemoveMatchedBlocksEffect.swift */; };
@@ -216,6 +219,9 @@
 		D83F62FD29C032BA001120C7 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		D83F630529C0E9B2001120C7 /* SKNodeExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKNodeExtension.swift; sourceTree = "<group>"; };
 		D83F630729C1A039001120C7 /* AutoPositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPositionTests.swift; sourceTree = "<group>"; };
+		D848B9F629E511C2004E4CDC /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
+		D848B9F829E53C94004E4CDC /* TableViewDefinitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewDefinitions.swift; sourceTree = "<group>"; };
+		D848B9FA29E7B408004E4CDC /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
 		D869175429A7F259008C60F0 /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		D869175829A97685008C60F0 /* PlayerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerNode.swift; sourceTree = "<group>"; };
 		D869175B29A9C373008C60F0 /* RemoveMatchedBlocksEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveMatchedBlocksEffect.swift; sourceTree = "<group>"; };
@@ -317,6 +323,7 @@
 				D869176729B2BFA2008C60F0 /* GridRange.swift */,
 				D8036E4429A21AFA0081CF41 /* GridReference.swift */,
 				D834301D29A481B600D9C052 /* ScreenPosition.swift */,
+				D848B9FA29E7B408004E4CDC /* Score.swift */,
 				D83DE33F29C8D2B1005F83A0 /* Settings.swift */,
 				D83DE37029D0176D005F83A0 /* ShapeRotationResult.swift */,
 				D869175A29A9C252008C60F0 /* BlockEffects */,
@@ -345,6 +352,7 @@
 				D83DE33229C85C77005F83A0 /* Settings */,
 				D8FDAE2E29A48D91007AA40B /* Game */,
 				D83F630429C032C4001120C7 /* Home */,
+				D848B9F829E53C94004E4CDC /* TableViewDefinitions.swift */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -382,6 +390,7 @@
 				D83F62EA29BDC24F001120C7 /* LevelService.swift */,
 				D83DE34529C92416005F83A0 /* GameService.swift */,
 				D83DE36029CAC364005F83A0 /* ServiceBase.swift */,
+				D848B9F629E511C2004E4CDC /* SettingsService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -793,6 +802,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D848B9F729E511C2004E4CDC /* SettingsService.swift in Sources */,
 				D83DE33929C85C8C005F83A0 /* SettingsDisplayData.swift in Sources */,
 				D8FDAE2B29A48D88007AA40B /* GameInteractor.swift in Sources */,
 				D834301E29A481B600D9C052 /* ScreenPosition.swift in Sources */,
@@ -826,6 +836,7 @@
 				D869177129B6B612008C60F0 /* DropIntoEmptyRowsEffect.swift in Sources */,
 				D812553329E213C100D6E124 /* BlockType.swift in Sources */,
 				D83DE34829C933CE005F83A0 /* ServiceFactory.swift in Sources */,
+				D848B9FB29E7B408004E4CDC /* Score.swift in Sources */,
 				D83DE36F29CFE671005F83A0 /* GridOffset.swift in Sources */,
 				D83F62F329BEBB82001120C7 /* EffectsRunner.swift in Sources */,
 				D83DE34229C8E3E2005F83A0 /* SettingsDelegate.swift in Sources */,
@@ -880,6 +891,7 @@
 				D83F630229C032BA001120C7 /* HomeInteractor.swift in Sources */,
 				D8036E4529A21AFA0081CF41 /* GridReference.swift in Sources */,
 				D8DD4B3B29DAACFB00F64EC0 /* ClassicTetrisGame.swift in Sources */,
+				D848B9F929E53C94004E4CDC /* TableViewDefinitions.swift in Sources */,
 				D83F62D829BAC16C001120C7 /* UIImageExtension.swift in Sources */,
 				D8DD4B3229DA5BA400F64EC0 /* LoadingPresenter.swift in Sources */,
 			);
@@ -997,6 +1009,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1050,6 +1063,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -1079,7 +1093,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = andrewtokeley.dropper;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = dropper;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1108,7 +1122,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = andrewtokeley.dropper;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "dropper ";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;

@@ -204,7 +204,6 @@ class BlockGrid {
                         throw BlockGridError.InvalidInitialBlocks("Unrecognised cell code, \(char)")
                     }
                 } else {
-                    print(char)
                     if type == .shapeOrigin {
                         shapeOrigin = GridReference(r,c)
                         if shapeOrigin == GridReference.zero {

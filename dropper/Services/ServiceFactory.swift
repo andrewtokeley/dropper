@@ -8,7 +8,7 @@
 import Foundation
 
 enum ServiceError: Error {
-    case Failed
+    case Failed(_ reason: String? = nil)
 }
 
 class ServiceFactory {
@@ -25,5 +25,9 @@ class ServiceFactory {
     
     lazy var levelService: LevelServiceContract = {
         return LevelService(runningInTestMode)
+    }()
+    
+    lazy var settingsService: SettingsServiceContract = {
+        return SettingsService(runningInTestMode)
     }()
 }

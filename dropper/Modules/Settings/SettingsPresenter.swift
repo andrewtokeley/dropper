@@ -17,14 +17,14 @@ final class SettingsPresenter: Presenter {
     private var gameTitle: GameTitle?
     
     override func viewHasLoaded() {
-        if let title = self.gameTitle {
-            interactor.loadSettings(for: title)
-        }
+        interactor.loadSettings(for: self.gameTitle)
     }
     
     override func setupView(data: Any) {
         if let setupData = data as? SettingsSetupData {
             self.delegate = setupData.delegate
+            
+            // this will be nil if loading from the home view
             self.gameTitle = setupData.gameTitle
         }
     }
@@ -34,41 +34,40 @@ final class SettingsPresenter: Presenter {
 extension SettingsPresenter: SettingsPresenterApi {
     
     func didSelectEnableHaptics(enabled: Bool) {
-        if let title = self.gameTitle {
-            settings.enableHaptics = enabled
-            interactor.saveSettings(for: title, settings: settings)
-        }
+        settings.enableHaptics = enabled
+        interactor.saveSettings(settings: settings, for: self.gameTitle)
     }
     
     func didClearHighScores() {
-        view.removeClearHighScoresOption()
+        view.enableClearHighScoresOption(false)
+        delegate?.didUpdateSettings(settings)
     }
     
     func didSelectClearHighScores() {
-        if let title = self.gameTitle {
-            interactor.clearHighScores(for: title)
-        }
+        interactor.clearHighScores(for: self.gameTitle)
+        
     }
+    
     func didLoadSettings(_ settings: Settings, showClearHighScores: Bool) {
         self.settings = settings
         view.displaySettings(settings, showClearHighScores: showClearHighScores)
-        if let title = self.gameTitle {
-            view.displayTitle("\(title.title) Settings")
-        }
+        view.displayTitle("Settings")
+        
+//        if let title = self.gameTitle {
+//            view.displayTitle("\(title.title) Settings")
+//        } else {
+//            view.displayTitle("Global Settings")
+//        }
     }
     
     func didUpdateShowGhost(show: Bool) {
-        if let title = self.gameTitle {
-            settings.showGhost = show
-            interactor.saveSettings(for: title, settings: settings)
-        }
+        settings.showGhost = show
+        interactor.saveSettings(settings: settings, for: self.gameTitle)
     }
     
     func didUpdateShowGrid(show: Bool) {
-        if let title = self.gameTitle {
-            settings.showGrid = show
-            interactor.saveSettings(for: title, settings: settings)
-        }
+        settings.showGrid = show
+        interactor.saveSettings(settings: settings, for: self.gameTitle)
     }
     
     func didSaveSettings(_ settings: Settings) {

@@ -24,7 +24,7 @@ struct GameState: Codable {
     init(game: Game) {
         self.blocks = game.grid.blocksExcludingShape
         self.score = game.score
-        self.level = game.currentLevel?.number ?? 1
+        self.level = game.currentLevel?.levelNumber ?? 1
         self.title = game.title
         self.levelAchievements = game.levelAchievements
         self.gameAchievements = game.gameAchievements

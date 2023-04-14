@@ -80,8 +80,8 @@ protocol GameViewApi: UserInterfaceProtocol {
     func addBlock(_ block: Block, reference: GridReference, completion: (()->Void)?)
     func moveBlock(_ block: Block, to: GridReference, completion: (()->Void)?)
     func moveBlocks(_ blocks: [Block], to: [GridReference], completion: (()->Void)?)
-    func removeBlock(_ block: Block, completion: (()->Void)?)
-    func removeBlocks(_ blocks: [Block], completion: (()->Void)?)
+    func removeBlock(_ block: Block, completion: ((BlockExplosionState)->Void)?)
+    func removeBlocks(_ blocks: [Block], completion: ((BlockExplosionState)->Void)?)
 
     //MARK: Display update methods
     
@@ -158,9 +158,10 @@ protocol GamePresenterApi: PresenterProtocol {
     func didFetchNextLevel(_ level: Level, fromState: Bool)
     
     /**
-     Called by Interactor to let the presenter know to add a new shape and display the next shape
+     Called by Interactor to let the presenter know to add a new shape and display the next shape.
      */
-    func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool)
+    func addNewShape(_ shape: Shape, nextShape: Shape)
+    //func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool)
     
     /**
      Called by interactor to let the Presenter know some points/progress has been made. Each value can be set to nil, if there is no change.
@@ -213,6 +214,7 @@ protocol GameInteractorApi: InteractorProtocol {
      Saves the score at the end of the game and returns whether it was a highscore
      */
     func saveScores(completion: ((Bool)->Void)?)
+    func saveScores() async -> Bool
     
     /**
      Saves the current game state

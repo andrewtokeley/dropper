@@ -25,6 +25,10 @@ final class HomePresenter: Presenter {
 // MARK: - HomePresenter API
 extension HomePresenter: HomePresenterApi {
     
+    func didSelectSettings() {
+        router.showSettings()
+    }
+    
     func didSelectContinueGame(state: GameState) {
         router.showGame(from: state)
     }
@@ -48,6 +52,13 @@ extension HomePresenter: HomePresenterApi {
             self.router.showGame(gameTitle)
         }
     }    
+}
+
+extension HomePresenter: SettingsDelegate {
+    func didUpdateSettings(_ settings: Settings) {
+        // refresh the totles in case the scores have been cleared
+        interactor.getGameTitles()
+    }
 }
 
 // MARK: - Home Viper Components

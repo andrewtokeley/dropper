@@ -19,6 +19,7 @@ class ColourMatcherGame: Game {
 // MARK: - Title
 
 class ColourMatcherTitle: GameTitle {
+    
     override init() throws {
         try super.init()
         id = "TCM"
@@ -31,22 +32,22 @@ class ColourMatcherTitle: GameTitle {
             ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
             ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
             ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-            ["  ", "X4", "X2", "X3", "X1", "X1", "X1"],
-            ["  ", "  ", "  ", "X1", "X1", "X2", "X1"],
-            ["  ", "  ", "  ", "X1", "X1", "X2", "X1"],
-            ["  ", "  ", "X5", "X4", "X4", "  ", "X1"],
+            ["X4", "X2", "X3", "X1", "X1", "X1", "X2"],
+            ["  ", "  ", "X1", "X1", "X2", "X1", "  "],
+            ["  ", "  ", "X1", "X1", "X2", "X1", "  "],
+            ["  ", "X5", "X4", "X4", "  ", "X1", "  "]
         ]
         gridHeroHighlight = [
-            GridReference(0, 6),
+            GridReference(0, 5),
+            GridReference(1, 2),
             GridReference(1, 3),
-            GridReference(1, 4),
-            GridReference(1, 6),
+            GridReference(1, 5),
+            GridReference(2, 2),
             GridReference(2, 3),
-            GridReference(2, 4),
-            GridReference(2, 6),
+            GridReference(2, 5),
+            GridReference(3, 3),
             GridReference(3, 4),
-            GridReference(3, 5),
-            GridReference(3, 6)
+            GridReference(3, 5)
         ]
     }
     
@@ -64,7 +65,7 @@ class ColourMatcherLevel: Level {
         
         goalValue = 10
         goalUnit = "MATCHES"
-        if levelNumber == 0 {
+        if levelNumber == 1 {
             goalDescription = "Colour match 10 groups of 15 or more blocks"
         } else {
             goalDescription = "You crushed it, keep matching those blocks!"
@@ -75,6 +76,20 @@ class ColourMatcherLevel: Level {
         goalProgressValue = {(a: Achievements) -> Int in
             return a.get(.colourMatchGroup)
         }
+    }
+    
+    override func pointsFor(moveAchievements: Achievements, levelAchievements: Achievements? = nil, hardDrop: Bool = false) -> Int {
+    
+        var points = 0
+        
+        // if the goal was to match 15 blocks of the same colour,
+        // and they match 20, then they get 300 base points + 20-15=5 * 100 extra points
+        let numberOfBlocksMatched = moveAchievements.get(.colourMatch)
+        let numberOfMatches = numberOfBlocksMatched/15
+        let numberOfExtraBlocks = numberOfBlocksMatched - numberOfMatches * 15
+        points += (300 * numberOfMatches + numberOfExtraBlocks * 100)
+        
+        return points
     }
     
     override func nextShape() -> Shape {

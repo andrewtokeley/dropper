@@ -58,10 +58,10 @@ class JewelLevel: Level {
         goalUnit = "JEWELS"
         goalValue = numberOfJewels
         
-        if levelNumber == 0 {
-            goalDescription = "Create rows to collect all the jewels."
+        if levelNumber == 1 {
+            goalDescription = "Collect all the jewels by filling their rows with blocks."
         } else {
-            goalDescription = "Keep it up, things are getting faster"
+            goalDescription = "Keep it up! More jewels are coming."
         }
         effects = [RemoveRowsEffect(), DropIntoEmptyRowsEffect()]
         goalProgressValue = {(a: Achievements) -> Int in
@@ -81,7 +81,7 @@ class JewelLevel: Level {
         
         // 500 points for first jewel, 1000 for second jewel, 1500 for third... times by the level
         let j = moveAchievements.get(.jewel)
-        points += (500 * j * (j + 1) / 2) * number
+        points += (500 * j * (j + 1) / 2) * levelNumber
         
         // BONUS?
         if points > 0 {
@@ -90,7 +90,7 @@ class JewelLevel: Level {
                 // we remove the rows used to catch each jewel, not perfect because you could have removed more than one row to get it, but hey.
                 let jewelsSoFar = levelAchievements.get(.jewel)
                 let totalRowsRemoved = levelAchievements.totalRowsRemoved - jewelsSoFar
-                let averageRowsRemovedPerJewel = totalRowsRemoved/jewelsSoFar
+                let averageRowsRemovedPerJewel = (jewelsSoFar == 0 ? totalRowsRemoved : totalRowsRemoved/jewelsSoFar)
                 
                 var bonusReduceBy = (averageRowsRemovedPerJewel) * 100
                 if bonusReduceBy > 1000 {
@@ -104,6 +104,14 @@ class JewelLevel: Level {
         
     }
     
+    override var shapeMoveDuration: TimeInterval {
+        // for this game it gets harder because there are more jewels to collect so we don't want to make the game speed up
+        return 0.4
+    }
+    
+    /**
+     Add the same number of jewels as goalValue
+     */
     override var initialBlocks: ([Block], [GridReference])? {
         var blocks = [Block]()
         var references = [GridReference]()

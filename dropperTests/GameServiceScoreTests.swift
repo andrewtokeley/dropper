@@ -12,111 +12,69 @@ final class GameServiceScoreTests: XCTestCase {
     let gameService = ServiceFactory.sharedInstance.gameService
     let TITLE_TETRIS = try! TetrisClassicTitle()
     let TITLE_COLOURS = try! ColourMatcherTitle()
-
-    override func setUp() {
-        let expect = expectation(description: "setup")
-        gameService.clearScoreState(for: TITLE_TETRIS) { (result) in
-            XCTAssertTrue(result)
-            self.gameService.clearScoreState(for: self.TITLE_COLOURS) { (result) in
-                XCTAssertTrue(result)
-                expect.fulfill()
-            }
-        }
-        
-        waitForExpectations(timeout: 100) { (error) in
-            if let e = error {
-                XCTFail(e.localizedDescription)
-            }
-        }
+    let TITLE_JEWEL = try! JewelTitle()
+    
+    override func setUp() async throws {
+        let _ = await gameService.clearScoreState(for: TITLE_JEWEL)
+        let _ = await gameService.clearScoreState(for: TITLE_TETRIS)
+        let _ = await gameService.clearScoreState(for: TITLE_COLOURS)
     }
         
     func testTestMode() throws {
         XCTAssertTrue(ServiceFactory.sharedInstance.runningInTestMode)
     }
     
-    func testClearState() throws {
-        let expect = expectation(description: "testClearState")
+    func testClearState() async throws {
+        let score = Score(points: 100)
         
-        self.gameService.addScore(for: TITLE_TETRIS, score: 100) { result, error in
-            XCTAssertNil(error)
-            self.gameService.clearScoreState(for: self.TITLE_TETRIS) { (result) in
-                XCTAssertTrue(result)
-                self.gameService.getScoreHistory(for: self.TITLE_TETRIS) { scores in
-                    XCTAssertEqual(scores.count, 0)
-                    expect.fulfill()
-                }
-            }
-            
-        }
-        waitForExpectations(timeout: 100) { (error) in
-            if let e = error {
-                XCTFail(e.localizedDescription)
-            }
-        }
+        var result = try await gameService.addScore(for: TITLE_TETRIS, score: score)
+        XCTAssertTrue(result)
+        
+        result = await gameService.clearScoreState(for: self.TITLE_TETRIS)
+        XCTAssertTrue(result)
+        
+        let scores = await gameService.getScoreHistory(for: self.TITLE_TETRIS)
+        XCTAssertEqual(scores.count, 0)
     }
     
-    func testGetScores() throws {
-        let expect = expectation(description: "testGetScores")
+    func testGetScores() async throws {
         
-        self.gameService.addScore(for: TITLE_COLOURS, score: 200) { _, error in
-            self.gameService.getScoreHistory(for: self.TITLE_COLOURS) { scores in
-                XCTAssertEqual(scores.count, 1)
-                XCTAssertEqual(scores[0], 200)
-                expect.fulfill()
-            }
-        }
+        let achievements = Achievements()
+        achievements.addTo(.jewel, 3)
+        achievements.addTo(.explodedBlock, 10)
+        let score = Score(points: 200, gameAchievements: achievements)
+        let result = try await self.gameService.addScore(for: TITLE_JEWEL, score: score)
+        XCTAssertTrue(result)
         
-        waitForExpectations(timeout: 100) { (error) in
-            if let e = error {
-                XCTFail(e.localizedDescription)
-            }
-        }
+        let scores = await self.gameService.getScoreHistory(for: self.TITLE_JEWEL)
+        XCTAssertEqual(scores.count, 1)
+        XCTAssertEqual(scores[0].points, 200)
+        XCTAssertEqual(scores[0].gameAchievements.get(.jewel), 3)
+        XCTAssertEqual(scores[0].gameAchievements.get(.explodedBlock), 10)
+
     }
     
-    func testSaveScores() throws {
-        let expect = expectation(description: "testSaveScores")
-        
-        gameService.addScore(for: TITLE_COLOURS, score: 100) { isHighScore, error in
-            XCTAssertNotNil(isHighScore)
-            XCTAssertTrue(isHighScore!)
-            expect.fulfill()
-        }
-        
-        waitForExpectations(timeout: 100) { (error) in
-            if let e = error {
-                XCTFail(e.localizedDescription)
-            }
-        }
+    func testSaveScores() async throws {
+        let score = Score(points: 100)
+        let isHighScore = try await gameService.addScore(for: TITLE_COLOURS, score: score)
+        XCTAssertTrue(isHighScore)
     }
     
-    func testScoresFull() throws {
-        let expect = expectation(description: "testSaveScores")
+    func testScoresFull() async throws {
+        let score1 = Score(points: 100)
+        let score2 = Score(points: 200)
+        let score3 = Score(points: 300)
+        let score4 = Score(points: 400)
         
-        gameService.addScore(for: TITLE_COLOURS, score: 100) { _, _ in
-            self.gameService.addScore(for: self.TITLE_COLOURS, score: 200) { _, _ in
-                self.gameService.addScore(for: self.TITLE_COLOURS, score: 300) { _, _ in
-                    self.gameService.addScore(for: self.TITLE_COLOURS, score: 400) { isHighScore, _ in
-                        XCTAssertTrue(isHighScore!)
-                        self.gameService.getScoreHistory(for: self.TITLE_COLOURS) { scores in
-                            
-                            // should only be 3 not 4
-                            XCTAssertEqual(scores.count, 3)
-                            
-                            // the highscore should be 400
-                            XCTAssertEqual(scores.max(), 400)
-                            
-                            expect.fulfill()
-                        }
-                    }
-                }
-            }
-        }
-        
-        waitForExpectations(timeout: 100) { (error) in
-            if let e = error {
-                XCTFail(e.localizedDescription)
-            }
-        }
+        let _ = try await gameService.addScore(for: TITLE_COLOURS, score: score1)
+        let _ = try await gameService.addScore(for: TITLE_COLOURS, score: score2)
+        let _ = try await gameService.addScore(for: TITLE_COLOURS, score: score3)
+        let isHighScore = try await gameService.addScore(for: TITLE_COLOURS, score: score4)
+        XCTAssertTrue(isHighScore)
+
+        let scores = await self.gameService.getScoreHistory(for: self.TITLE_COLOURS)
+        XCTAssertEqual(scores.count, 3)
+        XCTAssertEqual(scores.map({$0.points}).max(), 400)
     }
 
 }

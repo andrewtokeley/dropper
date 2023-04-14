@@ -30,21 +30,21 @@ class GravityMatcherTitle: GameTitle {
             ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
             ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
             ["  ", "  ", "  ", "  ", "  ", "  ", "  "],
-            ["  ", "  ", "X3", "X3", "X2", "X3", "  "],
-            ["  ", "  ", "  ", "  ", "X1", "  ", "  "],
-            ["  ", "  ", "  ", "X3", "X1", "  ", "X3"],
-            ["  ", "  ", "  ", "X3", "X3", "X3", "X3"],
+            ["  ", "X3", "X3", "X2", "X3", "  ", "  "],
+            ["  ", "  ", "  ", "X1", "  ", "  ", "  "],
+            ["  ", "  ", "X3", "X1", "  ", "X3", "  "],
+            ["  ", "  ", "X3", "X3", "X3", "X3", "  "]
         ]
         gridHeroHighlight = [
+            GridReference(0, 1),
             GridReference(0, 2),
             GridReference(0, 3),
             GridReference(0, 4),
             GridReference(0, 5),
-            GridReference(0, 6),
-            GridReference(1, 3),
+            GridReference(1, 2),
+            GridReference(1, 4),
             GridReference(1, 5),
-            GridReference(1, 6),
-            GridReference(2, 3),
+            GridReference(2, 2),
         ]
     }
     
@@ -53,18 +53,24 @@ class GravityMatcherTitle: GameTitle {
     }
 }
 
-class GravityMatcherLevel: Level {
+/**
+ Gravity Matcher game has the same level definitions as ColourMatcher but applies gravity and spawns new shapes with up to 2 colours.
+ */
+class GravityMatcherLevel: ColourMatcherLevel {
     
     required init(_ levelNumber: Int) {
         super.init(levelNumber)
         
-        goalValue = 10
-        goalUnit = "MATCHES"
-        goalDescription = "Match 10 colour groups to complete each level"
-        effects = [GravityEffect(), RemoveMatchedBlocksEffect(minimumMatchCount: 10)]
-        goalProgressValue = { (a) in
-            a.get(.colourMatchGroup)
+        if levelNumber == 1 {
+            goalDescription = "Match groups of 10 colours."
+        } else {
+            goalDescription = "Keep it up! Things are getting faster."
         }
+        
+        effects = [
+            RemoveMatchedBlocksEffect(minimumMatchCount: 10),
+            GravityEffect()
+            ]
     }
     
     override func nextShape() -> Shape {

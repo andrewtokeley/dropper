@@ -205,7 +205,6 @@ class GameScene: SKScene {
     }
     
     public func isInGrid(_ point: CGPoint) -> Bool {
-        print(point)
         let hOK = point.x > layout.gridLeft && point.x < layout.gridRight
         let vOK = point.y > layout.gridBottomOffset && point.y < (self.size.height - layout.gridTopOffset)
         return vOK && hOK
@@ -598,31 +597,44 @@ class GameScene: SKScene {
         }
     }
 
-    public func removeBlock(_ block: Block, completion: (()->Void)? = nil) {
+    public func removeBlock(_ block: Block, completion: ((BlockExplosionState)->Void)? = nil) {
         if let node = getNode(block) {
-            node.explode {
-                self.blockNodes.removeAll(where: { $0 == node })
-                completion?()
+            node.explode { state in
+                if state == .started {
+                    self.blockNodes.removeAll(where: { $0 == node })
+                }
+                completion?(state)
             }
         }
     }
     
-    public func removeBlocks(_ blocks: [Block], completion: (()->Void)? = nil) {
+    public func removeBlocks(_ blocks: [Block], completion: ((BlockExplosionState)->Void)? = nil) {
         
         if blocks.count == 0 {
-            completion?()
+            completion?(.started)
+            completion?(.dustSettled)
             return
         }
         
-        let dispatchGroup = DispatchGroup()
+        let dispatchGroupAllStarted = DispatchGroup()
+        let dispatchGroupAllDustSettled = DispatchGroup()
         for block in blocks {
-            dispatchGroup.enter()
-            removeBlock(block) {
-                dispatchGroup.leave()
+            dispatchGroupAllStarted.enter()
+            dispatchGroupAllDustSettled.enter()
+            removeBlock(block) { state in
+                if state == .started {
+                    dispatchGroupAllStarted.leave()
+                }
+                if state == .dustSettled {
+                    dispatchGroupAllDustSettled.leave()
+                }
             }
         }
-        dispatchGroup.notify(queue: DispatchQueue.main, execute: {
-            completion?()
+        dispatchGroupAllStarted.notify(queue: DispatchQueue.main, execute: {
+            completion?(.started)
+        })
+        dispatchGroupAllDustSettled.notify(queue: DispatchQueue.main, execute: {
+            completion?(.dustSettled)
         })
     }
 }

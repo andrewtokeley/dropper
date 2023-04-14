@@ -4,10 +4,35 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>dropper.xcscheme_^#shared#^_</key>
+		<key>dropper-release.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>4</integer>
+		</dict>
+		<key>dropper.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>isShown</key>
+			<true/>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>D88D551A29A16D79003A0478</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D88D553329A16D7B003A0478</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D88D553D29A16D7B003A0478</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

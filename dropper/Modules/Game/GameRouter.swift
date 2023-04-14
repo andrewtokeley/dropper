@@ -22,7 +22,7 @@ extension GameRouter: GameRouterApi {
     
     func showSettings(_ title: GameTitle) {
         let module = AppModules.settings.build()
-        let setupData = SettingsSetupData(gameTitle: title, delegate: presenter as! GamePresenter)
+        let setupData = SettingsSetupData(gameTitle: nil, delegate: presenter as! GamePresenter)
         module.router.show(from: viewController, embedInNavController: true, setupData: setupData)
     }
     

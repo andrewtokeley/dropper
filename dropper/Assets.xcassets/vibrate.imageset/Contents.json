@@ -1,16 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "tiles.png",
+      "filename" : "vibrate.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "tiles 1.png",
+      "filename" : "vibrate (1).png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "vibrate (2).png",
       "idiom" : "universal",
       "scale" : "3x"
     }

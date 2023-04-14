@@ -20,6 +20,7 @@ class GameTile: UIView {
     
     //MARK: - Outletes
     
+    @IBOutlet weak var highScoreSubText: UILabel!
     @IBOutlet weak var highscoreLabel: UILabel!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var primaryButton: UIButton!
@@ -56,9 +57,11 @@ class GameTile: UIView {
             numberFormatter.numberStyle = .decimal
             if let formattedNumber = numberFormatter.string(from: NSNumber(integerLiteral: title.highScore)) {
                 highscoreLabel.text = "\(formattedNumber)"
+                highScoreSubText.text = title.highScoreDescription
             }
         } else {
             highscoreLabel.text = "-"
+            highScoreSubText.text = ""
         }
         if state != nil {
             primaryButton.setTitle("Continue Game", for: .normal)

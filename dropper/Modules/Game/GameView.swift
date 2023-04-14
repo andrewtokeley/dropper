@@ -43,7 +43,7 @@ final class GameView: UserInterface {
         
         return view
     }()
-
+    
     lazy var settingsButton: UIBarButtonItem = {
         
         let view = UIBarButtonItem(title: NSString(string: "\u{2699}\u{0000FE0E}") as String, style: .plain, target: self, action: #selector(handleSettings))
@@ -195,7 +195,6 @@ final class GameView: UserInterface {
         let skViewPoint = CGPoint(x: point.x, y: self.view.frame.height - point.y)
         if let isInGrid = gameScene?.isInGrid(skViewPoint) {
             if isInGrid {
-                print("rotate")
                 presenter.didSelectRotate()
             }
         }
@@ -359,15 +358,15 @@ extension GameView: GameViewApi {
         }
     }
     
-    func removeBlock(_ block: Block, completion: (()->Void)? = nil) {
-        gameScene?.removeBlock(block) {
-            completion?()
+    func removeBlock(_ block: Block, completion: ((BlockExplosionState)->Void)? = nil) {
+        gameScene?.removeBlock(block) { state in
+            completion?(state)
         }
     }
     
-    func removeBlocks(_ blocks: [Block], completion: (()->Void)?) {
-        gameScene?.removeBlocks(blocks) {
-            completion?()
+    func removeBlocks(_ blocks: [Block], completion: ((BlockExplosionState)->Void)?) {
+        gameScene?.removeBlocks(blocks) { state in
+            completion?(state)
         }
     }
     

@@ -75,14 +75,13 @@ final class GamePresenter: Presenter {
         }
     }
 
-    private func gameOver() {
+    private func processGameOver() {
         view.stopGameLoop()
         
         self.interactor.clearState()
-        self.interactor.saveScores { (highscore) in
-            
-            let title = highscore ? "Highscore!" : "Oh No!"
-            let message = highscore ? "The blocks beat you, but that's a great score!" : "The blocks beat you this time!"
+        self.interactor.saveScores() { isHighScore in
+            let title = isHighScore ? "Highscore!" : "Oh No!"
+            let message = isHighScore ? "The blocks beat you, but that's a great score!" : "The blocks beat you this time!"
             let action = ModalDialogAction(title: "Close", style: .standard) { _ in
                 self.router.navigateHome()
             }
@@ -95,6 +94,7 @@ final class GamePresenter: Presenter {
 // MARK: - GamePresenterApi
 
 extension GamePresenter: GamePresenterApi {
+    
     
     // MARK: - From Interactor
     
@@ -129,16 +129,16 @@ extension GamePresenter: GamePresenterApi {
         self.view.stopGameLoop()
         
         // set the level specific attributes
-        self.gameLoopInterval = level.moveDuration
+        self.gameLoopInterval = level.shapeMoveDuration
         self.gridEffects = level.effects
         
         // Update the level number
-        self.view.displayLevel(level.number)
+        self.view.displayLevel(level.levelNumber)
         
         // Remove all the blocks and the player
         
-        let title = level.number == 1 ? "Get Ready!" : "Next Level!"
-        let primaryButton = level.number == 1 ? "Start!" : "Let's Go!"
+        let title = level.levelNumber == 1 ? "Get Ready!" : "Next Level!"
+        let primaryButton = level.levelNumber == 1 ? "Start!" : "Let's Go!"
         let message = level.goalDescription
         let startGameAction = ModalDialogAction(title: primaryButton, style: .standard, handler: { _ in
             if (!fromState) {
@@ -155,8 +155,10 @@ extension GamePresenter: GamePresenterApi {
             self.grid.removeBlocks(self.grid.getAll().map { $0.gridReference }, suppressDelegateCall: true)
             self.grid.replaceShapeWithBlocksOfType(.block)
             
-            self.view.removeBlocks(blocks) {
-                self.view.displayModalDialog(title: title, message: message, actions: [startGameAction])
+            self.view.removeBlocks(blocks) { state in
+                if state == .dustSettled {
+                    self.view.displayModalDialog(title: title, message: message, actions: [startGameAction])
+                }
             }
         } else {
             // The user is continuing a game from state.
@@ -177,7 +179,8 @@ extension GamePresenter: GamePresenterApi {
         }
     }
     
-    func addNewShape(_ shape: Shape, nextShape: Shape, pauseBeforeStarting: Bool = false) {
+    func addNewShape(_ shape: Shape, nextShape: Shape) {
+        
         // some edge case where you're rotating when you land but we don't
         self.isRotating = false
         
@@ -190,8 +193,7 @@ extension GamePresenter: GamePresenterApi {
             view.startGameLoop(gameLoopInterval)
         } else {
             // can't add a new player because there's no room :-(
-            self.gameOver()
-            view.stopGameLoop()
+            self.processGameOver()
         }
     }
     
@@ -295,13 +297,14 @@ extension GamePresenter: GamePresenterApi {
         // Apply removes
         if effects.blocksRemoved.count > 0 {
             dispatch.enter()
-            self.view.removeBlocks(effects.blocksRemoved.map { $0.block! }) {
-                if self.hapticsEnabled {
-                    print("haptics!")
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
+            self.view.removeBlocks(effects.blocksRemoved.map { $0.block! }) { state in
+                if state == .started {
+                    if self.hapticsEnabled {
+                        let generator = UIImpactFeedbackGenerator(style: .light)
+                        generator.impactOccurred()
+                    }
+                    dispatch.leave()
                 }
-                dispatch.leave()
             }
         }
         
@@ -338,7 +341,7 @@ extension GamePresenter: BlockGridDelegate {
     }
     
     func blockGrid(_ blockGrid: BlockGrid, blocksRemoved blocks: [Block]) {
-        view.removeBlocks(blocks) {
+        view.removeBlocks(blocks) { _ in
             // should we wait?
         }
     }
@@ -412,7 +415,8 @@ extension GamePresenter: EffectsRunnerDelegate {
         self.isDropping = false
         
         interactor.saveState()
-        interactor.readyForNewShape()
+        
+        self.interactor.readyForNewShape()
     }
 }
 

@@ -14,28 +14,31 @@ import Foundation
  */
 class Level {
     
+    /**
+     Initialise a new level. 1 is the first level.
+     */
     required init(_ levelNumber: Int) {
-        self.number = levelNumber
+        self.levelNumber = levelNumber
     }
     
     /**
      The number of a level, where 1 is the first level.
      */
-    var number: Int {
+    var levelNumber: Int {
         didSet {
-            if number <= 0 {
-                number = 1
+            if levelNumber <= 0 {
+                levelNumber = 1
             }
         }
     }
     
     /**
-     Returns the time a block takes to move on row. This can't be changed.
+     Returns the time it takes for the active shape to move down one row. By default the speed increases after each level, up to a maximum speed.
      */
-    var moveDuration: TimeInterval {
+    var shapeMoveDuration: TimeInterval {
         let speeds = [0.5, 0.4, 0.3, 0.2, 0.15]
-        if self.number <= 5 {
-            return speeds[self.number-1]
+        if self.levelNumber <= 5 {
+            return speeds[self.levelNumber-1]
         } else {
             // keep returning fastest
             return speeds[speeds.count-1]
@@ -53,7 +56,9 @@ class Level {
     var goalUnit = ""
     
     /**
-     Sentence describing the goal. The default is ""
+     Sentence describing the goal.
+     
+     The goalDescription is displayed to the user at the beginning of each level. Game level subclasses should override this to provide meaningful descriptions.
      */
     var goalDescription: String = ""
     
@@ -84,42 +89,10 @@ class Level {
     }
     
     /**
-     Returns the points awarded based on the current move's achievements
-     
-     - Parameters:
-        - moveAchievements: the achievements made in the last move (shape drop)
-        - levelAchievements: the combined achievements for the level so far (optional) - this isn't used by all games.
-        
-    The default points are;
-     
-     - 100*levei points for each single row
-     - 300*level* poiints for each double row
-     - 500*level points for each triple row
-     - 800*level points for each quad row
-     
-     - 300 points for each colour matched block * level + 100 points for each block over the block count
+     Returns the number of points collected for given achievements. This method should be overriden by each game subclass.
      */
     func pointsFor(moveAchievements: Achievements, levelAchievements: Achievements? = nil, hardDrop: Bool = false) -> Int {
-        var points = 0
-
-        let blockPoint = hardDrop ? 2 : 1
-        
-        // these are Tetris Clasic points
-        points += moveAchievements.get(.oneRow) * 100 * number
-        points += moveAchievements.get(.twoRows) * 300 * number
-        points += moveAchievements.get(.threeRows) * 500 * number
-        points += moveAchievements.get(.fourRows) * 800 * number
-        points += moveAchievements.get(.explodedBlock) * blockPoint
-        
-        // Matcher points
-        // e.g. if the goal was to match 15 blocks of the same colour,
-        // and they match 20, then they get 300 base points + 20-15=5 * 100 extra points
-        let numberOfBlocksMatched = moveAchievements.get(.colourMatch)
-        let numberOfMatches = numberOfBlocksMatched/15
-        let numberOfExtraBlocks = numberOfBlocksMatched - numberOfMatches * 15
-        points += (300 * numberOfMatches + numberOfExtraBlocks * 100)
-        
-        return points
+        return 0
     }
     
     /**
@@ -134,7 +107,7 @@ class Level {
     }
     
     /**
-     Some games have levels that start with some blocks on the grid
+     Some games have levels that start with some blocks on the grid, override this method to return the blocks and their initial positions.
      */
     var initialBlocks: ([Block], [GridReference])? {
         return nil
